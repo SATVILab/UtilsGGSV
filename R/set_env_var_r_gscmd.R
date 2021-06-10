@@ -7,6 +7,10 @@
 #'
 #' @export
 #'
+#' @details Note that this can be permanently set by
+#' following the instructions in the accepted answer to this
+#' Stackoverflow question: https://stackoverflow.com/questions/49738564/r-set-environment-variable-permanently.
+#'
 #' @return \code{invisible(TRUE)}.
 set_env_var_r_gscmd <- function(gs_version = "9.54.0"){
   if(!is.character(gs_version)){

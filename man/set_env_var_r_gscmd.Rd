@@ -16,3 +16,8 @@ set_env_var_r_gscmd(gs_version = "9.54.0")
 Set \code{R_GSCMD} environment variable
 that must be set for Ghostscript to be used.
 }
+\details{
+Note that this can be permanently set by
+following the instructions in the accepted answer to this
+Stackoverflow question: https://stackoverflow.com/questions/49738564/r-set-environment-variable-permanently.
+}
