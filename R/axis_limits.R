@@ -19,23 +19,38 @@
 #' data('cars', package = 'datasets')
 #' library(ggplot2)
 #' p <- ggplot(cars, aes(speed, dist)) +
-#' geom_point()
+#'   geom_point()
 #'
-#' axis_limits(p, axis_limits_equal = TRUE)
+#' axis_limits(
+#'   p,
+#'   axis_limits_equal = TRUE)
 #'
 #' # both axes
-#' axis_limits(p, expand_limits = list(200))
+#' axis_limits(
+#'   p,
+#'   expand_limits = list(200))
 #' # x only
-#' axis_limits(p, expand_limits = list(x = 75))
+#' axis_limits(
+#'   p,
+#'   expand_limits = list(x = 75))
 #' # y only
-#' axis_limits(p, expand_limits = list(y = 200))
+#' axis_limits(
+#'   p,
+#'   expand_limits = list(y = 200))
 #' # lower and upper expansion
-#' axis_limits(p, expand_limits = list(y = c(-50, 200), x = c(-10, 75)))
+#' axis_limits(
+#'   p,
+#'   expand_limits = list(y = c(-50, 200),
+#'                        x = c(-10, 75)))
 #'
 #' # note that when fixing range and expanding, range is fixed
 #' # after expansions are applied, so effectively the larger expansions apply to both.
 #' # compare the following output to the previous output:
-#' axis_limits(p, expand_limits = list(y = c(-50, 200), x = c(-10, 75)), axis_limits_equal = TRUE)
+#' axis_limits(
+#'   p,
+#'   expand_limits = list(y = c(-50, 200),
+#'                        x = c(-10, 75)),
+#'   axis_limits_equal = TRUE)
 axis_limits <- function(p, expand_limits = NULL, axis_limits_equal = FALSE){
 
   # initial check
