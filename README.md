@@ -13,7 +13,10 @@ primarily focused on plots.
 
 You can install `plotutils` from [GitHub](https://github.com/) with:
 
-`{ r, eval = FALSE{} # install.packages("devtools") devtools::install_github("MiguelRodo/plotutils")`
+``` r
+# install.packages("devtools")
+devtools::install_github("MiguelRodo/plotutils")
+```
 
 ## Examples
 
