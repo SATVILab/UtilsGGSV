@@ -1,5 +1,8 @@
 #' @title Manage axis limits
 #'
+#' @description Manage axis limits. Enforce certain points to be included (e.g. 0), and/or
+#' force axis limits to be the same between x- and y-axes.
+#'
 #' @param p object of class 'ggplot'. Limits are adjuste for this plot.
 #' @param expand_limits list. If not \code{NULL},
 #' then it is (effectively) passed onto \code{ggplot2::expand_limits} to
@@ -51,7 +54,10 @@
 #'   expand_limits = list(y = c(-50, 200),
 #'                        x = c(-10, 75)),
 #'   axis_limits_equal = TRUE)
-axis_limits <- function(p, expand_limits = NULL, axis_limits_equal = FALSE){
+axis_limits <- function(
+  p,
+  expand_limits = NULL,
+  axis_limits_equal = FALSE){
 
   # initial check
   # ------------------------

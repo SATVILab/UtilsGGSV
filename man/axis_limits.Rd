@@ -21,7 +21,8 @@ with the elements again being numeric vectors that must be included in plot.}
 must be equal. Effectively applied after expand_grid is applied. Default is \code{FALSE}.}
 }
 \description{
-Manage axis limits
+Manage axis limits. Enforce certain points to be included (e.g. 0), and/or
+force axis limits to be the same between x- and y-axes.
 }
 \examples{
 data('cars', package = 'datasets')
