@@ -1,17 +1,10 @@
 test_that("axis_limits works", {
 
-  ex_tbl <- readRDS(
-    file.path(
-      here::here(), "tests", "ex_tbl.rds"
-      )
-    )
-
-  marker <- c("FL2-H", "FL3-H")
-
-  p <- cytoutils::plot_cyto(
-    data = ex_tbl,
-    marker = marker
-  )
+  p <- readRDS(file.path(
+    here::here(),
+    "tests",
+    "p_axis_limits.rds"
+  ))
 
   # tests
   # -----------------
@@ -19,7 +12,7 @@ test_that("axis_limits works", {
   # one element of length 1, no name
   p_adj <- axis_limits(
     p = p,
-    expand_limits = list(-1e4)
+    limits_expand = list(-1e4)
   )
   expect_identical(
     length(p_adj$layers),
@@ -37,14 +30,14 @@ test_that("axis_limits works", {
   expect_error(
     axis_limits(
       p = p,
-      expand_limits = list(1e4, -5e2)
+      limits_expand = list(1e4, -5e2)
     )
   )
 
   # one element, no name
   p_adj <- axis_limits(
     p = p,
-    expand_limits = list(c(1e4, -5e2))
+    limits_expand = list(c(1e4, -5e2))
   )
   expect_identical(
     p_adj$layers[[2]]$data,
@@ -57,7 +50,7 @@ test_that("axis_limits works", {
   # one element, one name
   p_adj <- axis_limits(
     p = p,
-    expand_limits = list(x = c(1e4, -5e2))
+    limits_expand = list(x = c(1e4, -5e2))
   )
   expect_identical(
     p_adj$layers[[2]]$data,
@@ -67,7 +60,7 @@ test_that("axis_limits works", {
   )
   p_adj <- axis_limits(
     p = p,
-    expand_limits = list(y = c(1e4, -5e2))
+    limits_expand = list(y = c(1e4, -5e2))
   )
   expect_identical(
     p_adj$layers[[2]]$data,
@@ -79,7 +72,7 @@ test_that("axis_limits works", {
   # two elements, both named
   p_adj <- axis_limits(
     p = p,
-    expand_limits = list(y = c(1e4, -5e2),
+    limits_expand = list(y = c(1e4, -5e2),
                          x = c(-1e4, 2e4))
   )
   expect_identical(
@@ -96,7 +89,7 @@ test_that("axis_limits works", {
   # just axis range equal
   p_adj <- axis_limits(
     p = p,
-    axis_limits_equal = TRUE
+    limits_equal = TRUE
   )
 
   expect_identical(
@@ -104,12 +97,12 @@ test_that("axis_limits works", {
     p_adj$layers[[2]]$data[,2]
   )
 
-  # with expand_limits
+  # with limits_expand
   # just axis range equal
   p_adj <- axis_limits(
     p = p,
-    axis_limits_equal = TRUE,
-    expand_limits = list(y = c(1000, 200),
+    limits_equal = TRUE,
+    limits_expand = list(y = c(1000, 200),
                          x = c(-1e4, 500))
   )
   expect_identical(
@@ -127,8 +120,8 @@ test_that("axis_limits works", {
   # just y-axis
   p_adj <- axis_limits(
     p = p,
-    axis_limits_equal = TRUE,
-    expand_limits = list(y = c(1e4, 200))
+    limits_equal = TRUE,
+    limits_expand = list(y = c(1e4, 200))
   )
 
   expect_identical(
@@ -146,8 +139,8 @@ test_that("axis_limits works", {
   # just x-axis
   p_adj <- axis_limits(
     p = p,
-    axis_limits_equal = TRUE,
-    expand_limits = list(x = c(1e4, 200))
+    limits_equal = TRUE,
+    limits_expand = list(x = c(1e4, 200))
   )
 
   expect_identical(

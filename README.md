@@ -36,12 +36,12 @@ p0 <- ggplot(cars, aes(speed, dist)) +
   labs(x = "Speed", y = "Distance")
 p1 <- axis_limits(
   p = p0, 
-  axis_limits_equal = TRUE
+  limits_equal = TRUE
 ) +
   labs(title = "Axes limits equal")
 p2 <- axis_limits(
   p = p0, 
-  expand_limits = list(
+  limits_expand = list(
     x = c(0, 50), 
     y = c(-10, 200)
   ) 
