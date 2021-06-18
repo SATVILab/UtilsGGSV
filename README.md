@@ -38,7 +38,7 @@ p1 <- axis_limits(
   p = p0, 
   axis_limits_equal = TRUE
 ) +
-  labs(title = "Axis limits equal")
+  labs(title = "Axes limits equal")
 p2 <- axis_limits(
   p = p0, 
   expand_limits = list(
@@ -46,7 +46,7 @@ p2 <- axis_limits(
     y = c(-10, 200)
   ) 
 ) +
-  labs(title = "Axis limits expanded")
+  labs(title = "Axes limits expanded")
 cowplot::plot_grid(p0, p1, p2)
 ```
 
