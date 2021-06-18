@@ -7,7 +7,7 @@
 axis_limits(p, expand_limits = NULL, axis_limits_equal = FALSE)
 }
 \arguments{
-\item{p}{object of class 'ggplot'. Limits are adjuste for this plot.}
+\item{p}{object of class 'ggplot'. Limits are adjusted for this plot.}
 
 \item{expand_limits}{list. If not \code{NULL},
 then it is (effectively) passed onto \code{ggplot2::expand_limits} to

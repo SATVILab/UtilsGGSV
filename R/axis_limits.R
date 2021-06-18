@@ -3,7 +3,7 @@
 #' @description Manage axis limits. Enforce certain points to be included (e.g. 0), and/or
 #' force axis limits to be the same between x- and y-axes.
 #'
-#' @param p object of class 'ggplot'. Limits are adjuste for this plot.
+#' @param p object of class 'ggplot'. Limits are adjusted for this plot.
 #' @param expand_limits list. If not \code{NULL},
 #' then it is (effectively) passed onto \code{ggplot2::expand_limits} to
 #' ensure that certain values are included in the plot (such as, for example, 0
