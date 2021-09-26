@@ -26,6 +26,10 @@
 add_guide_lines <- function(p, axis = "x", min = 0, max = 1, n = 5, signif = 3) {
   min <- min(min, max)
   max <- max(min, max)
+  if(n == 1) {
+    min <- mean(min, max)
+    max <- mean(min, max)
+  }
   n <- ifelse(min == max, 1, n)
   seq_vec <- seq(min, max, length.out = n)
   seq_vec_01 <- seq(0.05, 0.95, length.out = n)
