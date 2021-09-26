@@ -16,7 +16,7 @@
 #' "gg" object, and so any manipulations (adding geoms, changing axis labels, etc.)
 #' will not work on this plot.
 #'
-#' @example
+#' @examples
 #'
 #' library(ggplot2)
 #' p <- ggplot(data.frame(x = 1, y = 1)) + geom_point()

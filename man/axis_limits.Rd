@@ -4,20 +4,20 @@
 \alias{axis_limits}
 \title{Manage axis limits}
 \usage{
-axis_limits(p, expand_limits = NULL, axis_limits_equal = FALSE)
+axis_limits(p, limits_expand = NULL, limits_equal = FALSE)
 }
 \arguments{
 \item{p}{object of class 'ggplot'. Limits are adjusted for this plot.}
 
-\item{expand_limits}{list. If not \code{NULL},
-then it is (effectively) passed onto \code{ggplot2::expand_limits} to
+\item{limits_expand}{list. If not \code{NULL},
+then it is (effectively) passed onto \code{ggplot2::limits_expand} to
 ensure that certain values are included in the plot (such as, for example, 0
 if that is the minimum value possible but it may not be plotted). If not named, then
 must consist of one numeric vector that will then force all values in the numeric value
 to be included in the plot. If named, then must have names \code{x} and/or \code{y},
 with the elements again being numeric vectors that must be included in plot.}
 
-\item{axis_limits_equal}{logical. If \code{TRUE}, then the ranges on the x- and y-axes
+\item{limits_equal}{logical. If \code{TRUE}, then the ranges on the x- and y-axes
 must be equal. Effectively applied after expand_grid is applied. Default is \code{FALSE}.}
 }
 \description{
@@ -32,24 +32,24 @@ p <- ggplot(cars, aes(speed, dist)) +
 
 axis_limits(
   p,
-  axis_limits_equal = TRUE)
+  limits_equal = TRUE)
 
 # both axes
 axis_limits(
   p,
-  expand_limits = list(200))
+  limits_expand = list(200))
 # x only
 axis_limits(
   p,
-  expand_limits = list(x = 75))
+  limits_expand = list(x = 75))
 # y only
 axis_limits(
   p,
-  expand_limits = list(y = 200))
+  limits_expand = list(y = 200))
 # lower and upper expansion
 axis_limits(
   p,
-  expand_limits = list(y = c(-50, 200),
+  limits_expand = list(y = c(-50, 200),
                        x = c(-10, 75)))
 
 # note that when fixing range and expanding, range is fixed
@@ -57,7 +57,7 @@ axis_limits(
 # compare the following output to the previous output:
 axis_limits(
   p,
-  expand_limits = list(y = c(-50, 200),
+  limits_expand = list(y = c(-50, 200),
                        x = c(-10, 75)),
-  axis_limits_equal = TRUE)
+  limits_equal = TRUE)
 }

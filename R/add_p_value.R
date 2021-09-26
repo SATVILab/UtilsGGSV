@@ -22,6 +22,8 @@
 #' will not work on this object. They should therefore be done before, with the
 #' plot afterward consisted as fixed apart from further additions from `cowplot::draw_`
 #' functions.
+#' 
+#' @export
 add_p_value <- function(p,
                         p_txt,
                         q_txt = NULL,
