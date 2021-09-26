@@ -4,13 +4,18 @@
 \alias{add_guide_lines}
 \title{Add labeled guide-lines to assist cowplot item position}
 \usage{
-add_guide_lines(p, axis = "x", min = 0, max = 1, n = 5, signif = 3)
+add_guide_lines(p, axis = "x", range = c(0, 1), n = 5, signif = 3)
 }
 \arguments{
 \item{p}{ggplot object. Object to add plot lines to.}
 
-\item{min, max}{[0,1]. Minimum and maximum values for lines, with 0 being the left-hand side/bottom
-and 1 being the right-hand side/bottom.}
+\item{range}{numeric vector. Values should lie between 0 and 1.
+Specifies minimum and maximum values for lines,
+with 0 being the left-hand side/bottom
+and 1 being the right-hand side/bottom.
+Can be of length one, in which case a single line is drawn at that
+coordinate (regardless of value of \code{n}). 
+Default is \code{c(0,1)}.}
 
 \item{n}{positive integer. Number of lines to draw. Default is 5.}
 
