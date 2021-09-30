@@ -70,8 +70,8 @@ add_guide_lines <- function(p, axis = "x", range = c(0,1),
         ) +
         cowplot::draw_text(
           text = signif(seq_vec[i], signif),
-          x = x,
-          y = rep(seq_vec_01[i], 2)
+          x = rep(seq_vec_01[i], 2),
+          y = rep(seq_vec[i], 2)
         )
     }
   }
