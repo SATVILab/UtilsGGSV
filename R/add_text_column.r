@@ -43,6 +43,57 @@
 #' of \code{geom_text}. Defaults are \code{0} and \code{0.5}, respectively.
 #'
 #' @examples
+#' data_mod <- data.frame(x = rnorm(10))
+#' data_mod$y <- data_mod$x * 3 + rnorm(10, sd = 0.5)
+#' fit <- lm(y ~ x, data = data_mod)
+#' coef_tbl <- coefficients(summary(fit))
+#' results_vec <- c(
+#'    paste0(
+#'      "Intercept: ",
+#'      signif(coef_tbl[1, "Estimate"][[1]], 2),
+#'      " (",
+#'      signif(coef_tbl[1, 1][[1]] - 2 * coef_tbl[1, 2][[1]], 3),
+#'      ", ",
+#'      signif(coef_tbl[1, 1][[1]] + 2 * coef_tbl[1, 2][[1]], 3),
+#'      "; p = ",
+#'      signif(coef_tbl[1, 4][[1]], 3),
+#'      ")"
+#'      ),
+#'    paste0(
+#'      "Slope: ",
+#'      signif(coef_tbl[2, "Estimate"][[1]], 2),
+#'      " (",
+#'      signif(coef_tbl[2, 1][[1]] - 2 * coef_tbl[2, 2][[1]], 3),
+#'      ", ",
+#'      signif(coef_tbl[2, 1][[1]] + 2 * coef_tbl[2, 2][[1]], 3),
+#'      "; p = ",
+#'      signif(coef_tbl[2, 4][[1]], 3),
+#'     ")"
+#'     )
+#' )
+#' p <- ggplot(
+#'   data = data_mod, 
+#'   aes(x = x, y = y)
+#' ) +
+#'   geom_point()
+#' add_text_column(
+#'   p = p,
+#'   x = data_mod$x,
+#'   y = data_mod$y,
+#'   text = results_vec)
+#' 
+#' # works even if y-axis is transformed
+#' p <- p + 
+#'   scale_y_continuous(
+#'     trans = ggutils::get_trans("asinh")
+#'  )
+#' add_text_column(
+#'   p = p,
+#'   x = data_mod$x,
+#'   y = data_mod$y,
+#'   text = results_vec, 
+#'   trans =  ggutils::get_trans("asinh")
+#' )
 #' @export
 add_text_column <- function(p, x, y, trans = "identity",
                             text, coord = c(0.1, 0.9),

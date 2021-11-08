@@ -22,8 +22,14 @@ must be equal. Effectively applied after expand_grid is applied. Default is \cod
 }
 \description{
 Manage axis limits.
-Enforce certain points to be included (e.g. 0), and/or 
-force axis limits to be the same between x- and y-axes.
+ Fix axis limits to be equal between x- and y-axes,
+and/or expand axis coordinates.
+The primary use of `axis_limits`
+is forcing the x- and y-axes
+to have the same limits "automatically"
+(i.e. by inspecting the `ggplot` object,
+thus not requiring the user to manually
+calculate limits to pass to `ggplot2::expand_limits`).
 }
 \examples{
 data("cars", package = "datasets")
