@@ -12,15 +12,15 @@
 #' Stackoverflow question: https://stackoverflow.com/questions/49738564/r-set-environment-variable-permanently.
 #'
 #' @return \code{invisible(TRUE)}.
-set_env_var_r_gscmd <- function(gs_version = "9.54.0"){
-  if(!is.character(gs_version)){
+set_env_var_r_gscmd <- function(gs_version = "9.54.0") {
+  if (!is.character(gs_version)) {
     stop("gs_version must be of class character")
   }
   path_gs_exe <- file.path(
     "C:/Program Files (x86)", "gs",
-    paste0('gs', gs_version), 'bin', 'gswin32c.exe'
-    )
-  if(!file.exists(path_gs_exe)){
+    paste0("gs", gs_version), "bin", "gswin32c.exe"
+  )
+  if (!file.exists(path_gs_exe)) {
     stop("path to Ghostscript executable not valid")
   }
   Sys.setenv(R_GSCMD = path_gs_exe)

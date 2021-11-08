@@ -1,5 +1,4 @@
 test_that("axis_limits works", {
-
   p <- readRDS(file.path(
     here::here(),
     "tests",
@@ -72,8 +71,10 @@ test_that("axis_limits works", {
   # two elements, both named
   p_adj <- axis_limits(
     p = p,
-    limits_expand = list(y = c(1e4, -5e2),
-                         x = c(-1e4, 2e4))
+    limits_expand = list(
+      y = c(1e4, -5e2),
+      x = c(-1e4, 2e4)
+    )
   )
   expect_identical(
     p_adj$layers[[2]]$data,
@@ -93,8 +94,8 @@ test_that("axis_limits works", {
   )
 
   expect_identical(
-    p_adj$layers[[2]]$data[,1],
-    p_adj$layers[[2]]$data[,2]
+    p_adj$layers[[2]]$data[, 1],
+    p_adj$layers[[2]]$data[, 2]
   )
 
   # with limits_expand
@@ -102,16 +103,18 @@ test_that("axis_limits works", {
   p_adj <- axis_limits(
     p = p,
     limits_equal = TRUE,
-    limits_expand = list(y = c(1000, 200),
-                         x = c(-1e4, 500))
+    limits_expand = list(
+      y = c(1000, 200),
+      x = c(-1e4, 500)
+    )
   )
   expect_identical(
-    p_adj$layers[[2]]$data[1,] %>%
+    p_adj$layers[[2]]$data[1, ] %>%
       as.numeric(),
     c(-1e4, -1e4)
   )
   expect_identical(
-    p_adj$layers[[2]]$data[2,] %>%
+    p_adj$layers[[2]]$data[2, ] %>%
       as.numeric() %>%
       round(),
     c(9222, 9222)
@@ -125,12 +128,12 @@ test_that("axis_limits works", {
   )
 
   expect_identical(
-    p_adj$layers[[2]]$data[1,] %>%
+    p_adj$layers[[2]]$data[1, ] %>%
       as.numeric(),
     c(1, 1)
   )
   expect_identical(
-    p_adj$layers[[2]]$data[2,] %>%
+    p_adj$layers[[2]]$data[2, ] %>%
       as.numeric() %>%
       round(),
     c(1e4, 9222)
@@ -144,16 +147,14 @@ test_that("axis_limits works", {
   )
 
   expect_identical(
-    p_adj$layers[[2]]$data[1,] %>%
+    p_adj$layers[[2]]$data[1, ] %>%
       as.numeric(),
     c(1, 1)
   )
   expect_identical(
-    p_adj$layers[[2]]$data[2,] %>%
+    p_adj$layers[[2]]$data[2, ] %>%
       as.numeric() %>%
       round(),
     c(1e4, 9222)
   )
-
 })
-

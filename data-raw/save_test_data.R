@@ -1,6 +1,6 @@
 devtools::load_all()
 # prep data
-data('GvHD', package = 'flowCore')
+data("GvHD", package = "flowCore")
 ex_tbl <- flowCore::exprs(GvHD[[1]]) %>%
   tibble::as_tibble()
 saveRDS(

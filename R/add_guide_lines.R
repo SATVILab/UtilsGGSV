@@ -13,7 +13,7 @@
 #' with 0 being the left-hand side/bottom
 #' and 1 being the right-hand side/bottom.
 #' Can be of length one, in which case a single line is drawn at that
-#' coordinate (regardless of value of \code{n}). 
+#' coordinate (regardless of value of \code{n}).
 #' Default is \code{c(0,1)}.
 #' @param n positive integer. Number of lines to draw. Default is 5.
 #'
@@ -24,16 +24,15 @@
 #' @examples
 #'
 #' library(ggplot2)
-#' p <- ggplot(data.frame(x = 1, y = 1)) + geom_point()
+#' p <- ggplot(data.frame(x = 1, y = 1)) +
+#'   geom_point()
 #' ggutils::add_cp_grid_guide(p = p, signif = 2)
-#'
 #' @export
-add_guide_lines <- function(p, axis = "x", range = c(0,1),
+add_guide_lines <- function(p, axis = "x", range = c(0, 1),
                             n = 5, signif = 3) {
-  
   min <- min(range)
   max <- max(range)
-  if(n == 1) {
+  if (n == 1) {
     min <- mean(min, max)
     max <- mean(min, max)
   }
@@ -45,8 +44,8 @@ add_guide_lines <- function(p, axis = "x", range = c(0,1),
   })
   p <- cowplot::ggdraw() +
     cowplot::draw_plot(p)
-  if("x" %in% axis_vec) {
-    y <- c(0,1)
+  if ("x" %in% axis_vec) {
+    y <- c(0, 1)
     for (i in seq_len(n)) {
       p <- p +
         cowplot::draw_line(
@@ -60,8 +59,8 @@ add_guide_lines <- function(p, axis = "x", range = c(0,1),
         )
     }
   }
-  if("y" %in% axis_vec) {
-    x <- c(0,1)
+  if ("y" %in% axis_vec) {
+    x <- c(0, 1)
     for (i in seq_len(n)) {
       p <- p +
         cowplot::draw_line(
