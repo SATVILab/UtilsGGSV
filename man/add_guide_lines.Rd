@@ -14,7 +14,7 @@ Specifies minimum and maximum values for lines,
 with 0 being the left-hand side/bottom
 and 1 being the right-hand side/bottom.
 Can be of length one, in which case a single line is drawn at that
-coordinate (regardless of value of \code{n}). 
+coordinate (regardless of value of \code{n}).
 Default is \code{c(0,1)}.}
 
 \item{n}{positive integer. Number of lines to draw. Default is 5.}
@@ -36,7 +36,7 @@ allowing one to gradually zoom in in on the desired coordinates very accurately 
 \examples{
 
 library(ggplot2)
-p <- ggplot(data.frame(x = 1, y = 1)) + geom_point()
+p <- ggplot(data.frame(x = 1, y = 1)) +
+  geom_point()
 ggutils::add_cp_grid_guide(p = p, signif = 2)
-
 }

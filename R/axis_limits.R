@@ -1,18 +1,19 @@
 #' @title Manage axis limits
 #'
-#' @description Manage axis limits. Enforce certain points to be included (e.g. 0), and/or
+#' @description Manage axis limits.
+#' Enforce certain points to be included (e.g. 0), and/or 
 #' force axis limits to be the same between x- and y-axes.
 #'
 #' @param p object of class 'ggplot'. Limits are adjusted for this plot.
 #' @param limits_expand list. If not \code{NULL},
 #' then it is (effectively) passed onto \code{ggplot2::limits_expand} to
 #' ensure that certain values are included in the plot (such as, for example, 0
-#' if that is the minimum value possible but it may not be plotted). If not named, then
-#' must consist of one numeric vector that will then force all values in the numeric value
-#' to be included in the plot. If named, then must have names \code{x} and/or \code{y},
+#' if that is the minimum value possible but it may not be plotted). If not named, then # nolint
+#' must consist of one numeric vector that will then force all values in the numeric value # nolint
+#' to be included in the plot. If named, then must have names \code{x} and/or \code{y}, # nolint
 #' with the elements again being numeric vectors that must be included in plot.
-#' @param limits_equal logical. If \code{TRUE}, then the ranges on the x- and y-axes
-#' must be equal. Effectively applied after expand_grid is applied. Default is \code{FALSE}.
+#' @param limits_equal logical. If \code{TRUE}, then the ranges on the x- and y-axes # nolint
+#' must be equal. Effectively applied after expand_grid is applied. Default is \code{FALSE}. # nolint
 #'
 #' @export
 #'
