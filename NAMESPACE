@@ -2,8 +2,9 @@
 
 export("%>%")
 export(add_guide_lines)
-export(add_p_value)
+export(add_text_column)
 export(axis_limits)
+export(get_trans)
 export(set_env_var_r_gscmd)
 export(set_gs_var)
 import(ggplot2)
