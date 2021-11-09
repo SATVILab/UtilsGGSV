@@ -8,7 +8,7 @@
 #' to have the same limits "automatically"
 #' (i.e. by inspecting the `ggplot` object,
 #' thus not requiring the user to manually
-#' calculate limits to pass to `ggplot2::expand_limits`). 
+#' calculate limits to pass to `ggplot2::expand_limits`).
 #'
 #' @param p object of class 'ggplot'. Limits are adjusted for this plot.
 #' @param limits_expand list. If not \code{NULL},

@@ -11,13 +11,12 @@ Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.1
 Suggests: 
-    cowplot,
-    cytoutils,
-    flowCore,
     ggrepel,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
 Imports: 
     rlang,
     ggplot2,
-    magrittr
+    magrittr,
+    cowplot,
+    scales

@@ -18,13 +18,13 @@ If class is a trans object, then it is returned as is.}
 Get trans object from character
 }
 \examples{
- x_vec <- seq(1, 5, length.out = 1e3)
- y_vec <- ggutils::get_trans("root_fifth")$transform(seq_vec)
- plot_tbl <- data.frame(x = x_vec, y = y_vec)
- ggplot(
-   plot_tbl,
-   aes(x, y)
-  ) +
+x_vec <- seq(1, 5, length.out = 1e3)
+y_vec <- ggutils::get_trans("root_fifth")$transform(seq_vec)
+plot_tbl <- data.frame(x = x_vec, y = y_vec)
+ggplot(
+  plot_tbl,
+  aes(x, y)
+) +
   geom_line() +
   geom_point() +
   coord_equal() +

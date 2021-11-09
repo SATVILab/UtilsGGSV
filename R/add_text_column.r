@@ -22,22 +22,15 @@
 #' \code{c(0, 0)} the top-right.
 #' There is no problem with specifying values outside \code{[0, 1]},
 #' however.
-#' Default is \code{c(0.1, 0.95)} (i.e. towards top-left corner).
+#' Default is \code{c(0.05, 0.95)} (i.e. towards top-left corner).
 #' @param skip numeric.
 #' Proportion of y-axis length to skip between rows.
-#' Default is 0.05.
+#' Default is 0.6.
 #' @param font_size numeric. Font size.
 #' Default is 4.2 (roughly size 12).
 #' @param align_symbol character.
 #' Symbol around which to align the text.
 #' Not implemented at present.
-#' @param expand_limits_y numeric.
-#' Proportion of y-axis limits to expand y-axis by.
-#' Default is 0.
-#' @param limits_equal logical.
-#' If \code{TRUE}, then x- and y-limits are forced
-#' to be equal.
-#' Default is \code{FALSE}.
 #' @param hjust,vjust numeric.
 #' Passed onto \code{hjust} and \code{vjust} parameters, respectively,
 #' of \code{geom_text}. Defaults are \code{0} and \code{0.5}, respectively.
@@ -48,31 +41,31 @@
 #' fit <- lm(y ~ x, data = data_mod)
 #' coef_tbl <- coefficients(summary(fit))
 #' results_vec <- c(
-#'    paste0(
-#'      "Intercept: ",
-#'      signif(coef_tbl[1, "Estimate"][[1]], 2),
-#'      " (",
-#'      signif(coef_tbl[1, 1][[1]] - 2 * coef_tbl[1, 2][[1]], 3),
-#'      ", ",
-#'      signif(coef_tbl[1, 1][[1]] + 2 * coef_tbl[1, 2][[1]], 3),
-#'      "; p = ",
-#'      signif(coef_tbl[1, 4][[1]], 3),
-#'      ")"
-#'      ),
-#'    paste0(
-#'      "Slope: ",
-#'      signif(coef_tbl[2, "Estimate"][[1]], 2),
-#'      " (",
-#'      signif(coef_tbl[2, 1][[1]] - 2 * coef_tbl[2, 2][[1]], 3),
-#'      ", ",
-#'      signif(coef_tbl[2, 1][[1]] + 2 * coef_tbl[2, 2][[1]], 3),
-#'      "; p = ",
-#'      signif(coef_tbl[2, 4][[1]], 3),
+#'   paste0(
+#'     "Intercept: ",
+#'     signif(coef_tbl[1, "Estimate"][[1]], 2),
+#'     " (",
+#'     signif(coef_tbl[1, 1][[1]] - 2 * coef_tbl[1, 2][[1]], 3),
+#'     ", ",
+#'     signif(coef_tbl[1, 1][[1]] + 2 * coef_tbl[1, 2][[1]], 3),
+#'     "; p = ",
+#'     signif(coef_tbl[1, 4][[1]], 3),
 #'     ")"
-#'     )
+#'   ),
+#'   paste0(
+#'     "Slope: ",
+#'     signif(coef_tbl[2, "Estimate"][[1]], 2),
+#'     " (",
+#'     signif(coef_tbl[2, 1][[1]] - 2 * coef_tbl[2, 2][[1]], 3),
+#'     ", ",
+#'     signif(coef_tbl[2, 1][[1]] + 2 * coef_tbl[2, 2][[1]], 3),
+#'     "; p = ",
+#'     signif(coef_tbl[2, 4][[1]], 3),
+#'     ")"
+#'   )
 #' )
 #' p <- ggplot(
-#'   data = data_mod, 
+#'   data = data_mod,
 #'   aes(x = x, y = y)
 #' ) +
 #'   geom_point()
@@ -80,19 +73,20 @@
 #'   p = p,
 #'   x = data_mod$x,
 #'   y = data_mod$y,
-#'   text = results_vec)
-#' 
+#'   text = results_vec
+#' )
+#'
 #' # works even if y-axis is transformed
-#' p <- p + 
+#' p <- p +
 #'   scale_y_continuous(
 #'     trans = ggutils::get_trans("asinh")
-#'  )
+#'   )
 #' add_text_column(
 #'   p = p,
 #'   x = data_mod$x,
 #'   y = data_mod$y,
-#'   text = results_vec, 
-#'   trans =  ggutils::get_trans("asinh")
+#'   text = results_vec,
+#'   trans = ggutils::get_trans("asinh")
 #' )
 #' @export
 add_text_column <- function(p, x, y, trans = "identity",
@@ -136,20 +130,12 @@ add_text_column <- function(p, x, y, trans = "identity",
     stop("align_symbol cannot be non-NULL yet")
   }
 
-  if (expand_limits_y) {
-    stop("expand_limits_y cannot be non-zero yet")
-  }
-
-  if (limits_equal) {
-    stop("limits_equal cannot be TRUE yet")
-  }
-
   p +
     geom_text(
       data = plot_tbl_text,
       mapping = aes(x = x, y = y, label = txt),
       hjust = hjust, vjust = vjust,
-      size = font_size, 
+      size = font_size,
       inherit.aes = FALSE
     )
 }
@@ -165,22 +151,20 @@ add_text_column <- function(p, x, y, trans = "identity",
 #'
 #' @export
 #' @examples
-#'  x_vec <- seq(1, 5, length.out = 1e3)
-#'  y_vec <- ggutils::get_trans("root_fifth")$transform(seq_vec)
-#'  plot_tbl <- data.frame(x = x_vec, y = y_vec)
-#'  ggplot(
-#'    plot_tbl,
-#'    aes(x, y)
-#'   ) +
+#' x_vec <- seq(1, 5, length.out = 1e3)
+#' y_vec <- ggutils::get_trans("root_fifth")$transform(seq_vec)
+#' plot_tbl <- data.frame(x = x_vec, y = y_vec)
+#' ggplot(
+#'   plot_tbl,
+#'   aes(x, y)
+#' ) +
 #'   geom_line() +
 #'   geom_point() +
 #'   coord_equal() +
 #'   expand_limits(x = 5, y = 5)
 get_trans <- function(trans) {
-  switch(
-    class(trans)[1],
-    "character" = switch(
-      trans,
+  switch(class(trans)[1],
+    "character" = switch(trans,
       "root_2" = , # nolint
       "root_quadratic" = , # nolint
       "root_quad" = , # nolint

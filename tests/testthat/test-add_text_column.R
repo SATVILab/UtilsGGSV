@@ -28,5 +28,4 @@ test_that("add_text_column works", {
     trans = "asinh"
   )
   expect_s3_class(p_asinh, c("gg", "ggplot"))
-
 })

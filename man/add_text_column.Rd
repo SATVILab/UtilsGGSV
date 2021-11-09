@@ -10,8 +10,8 @@ add_text_column(
   y,
   trans = "identity",
   text,
-  coord = c(0.1, 0.9),
-  skip = 0.05,
+  coord = c(0.05, 0.95),
+  skip = 0.06,
   font_size = 4.2,
   align_symbol = NULL,
   hjust = 0,
@@ -42,7 +42,7 @@ skip >= 0).}
 
 \item{skip}{numeric.
 Proportion of y-axis length to skip between rows.
-Default is 0.05.}
+Default is 0.6.}
 
 \item{font_size}{numeric. Font size.
 Default is 4.2 (roughly size 12).}
@@ -54,15 +54,6 @@ Not implemented at present.}
 \item{hjust, vjust}{numeric.
 Passed onto \code{hjust} and \code{vjust} parameters, respectively,
 of \code{geom_text}. Defaults are \code{0} and \code{0.5}, respectively.}
-
-\item{expand_limits_y}{numeric.
-Proportion of y-axis limits to expand y-axis by.
-Default is 0.}
-
-\item{limits_equal}{logical.
-If \code{TRUE}, then x- and y-limits are forced
-to be equal.
-Default is \code{FALSE}.}
 }
 \description{
 Add a column of text
@@ -73,31 +64,31 @@ data_mod$y <- data_mod$x * 3 + rnorm(10, sd = 0.5)
 fit <- lm(y ~ x, data = data_mod)
 coef_tbl <- coefficients(summary(fit))
 results_vec <- c(
-   paste0(
-     "Intercept: ",
-     signif(coef_tbl[1, "Estimate"][[1]], 2),
-     " (",
-     signif(coef_tbl[1, 1][[1]] - 2 * coef_tbl[1, 2][[1]], 3),
-     ", ",
-     signif(coef_tbl[1, 1][[1]] + 2 * coef_tbl[1, 2][[1]], 3),
-     "; p = ",
-     signif(coef_tbl[1, 4][[1]], 3),
-     ")"
-     ),
-   paste0(
-     "Slope: ",
-     signif(coef_tbl[2, "Estimate"][[1]], 2),
-     " (",
-     signif(coef_tbl[2, 1][[1]] - 2 * coef_tbl[2, 2][[1]], 3),
-     ", ",
-     signif(coef_tbl[2, 1][[1]] + 2 * coef_tbl[2, 2][[1]], 3),
-     "; p = ",
-     signif(coef_tbl[2, 4][[1]], 3),
+  paste0(
+    "Intercept: ",
+    signif(coef_tbl[1, "Estimate"][[1]], 2),
+    " (",
+    signif(coef_tbl[1, 1][[1]] - 2 * coef_tbl[1, 2][[1]], 3),
+    ", ",
+    signif(coef_tbl[1, 1][[1]] + 2 * coef_tbl[1, 2][[1]], 3),
+    "; p = ",
+    signif(coef_tbl[1, 4][[1]], 3),
     ")"
-    )
+  ),
+  paste0(
+    "Slope: ",
+    signif(coef_tbl[2, "Estimate"][[1]], 2),
+    " (",
+    signif(coef_tbl[2, 1][[1]] - 2 * coef_tbl[2, 2][[1]], 3),
+    ", ",
+    signif(coef_tbl[2, 1][[1]] + 2 * coef_tbl[2, 2][[1]], 3),
+    "; p = ",
+    signif(coef_tbl[2, 4][[1]], 3),
+    ")"
+  )
 )
 p <- ggplot(
-  data = data_mod, 
+  data = data_mod,
   aes(x = x, y = y)
 ) +
   geom_point()
@@ -105,18 +96,19 @@ add_text_column(
   p = p,
   x = data_mod$x,
   y = data_mod$y,
-  text = results_vec)
+  text = results_vec
+)
 
 # works even if y-axis is transformed
-p <- p + 
+p <- p +
   scale_y_continuous(
     trans = ggutils::get_trans("asinh")
- )
+  )
 add_text_column(
   p = p,
   x = data_mod$x,
   y = data_mod$y,
-  text = results_vec, 
-  trans =  ggutils::get_trans("asinh")
+  text = results_vec,
+  trans = ggutils::get_trans("asinh")
 )
 }

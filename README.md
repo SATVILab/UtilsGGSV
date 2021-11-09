@@ -134,3 +134,35 @@ The utility function `get_trans` returns `trans` objects (as implemented
 by the `scales` package) when given characters. It also adds various
 higher roots (such as cubic and quartic) and adds the `asinh`
 transformation.
+
+``` r
+get_trans("log10")
+#> Transformer:  log-10
+```
+
+The function `ggcorr` plots concordance correlation coefficients between
+two or more groups.
+
+``` r
+set.seed(3)
+response_vec_a <- rnorm(5)
+response_tbl <- data.frame(
+  group = rep(letters[1:3], each = 5),
+  response = c(
+    response_vec_a,
+    response_vec_a * 1.2 + rnorm(5, sd = 0.2),
+    response_vec_a * 2 + rnorm(5, sd = 2)
+  ),
+  pid = rep(paste0("id_", 1:5), 3)
+)
+
+ggcorr(
+  data = response_tbl,
+  grp = "group",
+  y = "response",
+  id = "pid",
+  limits_equal = TRUE
+)
+```
+
+<img src="man/figures/README-unnamed-chunk-6-1.png" width="100%" />
