@@ -96,8 +96,8 @@
 #' )
 #' @export
 add_text_column <- function(p, x, y, trans = "identity",
-                            text, coord = c(0.1, 0.9),
-                            skip = 0.05, font_size = 4.2,
+                            text, coord = c(0.05, 0.95),
+                            skip = 0.06, font_size = 4.2,
                             align_symbol = NULL,
                             hjust = 0,
                             vjust = 0.5,
