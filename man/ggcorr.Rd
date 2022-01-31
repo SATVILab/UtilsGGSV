@@ -71,12 +71,13 @@ by \code{data[[id]]} are displayed using
 Default is \code{FALSE}.}
 
 \item{trans}{character or trans object.
-Specifies the (visual) transformation applied to the y-axis.
-Internally passed to \code{ggutils::get_trans}, so see
-\code{?ggutils::get_trans} for further details regarding
-possible values. Default is "identity".
-Note that this transformation is NOT applied to the
-y-axis (the assumption is that it already has been, or will be).}
+Specifies scaling of y- and x-axes.
+If class is character, then it is converted to a trans object.
+Adds "root_cube", "root_fourth", "root_fifth" and
+"asinh" transformations, as well as "sqrt" transformation
+that allows plotting of lines at zero.
+If class is a trans object, then it is returned as is.
+Default is \code{"identity"}.}
 
 \item{skip}{numeric.
 Proportion of y-axis length to skip between rows.

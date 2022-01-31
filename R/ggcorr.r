@@ -7,6 +7,7 @@
 #'
 #' @inheritParams add_text_column
 #' @inheritParams axis_limits
+#' @inheritParams get_trans
 #' @param data dataframe. Has columns .
 #' @param grp character.
 #' Name of column in \code{data} that specifies
@@ -72,6 +73,14 @@
 #' Default is \code{"lm"}.
 #' If \code{NULL}, then
 #' no smoothed line is drawn.
+#' @param trans character or trans object.
+#' Specifies scaling of y- and x-axes.
+#' If class is character, then it is converted to a trans object.
+#' Adds "root_cube", "root_fourth", "root_fifth" and
+#' "asinh" transformations, as well as "sqrt" transformation
+#' that allows plotting of lines at zero.
+#' If class is a trans object, then it is returned as is.
+#' Default is \code{"identity"}.
 #' @export
 #' @examples
 #' response_vec_a <- rnorm(5)
@@ -117,6 +126,7 @@ ggcorr <- function(data,
   cn_vec[which(cn_vec == y)] <- ".y"
   cn_vec[which(cn_vec == id)] <- ".id"
   colnames(data) <- cn_vec
+  trans <- ggutils::get_trans(trans)
 
   grp_vec <- unique(data$`.grp`)
 
