@@ -13,7 +13,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-# ggutils
+# UtilsGGMR
 
 <!-- badges: start -->
 <!-- badges: end -->
@@ -22,17 +22,17 @@ The goal of plotutils is to provide utility functions for plotting in R using \c
 
 ## Installation
 
-You can install `ggutils` from [GitHub](https://github.com/) with:
+You can install `UtilsGGMR` from [GitHub](https://github.com/) with:
 
 ```{r, eval = FALSE}
-# install.packages("devtools")
-devtools::install_github("MiguelRodo/ggutils")
+if (!requireNamespace("remotes", quietly = TRUE)) install.packages("remotes")
+remotes::install_github("MiguelRodo/UtilsGGMR")
 ```
 
 ## Examples
 
 ```{r example}
-library(ggutils)
+library(UtilsGGMR)
 ```
 
 Fix axis limits to be equal between x- and y-axes, and/or expand axis coordinates. The primary use of `axis_limits` is forcing the x- and y-axes to have the same limits "automatically" (i.e. by inspecting the `ggplot` object, thus not requiring the user to automatically calculate limits to pass to `ggplot2::expand_limits`). 
@@ -116,14 +116,14 @@ Note that `add_text_column` places text in the same position, regardless of unde
 ```{r }
 p <- p +
   scale_y_continuous(
-    trans = ggutils::get_trans("asinh")
+    trans = UtilsGGMR::get_trans("asinh")
   )
 add_text_column(
   p = p,
   x = data_mod$x,
   y = data_mod$y,
   text = results_vec,
-  trans = ggutils::get_trans("asinh"),
+  trans = UtilsGGMR::get_trans("asinh"),
   coord = c(0.05, 0.95),
   skip = 0.07
 )

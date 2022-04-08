@@ -26,7 +26,7 @@
 #' library(ggplot2)
 #' p <- ggplot(data.frame(x = 1, y = 1)) +
 #'   geom_point()
-#' ggutils::add_cp_grid_guide(p = p, signif = 2)
+#' UtilsGGMR::add_cp_grid_guide(p = p, signif = 2)
 #' @export
 add_guide_lines <- function(p, axis = "x", range = c(0, 1),
                             n = 5, signif = 3) {

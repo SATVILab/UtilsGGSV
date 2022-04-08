@@ -29,8 +29,8 @@ The min and max of these vectors specify the range of the plot.}
 
 \item{trans}{character or trans object.
 Specifies the (visual) transformation applied to the y-axis.
-Internally passed to \code{ggutils::get_trans}, so see
-\code{?ggutils::get_trans} for further details regarding
+Internally passed to \code{UtilsGGMR::get_trans}, so see
+\code{?UtilsGGMR::get_trans} for further details regarding
 possible values. Default is "identity".
 Note that this transformation is NOT applied to the
 y-axis (the assumption is that it already has been, or will be).}
@@ -102,13 +102,13 @@ add_text_column(
 # works even if y-axis is transformed
 p <- p +
   scale_y_continuous(
-    trans = ggutils::get_trans("asinh")
+    trans = UtilsGGMR::get_trans("asinh")
   )
 add_text_column(
   p = p,
   x = data_mod$x,
   y = data_mod$y,
   text = results_vec,
-  trans = ggutils::get_trans("asinh")
+  trans = UtilsGGMR::get_trans("asinh")
 )
 }

@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# ggutils
+# UtilsGGMR
 
 <!-- badges: start -->
 <!-- badges: end -->
@@ -11,17 +11,17 @@ using .
 
 ## Installation
 
-You can install `ggutils` from [GitHub](https://github.com/) with:
+You can install `UtilsGGMR` from [GitHub](https://github.com/) with:
 
 ``` r
-# install.packages("devtools")
-devtools::install_github("MiguelRodo/ggutils")
+if (!requireNamespace("remotes", quietly = TRUE)) install.packages("remotes")
+remotes::install_github("MiguelRodo/UtilsGGMR")
 ```
 
 ## Examples
 
 ``` r
-library(ggutils)
+library(UtilsGGMR)
 ```
 
 Fix axis limits to be equal between x- and y-axes, and/or expand axis
@@ -115,14 +115,14 @@ of underlying transformation.
 ``` r
 p <- p +
   scale_y_continuous(
-    trans = ggutils::get_trans("asinh")
+    trans = UtilsGGMR::get_trans("asinh")
   )
 add_text_column(
   p = p,
   x = data_mod$x,
   y = data_mod$y,
   text = results_vec,
-  trans = ggutils::get_trans("asinh"),
+  trans = UtilsGGMR::get_trans("asinh"),
   coord = c(0.05, 0.95),
   skip = 0.07
 )

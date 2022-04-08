@@ -126,7 +126,7 @@ ggcorr <- function(data,
   cn_vec[which(cn_vec == y)] <- ".y"
   cn_vec[which(cn_vec == id)] <- ".id"
   colnames(data) <- cn_vec
-  trans <- ggutils::get_trans(trans)
+  trans <- UtilsGGMR::get_trans(trans)
 
   grp_vec <- unique(data$`.grp`)
 

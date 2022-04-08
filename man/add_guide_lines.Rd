@@ -38,5 +38,5 @@ allowing one to gradually zoom in in on the desired coordinates very accurately 
 library(ggplot2)
 p <- ggplot(data.frame(x = 1, y = 1)) +
   geom_point()
-ggutils::add_cp_grid_guide(p = p, signif = 2)
+UtilsGGMR::add_cp_grid_guide(p = p, signif = 2)
 }
