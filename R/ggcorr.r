@@ -121,6 +121,10 @@ ggcorr <- function(data,
                    abline = TRUE,
                    smooth = TRUE,
                    smooth_method = "lm") {
+
+  if (!requireNamespace("cccrm", quietly = TRUE)) {
+    install.packages("cccrm")
+  }
   cn_vec <- colnames(data)
   cn_vec[which(cn_vec == grp)] <- ".grp"
   cn_vec[which(cn_vec == y)] <- ".y"
