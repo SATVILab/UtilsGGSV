@@ -6,7 +6,7 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of plotutils is to provide utility functions for plotting in R
+The goal of UtilsGGMR is to provide utility functions for plotting in R
 using .
 
 ## Installation

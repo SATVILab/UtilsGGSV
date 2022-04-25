@@ -18,7 +18,7 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of plotutils is to provide utility functions for plotting in R using \code{ggplot2}. 
+The goal of UtilsGGMR is to provide utility functions for plotting in R using \code{ggplot2}. 
 
 ## Installation
 

@@ -1,4 +1,4 @@
 library(testthat)
-library(plotutils)
+library(UtilsGGMR)
 
-test_check("plotutils")
+test_check("UtilsGGMR")
