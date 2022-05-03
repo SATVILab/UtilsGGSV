@@ -6,8 +6,8 @@
 #' The min and max of these vectors specify the range of the plot.
 #' @param trans character or trans object.
 #' Specifies the (visual) transformation applied to the y-axis.
-#' Internally passed to \code{UtilsGGMR::get_trans}, so see
-#' \code{?UtilsGGMR::get_trans} for further details regarding
+#' Internally passed to \code{UtilsGGSV::get_trans}, so see
+#' \code{?UtilsGGSV::get_trans} for further details regarding
 #' possible values. Default is "identity".
 #' Note that this transformation is NOT applied to the
 #' y-axis (the assumption is that it already has been, or will be).
@@ -79,14 +79,14 @@
 #' # works even if y-axis is transformed
 #' p <- p +
 #'   scale_y_continuous(
-#'     trans = UtilsGGMR::get_trans("asinh")
+#'     trans = UtilsGGSV::get_trans("asinh")
 #'   )
 #' add_text_column(
 #'   p = p,
 #'   x = data_mod$x,
 #'   y = data_mod$y,
 #'   text = results_vec,
-#'   trans = UtilsGGMR::get_trans("asinh")
+#'   trans = UtilsGGSV::get_trans("asinh")
 #' )
 #' @export
 add_text_column <- function(p, x, y, trans = "identity",
@@ -152,7 +152,7 @@ add_text_column <- function(p, x, y, trans = "identity",
 #' @export
 #' @examples
 #' x_vec <- seq(1, 5, length.out = 1e3)
-#' y_vec <- UtilsGGMR::get_trans("root_fifth")$transform(seq_vec)
+#' y_vec <- UtilsGGSV::get_trans("root_fifth")$transform(seq_vec)
 #' plot_tbl <- data.frame(x = x_vec, y = y_vec)
 #' ggplot(
 #'   plot_tbl,

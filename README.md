@@ -1,27 +1,27 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# UtilsGGMR
+# UtilsGGSV
 
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of UtilsGGMR is to provide utility functions for plotting in R
+The goal of UtilsGGSV is to provide utility functions for plotting in R
 using .
 
 ## Installation
 
-You can install `UtilsGGMR` from [GitHub](https://github.com/) with:
+You can install `UtilsGGSV` from [GitHub](https://github.com/) with:
 
 ``` r
 if (!requireNamespace("remotes", quietly = TRUE)) install.packages("remotes")
-remotes::install_github("MiguelRodo/UtilsGGMR")
+remotes::install_github("SATVILab/UtilsGGSV")
 ```
 
 ## Examples
 
 ``` r
-library(UtilsGGMR)
+library(UtilsGGSV)
 ```
 
 Fix axis limits to be equal between x- and y-axes, and/or expand axis
@@ -115,14 +115,14 @@ of underlying transformation.
 ``` r
 p <- p +
   scale_y_continuous(
-    trans = UtilsGGMR::get_trans("asinh")
+    trans = UtilsGGSV::get_trans("asinh")
   )
 add_text_column(
   p = p,
   x = data_mod$x,
   y = data_mod$y,
   text = results_vec,
-  trans = UtilsGGMR::get_trans("asinh"),
+  trans = UtilsGGSV::get_trans("asinh"),
   coord = c(0.05, 0.95),
   skip = 0.07
 )

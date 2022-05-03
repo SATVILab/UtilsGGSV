@@ -1,4 +1,4 @@
 library(testthat)
-library(UtilsGGMR)
+library(UtilsGGSV)
 
-test_check("UtilsGGMR")
+test_check("UtilsGGSV")

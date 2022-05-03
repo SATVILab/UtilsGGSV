@@ -19,7 +19,7 @@ Get trans object from character
 }
 \examples{
 x_vec <- seq(1, 5, length.out = 1e3)
-y_vec <- UtilsGGMR::get_trans("root_fifth")$transform(seq_vec)
+y_vec <- UtilsGGSV::get_trans("root_fifth")$transform(seq_vec)
 plot_tbl <- data.frame(x = x_vec, y = y_vec)
 ggplot(
   plot_tbl,
