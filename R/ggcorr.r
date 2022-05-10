@@ -310,6 +310,9 @@ ggcorr <- function(data,
   }
 
   if (label_id) {
+    if (!requireNamespace("ggrepel", quietly = TRUE)) {
+      utils::install.packages("ggrepel")
+    }
     p <- p +
       ggrepel::geom_text_repel(
         aes(label = .id),
