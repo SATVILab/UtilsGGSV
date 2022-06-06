@@ -73,6 +73,9 @@
 #' Default is \code{"lm"}.
 #' If \code{NULL}, then
 #' no smoothed line is drawn.
+#' @param corr_method \code{"ccc", "pearson"}.
+#' Correlation method.
+#' Default is concordance correlation coefficient.
 #' @param trans character or trans object.
 #' Specifies scaling of y- and x-axes.
 #' If class is character, then it is converted to a trans object.
