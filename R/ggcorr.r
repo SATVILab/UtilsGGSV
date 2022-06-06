@@ -103,6 +103,7 @@
 #'  id = "pid"
 #' )
 ggcorr <- function(data,
+                   corr_method = "ccc",
                    grp,
                    grp_base = NULL,
                    grp_x = NULL,
@@ -125,7 +126,8 @@ ggcorr <- function(data,
                    smooth = TRUE,
                    smooth_method = "lm") {
 
-  if (!requireNamespace("cccrm", quietly = TRUE)) {
+  stopifnot(nzchar(corr_method, c("ccc", "pearson")))
+  if (!requireNamespace("cccrm", quietly = TRUE) && "ccc" %in% corr_method) {
     install.packages("cccrm")
   }
   cn_vec <- colnames(data)
@@ -155,26 +157,54 @@ ggcorr <- function(data,
     grp_vec_curr <- combn_mat[, i]
     data_curr <- data %>%
       dplyr::filter(.grp %in% grp_vec_curr)
-    corr <- suppressWarnings(cccrm::cccUst(
-      dataset = data_curr,
-      ry = ".y",
-      rmet = ".grp",
-      cl = 0.95
-    ))[1:3]
-    corr <- corr %>% signif(2)
-    tibble::tibble(
-      g1 = grp_vec_curr[1],
-      g2 = grp_vec_curr[2],
-      est = corr[1],
-      lb = corr[2],
-      ub = corr[3]
-    ) %>%
-      dplyr::mutate(
-        txt = paste0(
-          g1, " vs ", g2, ": ", corr[1],
-          " (", corr[2], "; ", corr[3], ")"
+    purrr::map_df(corr_method, function(mthd) {
+      if (mthd == "ccc") {
+        corr <- suppressWarnings(cccrm::cccUst(
+          dataset = data_curr,
+          ry = ".y",
+          rmet = ".grp",
+          cl = 0.95
+        ))[1:3]
+        corr <- corr %>% signif(2)
+        add_method <- ifelse(length(corr_method) > 1, " (CCC)", "")
+        out_tbl <- tibble::tibble(
+          g1 = grp_vec_curr[1],
+          g2 = grp_vec_curr[2],
+          est = corr[1],
+          lb = corr[2],
+          ub = corr[3]
+        ) %>%
+          dplyr::mutate(
+            txt = paste0(
+              g1, " vs ", g2, add_method, ": ", corr[1],
+              " (", corr[2], "; ", corr[3], ")"
+            )
+          )
+        return(out_tbl)
+      }
+      if (mthd == "pearson") {
+        corr <- cor.test(
+          data_curr[[".y"]][data_curr[[".grp"]] == grp_vec_curr[1]],
+          data_curr[[".y"]][data_curr[[".grp"]] == grp_vec_curr[2]]
         )
-      )
+        add_method <- ifelse(length(corr_method) > 1, " (PCC)", "")
+        corr <- c(corr$estimate, corr[["conf.int"]]) %>% signif(2)
+        out_tbl <- tibble::tibble(
+          g1 = grp_vec_curr[1],
+          g2 = grp_vec_curr[2],
+          est = corr[1],
+          lb = corr[2],
+          ub = corr[3]
+        ) %>%
+          dplyr::mutate(
+            txt = paste0(
+              g1, " vs ", g2, add_method, ": ", corr[1],
+              " (", corr[2], "; ", corr[3], ")"
+            )
+          )
+      }
+      stop("method ", mthd, " not recognised")
+    })
   })
 
   match_elem <- grp_vec[[1]]

@@ -6,6 +6,7 @@
 \usage{
 ggcorr(
   data,
+  corr_method = "ccc",
   grp,
   grp_base = NULL,
   grp_x = NULL,
@@ -31,6 +32,10 @@ ggcorr(
 }
 \arguments{
 \item{data}{dataframe. Has columns .}
+
+\item{corr_method}{\code{"ccc", "pearson"}.
+Correlation method.
+Default is concordance correlation coefficient.}
 
 \item{grp}{character.
 Name of column in \code{data} that specifies
@@ -86,11 +91,7 @@ Default is 0.6.}
 \item{font_size}{numeric. Font size.
 Default is 4.2 (roughly size 12).}
 
-\item{hjust}{numeric.
-Passed onto \code{hjust} and \code{vjust} parameters, respectively,
-of \code{geom_text}. Defaults are \code{0} and \code{0.5}, respectively.}
-
-\item{vjust}{numeric.
+\item{hjust, vjust}{numeric.
 Passed onto \code{hjust} and \code{vjust} parameters, respectively,
 of \code{geom_text}. Defaults are \code{0} and \code{0.5}, respectively.}
 
