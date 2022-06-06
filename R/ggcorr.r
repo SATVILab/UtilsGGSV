@@ -202,6 +202,7 @@ ggcorr <- function(data,
               " (", corr[2], "; ", corr[3], ")"
             )
           )
+        return(out_tbl)
       }
       stop("method ", mthd, " not recognised")
     })

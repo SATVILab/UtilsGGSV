@@ -17,6 +17,20 @@ test_that("ggcorr works", {
     y = "response",
     id = "pid"
   )
+  p_std <- ggcorr(
+    data = response_tbl,
+    grp = "group",
+    corr_method = "pearson",
+    y = "response",
+    id = "pid"
+  )
+  p_std <- ggcorr(
+    data = response_tbl,
+    grp = "group",
+    corr_method = c("ccc", "pearson"),
+    y = "response",
+    id = "pid"
+  )
 
   expect_s3_class(
     p_std,
