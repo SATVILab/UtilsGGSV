@@ -17,7 +17,8 @@ add_text_column(
   hjust = 0,
   vjust = 0.5,
   expand_limits_y = 0,
-  limits_equal = FALSE
+  limits_equal = FALSE,
+  ...
 )
 }
 \arguments{
@@ -54,6 +55,8 @@ Not implemented at present.}
 \item{hjust, vjust}{numeric.
 Passed onto \code{hjust} and \code{vjust} parameters, respectively,
 of \code{geom_text}. Defaults are \code{0} and \code{0.5}, respectively.}
+
+\item{...}{Passed to \code{geom_text}.}
 }
 \description{
 Add a column of text

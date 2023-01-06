@@ -34,6 +34,7 @@
 #' @param hjust,vjust numeric.
 #' Passed onto \code{hjust} and \code{vjust} parameters, respectively,
 #' of \code{geom_text}. Defaults are \code{0} and \code{0.5}, respectively.
+#' @param ... Passed to \code{geom_text}.
 #'
 #' @examples
 #' data_mod <- data.frame(x = rnorm(10))
@@ -96,8 +97,8 @@ add_text_column <- function(p, x, y, trans = "identity",
                             hjust = 0,
                             vjust = 0.5,
                             expand_limits_y = 0,
-                            limits_equal = FALSE) {
-
+                            limits_equal = FALSE,
+                            ...) {
   # prepare transformation
   trans <- get_trans(trans = trans) # nolint
 
@@ -136,7 +137,8 @@ add_text_column <- function(p, x, y, trans = "identity",
       mapping = aes(x = x, y = y, label = txt),
       hjust = hjust, vjust = vjust,
       size = font_size,
-      inherit.aes = FALSE
+      inherit.aes = FALSE,
+      ...
     )
 }
 
