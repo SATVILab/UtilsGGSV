@@ -146,7 +146,8 @@ ggcorr <- function(data,
         rep(grp_base, length(grp_vec_alt)),
         grp_vec_alt
       ),
-      byrow = TRUE
+      byrow = TRUE,
+      ncol = length(grp_vec_alt)
     )
   } else {
     if (!is.null(grp_x)) grp_vec <- c(grp_x, setdiff(grp_vec, grp_x))
