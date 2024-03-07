@@ -219,6 +219,7 @@ get_trans <- function(trans) {
       "modulus" = scales::modulus_trans()
     ),
     "trans" = trans,
+    "transform" = trans,
     stop(paste0("class ", class(trans)[1], " not recognised"))
   )
 }
