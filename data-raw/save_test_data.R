@@ -1,5 +1,8 @@
 devtools::load_all()
 # prep data
+if (!requireNamespace("flowCore", quietly = TRUE)) {
+  renv::install("bioc::flowCore")
+}
 data("GvHD", package = "flowCore")
 ex_tbl <- flowCore::exprs(GvHD[[1]]) %>%
   tibble::as_tibble()
@@ -15,7 +18,11 @@ saveRDS(
 # save p
 marker <- c("FL2-H", "FL3-H")
 
-p_axis_limits <- cytoutils::plot_cyto(
+if (!requireNamespace("UtilsCytoRSV", quietly = TRUE)) {
+  renv::install("SATVILab/UtilsCytoRSV")
+}
+
+p_axis_limits <- UtilsCytoRSV::plot_cyto(
   data = ex_tbl,
   marker = marker
 )
