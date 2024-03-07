@@ -1,4 +1,5 @@
 test_that("ggcorr works", {
+  browser()
   set.seed(2106)
   response_vec_a <- rnorm(5)
   response_tbl <- data.frame(
