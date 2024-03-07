@@ -1,4 +1,7 @@
+^renv$
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^LICENSE\.md$
 ^README\.Rmd$
+^renv/.*$
+^renv\.lock$
