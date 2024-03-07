@@ -1,5 +1,7 @@
 .Rproj.user/*
 .Rproj.user
 .Rhistory
+SCRATCH.R
 
 .vscode/settings.json
+tests/testthat/Rplots.pdf
