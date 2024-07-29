@@ -4,7 +4,7 @@ if (!requireNamespace("flowCore", quietly = TRUE)) {
   renv::install("bioc::flowCore")
 }
 data("GvHD", package = "flowCore")
-ex_tbl <- flowCore::exprs(GvHD[[1]]) %>%
+ex_tbl <- flowCore::exprs(GvHD[[1]]) |>
   tibble::as_tibble()
 saveRDS(
   object = ex_tbl,
