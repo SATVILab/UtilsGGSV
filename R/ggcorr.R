@@ -351,7 +351,7 @@ ggcorr <- function(data,
                          label_id_size,
                          combn_mat) {
   plot_tbl_raw <- .ggcorr_plot_tbl_get_raw(data, grp_vec)
-  p <- .ggcorr_plot_init(plot_tbl_raw) |>
+  .ggcorr_plot_init(plot_tbl_raw) |>
     .ggcorr_plot_theme(thm, grid) |>
     .ggcorr_plot_colour(plot_tbl_raw, grp_to_col, grp_vec) |>
     .ggcorr_plot_limits(limits_expand, limits_equal, plot_tbl_raw) |>
@@ -361,7 +361,6 @@ ggcorr <- function(data,
     .ggcorr_plot_abline(abline) |>
     .ggcorr_plot_smooth(smooth) |>
     .ggcorr_plot_label_points(label_id, label_id_size)
-  p
 }
 
 .ggcorr_plot_tbl_get_raw <- function(data, grp_vec) {
