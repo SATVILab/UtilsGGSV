@@ -135,7 +135,7 @@ The utility function `get_trans` returns `trans` objects (as implemented by the 
 get_trans("log10")
 ```
 
-The function `ggcorr` plots concordance correlation coefficients between two or more groups.
+The function `ggcorr` plots correlation coefficients between two or more groups.
 ```{r }
 set.seed(3)
 response_vec_a <- rnorm(5)

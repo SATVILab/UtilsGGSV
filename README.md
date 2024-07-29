@@ -4,6 +4,8 @@
 # UtilsGGSV
 
 <!-- badges: start -->
+
+[![R-CMD-check](https://github.com/SATVILab/UtilsGGSV/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/SATVILab/UtilsGGSV/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 The goal of UtilsGGSV is to provide utility functions for plotting in R
@@ -137,11 +139,11 @@ transformation.
 
 ``` r
 get_trans("log10")
-#> Transformer:  log-10
+#> Transformer: log-10 [1e-100, Inf]
 ```
 
-The function `ggcorr` plots concordance correlation coefficients between
-two or more groups.
+The function `ggcorr` plots correlation coefficients between two or more
+groups.
 
 ``` r
 set.seed(3)
