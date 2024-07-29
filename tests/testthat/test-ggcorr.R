@@ -38,7 +38,7 @@ test_that("ggcorr works", {
   )
 
   p_group_2 <- ggcorr(
-    data = response_tbl %>%
+    data = response_tbl |>
       dplyr::filter(group != "c"),
     grp = "group",
     y = "response",
@@ -51,7 +51,7 @@ test_that("ggcorr works", {
   )
 
   p_lab_id <- ggcorr(
-    data = response_tbl %>%
+    data = response_tbl |>
       dplyr::filter(group != "c"),
     grp = "group",
     y = "response",
@@ -65,7 +65,7 @@ test_that("ggcorr works", {
   )
 
   p_abline <- ggcorr(
-    data = response_tbl %>%
+    data = response_tbl |>
       dplyr::filter(group != "c"),
     grp = "group",
     y = "response",
@@ -79,7 +79,7 @@ test_that("ggcorr works", {
   )
 
   p_smooth <- ggcorr(
-    data = response_tbl %>%
+    data = response_tbl |>
       dplyr::filter(group != "c"),
     grp = "group",
     y = "response",
@@ -91,7 +91,7 @@ test_that("ggcorr works", {
     4L
   )
   p_smooth_loess <- ggcorr(
-    data = response_tbl %>%
+    data = response_tbl |>
       dplyr::filter(group != "c"),
     grp = "group",
     y = "response",
@@ -105,7 +105,7 @@ test_that("ggcorr works", {
   )
 
   p_equal <- ggcorr(
-    data = response_tbl %>%
+    data = response_tbl |>
       dplyr::filter(group != "c"),
     grp = "group",
     y = "response",
