@@ -2,7 +2,7 @@
 % Please edit documentation in R/ggcorr.R
 \name{ggcorr}
 \alias{ggcorr}
-\title{Plot scatterplot with CCC and ab-line overlaid}
+\title{Plot scatterplot with correlation coefficients and ab-line overlaid}
 \usage{
 ggcorr(
   data,
@@ -33,139 +33,94 @@ ggcorr(
 )
 }
 \arguments{
-\item{data}{dataframe. Has columns .}
+\item{data}{dataframe. Dataframe containing the data to be plotted.}
 
-\item{corr_method}{character vector,
-of values from \code{"ccc", "pearson", "spearman"} and \code{"kendall"}.
-Correlation method.
-Default is spearman correlation coefficient.}
+\item{corr_method}{character vector. Correlation method. One or more of
+\code{c("ccc", "pearson", "spearman", "kendall")}. Default is \code{"spearman"}.}
 
-\item{grp}{character.
-Name of column in \code{data} that specifies
-the variables to compare between.
-The first level within \code{grp}
-(i.e. \code{data[[grp]][1]}) is
-the level that is plotted on the x-axis.}
+\item{grp}{character. Name of the column in \code{data} that specifies the
+variables to compare between. The first level within \code{grp} (i.e. \code{data[[grp]][1]})
+is the level plotted on the x-axis.}
 
-\item{grp_base}{character.
-If not \code{NULL}, then only
-correlations between this level
-within \code{data[[grp]]} and
-other levels are displayed.
-If \code{NULL}, then all
-two-way correlations are displayed.
-Default is \code{NULL}.}
+\item{grp_base}{character. If not \code{NULL}, then only correlations between this
+level within \code{data[[grp]]} and other levels are displayed. If \code{NULL}, all
+two-way correlations are displayed. Default is \code{NULL}.}
 
-\item{grp_x}{character.
-If \code{NULL}, then
-this level of \code{grp}
-is the level plotted along the
-x-axis.
-Default is \code{NULL}.}
+\item{grp_x}{character. If \code{NULL}, then this level of \code{grp} is plotted along
+the x-axis. Default is \code{NULL}.}
 
-\item{y}{character.
-Name of column in \code{data} that specifies
-the values/measurements/responses
-being correlated between groups.}
+\item{y}{character. Name of the column in \code{data} that specifies the
+values/measurements/responses being correlated between groups.}
 
-\item{id}{character.
-Name of column in \code{data} that specifies
-the subject from which multiple measurements were taken.}
+\item{id}{character. Name of the column in \code{data} that specifies the subject
+from which multiple measurements were taken.}
 
-\item{label_id}{logical.
-If \code{TRUE}, then points labels as given
-by \code{data[[id]]} are displayed using
-\code{ggrepel::geom_text_repel}.
-Default is \code{FALSE}.}
+\item{label_id}{logical. If \code{TRUE}, points labels as given by \code{data[[id]]}
+are displayed using \code{ggrepel::geom_text_repel}. Default is \code{FALSE}.}
 
-\item{label_id_size}{Numeric.
-Size of labels.
-Default is \code{3}.}
+\item{label_id_size}{numeric. Size of labels. Default is \code{3}.}
 
-\item{trans}{character or trans object.
-Specifies scaling of y- and x-axes.
-If class is character, then it is converted to a trans object.
-Adds "root_cube", "root_fourth", "root_fifth" and
-"asinh" transformations, as well as "sqrt" transformation
-that allows plotting of lines at zero.
-If class is a trans object, then it is returned as is.
-Default is \code{"identity"}.}
+\item{trans}{character or trans object. Specifies scaling of y- and x-axes.
+If class is character, it is converted to a trans object. Adds "root_cube",
+"root_fourth", "root_fifth" and "asinh" transformations, as well as "sqrt"
+transformation that allows plotting of lines at zero. If class is a trans
+object, it is returned as is. Default is \code{"identity"}.}
 
-\item{skip}{numeric.
-Proportion of y-axis length to skip between rows.
-Default is 0.6.}
+\item{coord}{numeric vector. Coordinates for text placement. Default is
+\code{c(0.05, 0.95)}.}
 
-\item{font_size}{numeric. Font size.
-Default is 4.2 (roughly size 12).}
+\item{skip}{numeric. Skips a number of characters from the start of each
+string. Default is \code{0.05}.}
 
-\item{hjust, vjust}{numeric.
-Passed onto \code{hjust} and \code{vjust} parameters, respectively,
-of \code{geom_text}. Defaults are \code{0} and \code{0.5}, respectively.}
+\item{font_size}{numeric. Font size for text. Default is \code{10}.}
 
-\item{limits_expand}{list. If not \code{NULL},
-then it is (effectively) passed onto \code{ggplot2::limits_expand} to
-ensure that certain values are included in the plot (such as, for example, 0
-if that is the minimum value possible but it may not be plotted). If not named, then # nolint
-must consist of one numeric vector that will then force all values in the numeric value # nolint
-to be included in the plot. If named, then must have names \code{x} and/or \code{y}, # nolint
-with the elements again being numeric vectors that must be included in plot.}
+\item{hjust}{numeric. Horizontal justification for text. Default is \code{0}.}
 
-\item{limits_equal}{logical. If \code{TRUE}, then the ranges on the x- and y-axes # nolint
-must be equal. Effectively applied after expand_grid is applied. Default is \code{FALSE}. # nolint}
+\item{vjust}{numeric. Vertical justification for text. Default is \code{0.5}.}
 
-\item{thm}{object of class \code{c("theme", "gg")}.
-Specifies \code{ggplot2} theme.
-Default is \code{cowplot::theme_cowplot()}.}
+\item{limits_expand}{list. Expand the axis limits. Default is \code{NULL}.}
 
-\item{grid}{object of class \code{c("theme", "gg")}.
-Specifies background grid.
-If not using \code{cowplot::theme_cowplot()}
-for theme, then likely best to set to NULL.
+\item{limits_equal}{logical. Set axis limits equal. Default is \code{FALSE}.}
+
+\item{thm}{ggplot2 theme. Specifies \code{ggplot2} theme. Default is
+\code{cowplot::theme_cowplot()}.}
+
+\item{grid}{ggplot2 theme. Specifies background grid. If not using
+\code{cowplot::theme_cowplot()} for theme, then likely best to set to \code{NULL}.
 Default is \code{cowplot::background_grid(major = "xy")}.}
 
-\item{grp_to_col}{character vector.
-Specifies colours for elements in \code{grp}.
-Elements are colours.
-If \code{named}, then the names specify the
-level within \code{grp} to which the colours
-are matched.
-If \code{NULL} and only two groups are compared,
-then all points are black.
-If \code{NULL} and there are more than two groups
-compared, then defaults to palette \code{Set1}
-of the RColorBrewer package.
+\item{grp_to_col}{character vector. Specifies colours for elements in \code{grp}.
+Elements are colours. If named, the names specify the level within \code{grp} to
+which the colours are matched. If \code{NULL} and only two groups are compared,
+then all points are black. If \code{NULL} and there are more than two groups
+compared, then defaults to palette \code{Set1} of the RColorBrewer package.
 Default is \code{NULL}.}
 
-\item{abline}{logical.
-If \code{TRUE}, then the y=x line is plotted
-in colour "gray85".}
+\item{abline}{logical. If \code{TRUE}, then the y=x line is plotted in colour
+"gray85". Default is \code{TRUE}.}
 
-\item{smooth_method.}{Smoothing method to pass to
-\code{geom_smooth}.
-Default is \code{"lm"}.
-If \code{NULL}, then
-no smoothed line is drawn.}
+\item{smooth_method}{character. Smoothing method to pass to \code{geom_smooth}.
+Default is \code{"lm"}. If \code{NULL}, no smoothed line is drawn.}
 }
 \description{
-At present only allows the concordance correlation
-coefficient.
-More correlation coefficients will be added in future.
+Plots a scatterplot with various correlation coefficients and an optional
+ab-line overlaid.
 }
 \examples{
 response_vec_a <- rnorm(5)
-  response_tbl <- data.frame(
+response_tbl <- data.frame(
   group = rep(letters[1:3], each = 5),
   response = c(
     response_vec_a,
     response_vec_a * 1.2 + rnorm(5, sd = 0.2),
     response_vec_a * 2 + rnorm(5, sd = 2)
   ),
- pid = rep(paste0("id_", 1:5), 3)
+  pid = rep(paste0("id_", 1:5), 3)
 )
 ggcorr(
- data = response_tbl,
- grp = "group",
- y = "response",
- id = "pid"
+  data = response_tbl,
+  grp = "group",
+  y = "response",
+  id = "pid"
 )
 }

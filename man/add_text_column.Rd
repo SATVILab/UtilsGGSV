@@ -2,7 +2,7 @@
 % Please edit documentation in R/add_text_column.R
 \name{add_text_column}
 \alias{add_text_column}
-\title{Add a column of text}
+\title{Add a column of text to a ggplot}
 \usage{
 add_text_column(
   p,
@@ -13,53 +13,46 @@ add_text_column(
   coord = c(0.05, 0.95),
   skip = 0.06,
   font_size = 4.2,
-  align_symbol = NULL,
   hjust = 0,
   vjust = 0.5,
-  expand_limits_y = 0,
-  limits_equal = FALSE,
   ...
 )
 }
 \arguments{
-\item{p}{\code{ggplot} object.
-Plot to have text overlaid onto.}
+\item{p}{ggplot object. Plot to have text overlaid onto.}
 
-\item{x, y}{numeric vector.
-The min and max of these vectors specify the range of the plot.}
+\item{x, y}{numeric vector. The min and max of these vectors specify the range
+of the plot.}
 
-\item{trans}{character or trans object.
-Specifies the (visual) transformation applied to the y-axis.
-Internally passed to \code{UtilsGGSV::get_trans}, so see
-\code{?UtilsGGSV::get_trans} for further details regarding
-possible values. Default is "identity".
-Note that this transformation is NOT applied to the
-y-axis (the assumption is that it already has been, or will be).}
+\item{trans}{character or trans object. Specifies the (visual) transformation
+applied to the y-axis. Internally passed to \code{get_trans}. Default is "identity".
+Note that this transformation is NOT applied to the y-axis (the assumption is
+that it already has been or will be).}
 
-\item{text}{character vector.
-Each element specifies a line of text.
-Subsequent elements are plotted underneath (assuming
-skip >= 0).}
+\item{text}{character vector. Each element specifies a line of text.
+Subsequent elements are plotted underneath (assuming skip >= 0).}
 
-\item{skip}{numeric.
-Proportion of y-axis length to skip between rows.
-Default is 0.6.}
+\item{coord}{numeric vector of length two. The elements specify the x- and
+y-coordinates, respectively, for the first line of text (i.e. the first element)
+of \code{text}. \code{c(0, 0)} means the bottom-left corner and \code{c(1, 1)} the top-right.
+There is no problem with specifying values outside \verb{[0, 1]}, however.
+Default is \code{c(0.05, 0.95)} (i.e. towards top-left corner).}
 
-\item{font_size}{numeric. Font size.
-Default is 4.2 (roughly size 12).}
+\item{skip}{numeric. Proportion of y-axis length to skip between rows. Default is 0.06.}
 
-\item{align_symbol}{character.
-Symbol around which to align the text.
-Not implemented at present.}
+\item{font_size}{numeric. Font size. Default is 4.2 (roughly size 12).}
 
-\item{hjust, vjust}{numeric.
-Passed onto \code{hjust} and \code{vjust} parameters, respectively,
-of \code{geom_text}. Defaults are \code{0} and \code{0.5}, respectively.}
+\item{hjust, vjust}{numeric. Passed to \code{hjust} and \code{vjust} parameters of
+\code{geom_text}. Defaults are \code{0} and \code{0.5}, respectively.}
 
-\item{...}{Passed to \code{geom_text}.}
+\item{...}{Additional parameters passed to \code{geom_text}.}
+}
+\value{
+A ggplot object with the added text.
 }
 \description{
-Add a column of text
+Adds a column of text to a ggplot object, overlaying the text at specified
+coordinates with customizable transformation, font size, and alignment.
 }
 \examples{
 data_mod <- data.frame(x = rnorm(10))
@@ -68,33 +61,19 @@ fit <- lm(y ~ x, data = data_mod)
 coef_tbl <- coefficients(summary(fit))
 results_vec <- c(
   paste0(
-    "Intercept: ",
-    signif(coef_tbl[1, "Estimate"][[1]], 2),
-    " (",
-    signif(coef_tbl[1, 1][[1]] - 2 * coef_tbl[1, 2][[1]], 3),
-    ", ",
-    signif(coef_tbl[1, 1][[1]] + 2 * coef_tbl[1, 2][[1]], 3),
-    "; p = ",
-    signif(coef_tbl[1, 4][[1]], 3),
-    ")"
+    "Intercept: ", signif(coef_tbl[1, "Estimate"][[1]], 2), " (",
+    signif(coef_tbl[1, 1][[1]] - 2 * coef_tbl[1, 2][[1]], 3), ", ",
+    signif(coef_tbl[1, 1][[1]] + 2 * coef_tbl[1, 2][[1]], 3), "; p = ",
+    signif(coef_tbl[1, 4][[1]], 3), ")"
   ),
   paste0(
-    "Slope: ",
-    signif(coef_tbl[2, "Estimate"][[1]], 2),
-    " (",
-    signif(coef_tbl[2, 1][[1]] - 2 * coef_tbl[2, 2][[1]], 3),
-    ", ",
-    signif(coef_tbl[2, 1][[1]] + 2 * coef_tbl[2, 2][[1]], 3),
-    "; p = ",
-    signif(coef_tbl[2, 4][[1]], 3),
-    ")"
+    "Slope: ", signif(coef_tbl[2, "Estimate"][[1]], 2), " (",
+    signif(coef_tbl[2, 1][[1]] - 2 * coef_tbl[2, 2][[1]], 3), ", ",
+    signif(coef_tbl[2, 1][[1]] + 2 * coef_tbl[2, 2][[1]], 3), "; p = ",
+    signif(coef_tbl[2, 4][[1]], 3), ")"
   )
 )
-p <- ggplot(
-  data = data_mod,
-  aes(x = x, y = y)
-) +
-  geom_point()
+p <- ggplot(data_mod, aes(x = x, y = y)) + geom_point()
 add_text_column(
   p = p,
   x = data_mod$x,
@@ -102,16 +81,13 @@ add_text_column(
   text = results_vec
 )
 
-# works even if y-axis is transformed
-p <- p +
-  scale_y_continuous(
-    trans = UtilsGGSV::get_trans("asinh")
-  )
+# Works even if y-axis is transformed
+p <- p + scale_y_continuous(trans = get_trans("asinh"))
 add_text_column(
   p = p,
   x = data_mod$x,
   y = data_mod$y,
   text = results_vec,
-  trans = UtilsGGSV::get_trans("asinh")
+  trans = "asinh"
 )
 }

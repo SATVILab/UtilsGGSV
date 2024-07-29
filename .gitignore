@@ -2,6 +2,7 @@
 .Rproj.user
 .Rhistory
 SCRATCH.R
+_tmp/*
 
 .vscode/settings.json
 tests/testthat/Rplots.pdf

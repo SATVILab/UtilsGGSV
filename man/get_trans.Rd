@@ -2,29 +2,29 @@
 % Please edit documentation in R/add_text_column.R
 \name{get_trans}
 \alias{get_trans}
-\title{Get trans object from character}
+\title{Get transformation object}
 \usage{
 get_trans(trans)
 }
 \arguments{
-\item{trans}{character or trans object.
-If class is character, then it is converted to a trans object.
-Adds "root_cube", "root_fourth", "root_fifth" and
-"asinh" transformations, as well as "sqrt" transformation
-that allows plotting of lines at zero.
-If class is a trans object, then it is returned as is.}
+\item{trans}{character or trans object. If class is character, it is converted
+to a trans object. Adds "root_cube", "root_fourth", "root_fifth" and "asinh"
+transformations, as well as "sqrt" transformation that allows plotting of
+lines at zero. If class is a trans object, it is returned as is.}
+}
+\value{
+A \code{trans} object corresponding to the specified transformation.
 }
 \description{
-Get trans object from character
+Converts a character string specifying a transformation into a \code{trans} object,
+or returns the input if it is already a \code{trans} object. Supports various
+root, log, and other transformations.
 }
 \examples{
-x_vec <- seq(1, 5, length.out = 1e3)
-y_vec <- UtilsGGSV::get_trans("root_fifth")$transform(seq_vec)
+x_vec <- seq(1, 5, length.out = 1000)
+y_vec <- get_trans("root_fifth")$transform(x_vec)
 plot_tbl <- data.frame(x = x_vec, y = y_vec)
-ggplot(
-  plot_tbl,
-  aes(x, y)
-) +
+ggplot(plot_tbl, aes(x, y)) +
   geom_line() +
   geom_point() +
   coord_equal() +

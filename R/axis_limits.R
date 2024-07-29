@@ -185,7 +185,7 @@ axis_limits <- function(p,
       }
       if (length(limits_expand) == 1) {
         nm <- setdiff(c("x", "y"), names(limits_expand))
-        limits_expand %<>%
+        limits_expand <- limits_expand |>
           append(list(range) |> setNames(nm))
       }
     }

@@ -1,7 +1,7 @@
 Package: UtilsGGSV
 Type: Package
 Title: Utility functions for ggplot2
-Version: 0.2.1
+Version: 0.3.0
 Author: Miguel Rodo
 Maintainer: Miguel Rodo <rdxmig002@myuct.ac.za>
 Description: Provides utility functions for working with `ggplot2` objects.
@@ -22,3 +22,4 @@ Imports:
     rprojroot,
     purrr,
     dplyr
+Roxygen: list(markdown = TRUE)

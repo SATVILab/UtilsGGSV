@@ -1,109 +1,75 @@
-#' @title Plot scatterplot with CCC and ab-line overlaid
+#' @md
+#' @title Plot scatterplot with correlation coefficients and ab-line overlaid
 #'
 #' @description
-#' At present only allows the concordance correlation
-#' coefficient.
-#' More correlation coefficients will be added in future.
+#' Plots a scatterplot with various correlation coefficients and an optional
+#' ab-line overlaid.
 #'
-#' @inheritParams add_text_column
-#' @inheritParams axis_limits
-#' @inheritParams get_trans
-#' @param data dataframe. Has columns .
-#' @param grp character.
-#' Name of column in \code{data} that specifies
-#' the variables to compare between.
-#' The first level within \code{grp}
-#' (i.e. \code{data[[grp]][1]}) is
-#' the level that is plotted on the x-axis.
-#' @param grp_base character.
-#' If not \code{NULL}, then only
-#' correlations between this level
-#' within \code{data[[grp]]} and
-#' other levels are displayed.
-#' If \code{NULL}, then all
-#' two-way correlations are displayed.
-#' Default is \code{NULL}.
-#' @param grp_x character.
-#' If \code{NULL}, then
-#' this level of \code{grp}
-#' is the level plotted along the
-#' x-axis.
-#' Default is \code{NULL}.
-#' @param y character.
-#' Name of column in \code{data} that specifies
-#' the values/measurements/responses
-#' being correlated between groups.
-#' @param id character.
-#' Name of column in \code{data} that specifies
-#' the subject from which multiple measurements were taken.
-#' @param label_id logical.
-#' If \code{TRUE}, then points labels as given
-#' by \code{data[[id]]} are displayed using
-#' \code{ggrepel::geom_text_repel}.
-#' Default is \code{FALSE}.
-#' @param label_id_size Numeric.
-#' Size of labels.
-#' Default is \code{3}.
-#' @param thm object of class \code{c("theme", "gg")}.
-#' Specifies \code{ggplot2} theme.
-#' Default is \code{cowplot::theme_cowplot()}.
-#' @param grid object of class \code{c("theme", "gg")}.
-#' Specifies background grid.
-#' If not using \code{cowplot::theme_cowplot()}
-#' for theme, then likely best to set to NULL.
-#' Default is \code{cowplot::background_grid(major = "xy")}.
-#' @param grp_to_col character vector.
-#' Specifies colours for elements in \code{grp}.
-#' Elements are colours.
-#' If \code{named}, then the names specify the
-#' level within \code{grp} to which the colours
-#' are matched.
-#' If \code{NULL} and only two groups are compared,
-#' then all points are black.
-#' If \code{NULL} and there are more than two groups
-#' compared, then defaults to palette \code{Set1}
-#' of the RColorBrewer package.
-#' Default is \code{NULL}.
-#' @param abline logical.
-#' If \code{TRUE}, then the y=x line is plotted
-#' in colour "gray85".
-#' @param smooth_method.
-#' Smoothing method to pass to
-#' \code{geom_smooth}.
-#' Default is \code{"lm"}.
-#' If \code{NULL}, then
-#' no smoothed line is drawn.
-#' @param corr_method character vector,
-#' of values from \code{"ccc", "pearson", "spearman"} and \code{"kendall"}.
-#' Correlation method.
-#' Default is spearman correlation coefficient.
-#' @param trans character or trans object.
-#' Specifies scaling of y- and x-axes.
-#' If class is character, then it is converted to a trans object.
-#' Adds "root_cube", "root_fourth", "root_fifth" and
-#' "asinh" transformations, as well as "sqrt" transformation
-#' that allows plotting of lines at zero.
-#' If class is a trans object, then it is returned as is.
-#' Default is \code{"identity"}.
+#' @param data dataframe. Dataframe containing the data to be plotted.
+#' @param grp character. Name of the column in `data` that specifies the
+#' variables to compare between. The first level within `grp` (i.e. `data[[grp]][1]`)
+#' is the level plotted on the x-axis.
+#' @param grp_base character. If not `NULL`, then only correlations between this
+#' level within `data[[grp]]` and other levels are displayed. If `NULL`, all
+#' two-way correlations are displayed. Default is `NULL`.
+#' @param grp_x character. If `NULL`, then this level of `grp` is plotted along
+#' the x-axis. Default is `NULL`.
+#' @param y character. Name of the column in `data` that specifies the
+#' values/measurements/responses being correlated between groups.
+#' @param id character. Name of the column in `data` that specifies the subject
+#' from which multiple measurements were taken.
+#' @param label_id logical. If `TRUE`, points labels as given by `data[[id]]`
+#' are displayed using `ggrepel::geom_text_repel`. Default is `FALSE`.
+#' @param label_id_size numeric. Size of labels. Default is `3`.
+#' @param thm ggplot2 theme. Specifies `ggplot2` theme. Default is
+#' `cowplot::theme_cowplot()`.
+#' @param grid ggplot2 theme. Specifies background grid. If not using
+#' `cowplot::theme_cowplot()` for theme, then likely best to set to `NULL`.
+#' Default is `cowplot::background_grid(major = "xy")`.
+#' @param grp_to_col character vector. Specifies colours for elements in `grp`.
+#' Elements are colours. If named, the names specify the level within `grp` to
+#' which the colours are matched. If `NULL` and only two groups are compared,
+#' then all points are black. If `NULL` and there are more than two groups
+#' compared, then defaults to palette `Set1` of the RColorBrewer package.
+#' Default is `NULL`.
+#' @param abline logical. If `TRUE`, then the y=x line is plotted in colour
+#' "gray85". Default is `TRUE`.
+#' @param smooth_method character. Smoothing method to pass to `geom_smooth`.
+#' Default is `"lm"`. If `NULL`, no smoothed line is drawn.
+#' @param corr_method character vector. Correlation method. One or more of
+#' `c("ccc", "pearson", "spearman", "kendall")`. Default is `"spearman"`.
+#' @param trans character or trans object. Specifies scaling of y- and x-axes.
+#' If class is character, it is converted to a trans object. Adds "root_cube",
+#' "root_fourth", "root_fifth" and "asinh" transformations, as well as "sqrt"
+#' transformation that allows plotting of lines at zero. If class is a trans
+#' object, it is returned as is. Default is `"identity"`.
+#' @param coord numeric vector. Coordinates for text placement. Default is
+#' `c(0.05, 0.95)`.
+#' @param skip numeric. Skips a number of characters from the start of each
+#' string. Default is `0.05`.
+#' @param font_size numeric. Font size for text. Default is `10`.
+#' @param hjust numeric. Horizontal justification for text. Default is `0`.
+#' @param vjust numeric. Vertical justification for text. Default is `0.5`.
+#' @param limits_expand list. Expand the axis limits. Default is `NULL`.
+#' @param limits_equal logical. Set axis limits equal. Default is `FALSE`.
 #' @export
 #' @examples
 #' response_vec_a <- rnorm(5)
-#'   response_tbl <- data.frame(
+#' response_tbl <- data.frame(
 #'   group = rep(letters[1:3], each = 5),
 #'   response = c(
 #'     response_vec_a,
 #'     response_vec_a * 1.2 + rnorm(5, sd = 0.2),
 #'     response_vec_a * 2 + rnorm(5, sd = 2)
 #'   ),
-#'  pid = rep(paste0("id_", 1:5), 3)
+#'   pid = rep(paste0("id_", 1:5), 3)
 #' )
 #' ggcorr(
-#'  data = response_tbl,
-#'  grp = "group",
-#'  y = "response",
-#'  id = "pid"
+#'   data = response_tbl,
+#'   grp = "group",
+#'   y = "response",
+#'   id = "pid"
 #' )
-
 ggcorr <- function(data,
                    corr_method = "spearman",
                    corr_lab = c(
@@ -389,13 +355,13 @@ ggcorr <- function(data,
     .ggcorr_plot_theme(thm, grid) |>
     .ggcorr_plot_colour(plot_tbl_raw, grp_to_col, grp_vec) |>
     .ggcorr_plot_limits(limits_expand, limits_equal, plot_tbl_raw) |>
-    .ggcorr_plot_results(results_tbl, coord, skip, hjust, vjust) |>
+    .ggcorr_plot_results(results_tbl, coord, skip, hjust, vjust, trans) |>
     .ggcorr_plot_trans(trans) |>
     .ggcorr_plot_label_axes(grp_vec, combn_mat) |>
     .ggcorr_plot_abline(abline) |>
     .ggcorr_plot_smooth(smooth) |>
     .ggcorr_plot_label_points(label_id, label_id_size)
-  print(p)
+  p
 }
 
 .ggcorr_plot_tbl_get_raw <- function(data, grp_vec) {
@@ -534,7 +500,13 @@ ggcorr <- function(data,
   )
 }
 
-.ggcorr_plot_results <- function(p, results_tbl, coord, skip, hjust, vjust) {
+.ggcorr_plot_results <- function(p,
+                                 results_tbl,
+                                 coord,
+                                 skip,
+                                 hjust,
+                                 vjust,
+                                 trans) {
   add_text_column(
     p = p,
     x = p$layers[[2]]$data$x,
@@ -543,14 +515,15 @@ ggcorr <- function(data,
     coord = coord,
     skip = skip,
     hjust = hjust,
-    vjust = vjust
+    vjust = vjust,
+    trans = trans
   )
 }
 
 .ggcorr_plot_trans <- function(p, trans) {
   p + 
-    scale_x_continuous(trans = trans) +
-    scale_y_continuous(trans = trans)
+    scale_x_continuous(trans = get_trans(trans)) +
+    scale_y_continuous(trans = get_trans(trans))
 }
 
 .ggcorr_plot_label_axes <- function(p, grp_vec, combn_mat) {
