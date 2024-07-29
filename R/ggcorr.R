@@ -96,7 +96,7 @@ ggcorr <- function(data,
                    thm = cowplot::theme_cowplot(),
                    grid = cowplot::background_grid(major = "xy"),
                    grp_to_col = NULL,
-                   abline = TRUE,
+                   abline = FALSE,
                    smooth = TRUE,
                    smooth_method = "lm") {
   
@@ -447,23 +447,34 @@ ggcorr <- function(data,
   grp_to_col
 }
 
-.ggcorr_plot_colour_manual_ensure_name_unspecified <- function(grp_to_col, plot_tbl_raw, grp_vec) {
+.ggcorr_plot_colour_manual_ensure_name_unspecified <- function(grp_to_col,
+                                                               plot_tbl_raw,
+                                                               grp_vec) {
   switch(as.character(length(grp_to_col)),
-         "1" = .ggcorr_plot_colour_manual_ensure_name_unspecified_one(grp_to_col),
-         .ggcorr_plot_colour_manual_ensure_name_unspecified_mult(grp_to_col, grp_vec, plot_tbl_raw)
+    "1" = .ggcorr_plot_colour_manual_ensure_name_unspecified_one(
+      grp_to_col, plot_tbl_raw
+    ),
+    .ggcorr_plot_colour_manual_ensure_name_unspecified_mult(
+      grp_to_col, grp_vec, plot_tbl_raw
+    )
   )
 }
 
-.ggcorr_plot_colour_manual_ensure_name_unspecified_one <- function(grp_to_col) {
+.ggcorr_plot_colour_manual_ensure_name_unspecified_one <- function(grp_to_col,
+                                                                   plot_tbl_raw) {
   stats::setNames(
     rep(grp_to_col, length(unique(plot_tbl_raw$grp_y))),
     unique(plot_tbl_raw$grp_y)
   )
 }
 
-.ggcorr_plot_colour_manual_ensure_name_unspecified_mult <- function(grp_to_col, grp_vec, plot_tbl_raw) {
+.ggcorr_plot_colour_manual_ensure_name_unspecified_mult <- function(grp_to_col,
+                                                                    grp_vec,
+                                                                    plot_tbl_raw) {
   if (length(grp_to_col) < length(grp_vec) - 1) {
-    stop(paste0("If more than length one and not named, the number of elements in grp_to_col must be at least as many as the number of groups less one in data[[grp]]"))
+    stop(paste0(
+      "If more than length one and not named, the number of elements in grp_to_col must be at least as many as the number of groups less one in data[[grp]]"
+    ))
   }
   stats::setNames(
     grp_to_col[seq_len(length(unique(plot_tbl_raw$grp_y)))],
