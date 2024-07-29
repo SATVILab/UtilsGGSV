@@ -488,7 +488,7 @@ ggcorr <- function(data,
            "1" = scale_colour_manual(
              values = setNames(
                rep("black", length(unique(plot_tbl_raw$grp_y))),
-               length(unique(plot_tbl_raw$grp_y))
+               unique(plot_tbl_raw$grp_y)
              )
            ),
            scale_colour_brewer(palette = "Set1")
