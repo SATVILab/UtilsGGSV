@@ -208,7 +208,7 @@ ggcorr <- function(data,
     )
   }
   if ("concordance" %in% x) {
-    .utilsggsv_dep_install("cccrm")
+    .utilsggsv_dep_install("DescTools")
   }
   invisible(TRUE)
 }
@@ -326,8 +326,8 @@ ggcorr <- function(data,
 }
 
 .ggcorr_results_get_init_conc <- function(data, grp_vec) {  
-  .utilsggsv_dep_install("cccrm")
-  corr <- .ggcorr_results_get_init_conc_corr(data)
+  .utilsggsv_dep_install("DescTools")
+  corr <- .ggcorr_results_get_init_conc_corr(data, grp_vec)
   tibble::tibble(
     method = "concordance",
     g1 = grp_vec[1], g2 = grp_vec[2],
@@ -336,10 +336,10 @@ ggcorr <- function(data,
   )
 }
 
-.ggcorr_results_get_init_conc_corr <- function(data) {
-  suppressWarnings(cccrm::cccUst(
-    dataset = data, ry = ".y", rmet = ".grp", cl = 0.95
-  )[1:3])
+.ggcorr_results_get_init_conc_corr <- function(data, grp_vec) {
+  val1 <- data[[".y"]][data[[".grp"]] == grp_vec[1]]
+  val2 <- data[[".y"]][data[[".grp"]] == grp_vec[2]]
+  suppressWarnings(DescTools::CCC(val1, val2)$rho.c |> unlist())
 }
 
 .ggcorr_results_get_init_stats <- function(data, grp_vec, mthd) {

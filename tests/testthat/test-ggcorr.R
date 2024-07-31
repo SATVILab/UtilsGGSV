@@ -38,7 +38,7 @@ test_that("ggcorr works", {
     y = "response",
     id = "pid"
   )
-  
+
   p_test <- ggcorr(
     data = response_tbl,
     grp = "group",

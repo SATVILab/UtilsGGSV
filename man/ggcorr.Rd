@@ -28,6 +28,8 @@ ggcorr(
   font_size = 4.2,
   hjust = 0,
   vjust = 0.5,
+  point_size = 1,
+  point_alpha = 0.9,
   limits_expand = NULL,
   limits_equal = FALSE,
   legend_title = FALSE,
@@ -130,6 +132,10 @@ Default is \code{0.05}.}
 \item{hjust}{numeric. Horizontal justification for text. Default is \code{0}.}
 
 \item{vjust}{numeric. Vertical justification for text. Default is \code{0.5}.}
+
+\item{point_size}{numeric. Size of points. Default is \code{1}.}
+
+\item{point_alpha}{numeric. Alpha value for points. Default is \code{0.9}.}
 
 \item{limits_expand}{list. Expand the axis limits. Default is \code{NULL}.}
 
