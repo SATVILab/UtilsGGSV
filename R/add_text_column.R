@@ -46,6 +46,8 @@
 #'     signif(coef_tbl[2, 4][[1]], 3), ")"
 #'   )
 #' )
+#' library(ggplot2)
+#' library(UtilsGGSV)
 #' p <- ggplot(data_mod, aes(x = x, y = y)) + geom_point()
 #' add_text_column(
 #'   p = p,
@@ -117,6 +119,7 @@ add_text_column <- function(p, x, y, trans = "identity", text,
 #' x_vec <- seq(1, 5, length.out = 1000)
 #' y_vec <- get_trans("root_fifth")$transform(x_vec)
 #' plot_tbl <- data.frame(x = x_vec, y = y_vec)
+#' library(ggplot2)
 #' ggplot(plot_tbl, aes(x, y)) +
 #'   geom_line() +
 #'   geom_point() +
@@ -161,8 +164,8 @@ get_trans <- function(trans) {
       "identity" = scales::identity_trans(),
       "log10" = scales::log10_trans(),
       "log2" = scales::log2_trans(),
-      "log1p" = scales::log1p(),
-      "log" = scales::log(),
+      "log1p" = scales::log1p_trans(),
+      "log" = scales::log_trans(),
       "psueudo_log" = scales::pseudo_log_trans(),
       "asinh" = scales::trans_new(
         "asinh",

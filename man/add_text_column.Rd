@@ -73,6 +73,8 @@ results_vec <- c(
     signif(coef_tbl[2, 4][[1]], 3), ")"
   )
 )
+library(ggplot2)
+library(UtilsGGSV)
 p <- ggplot(data_mod, aes(x = x, y = y)) + geom_point()
 add_text_column(
   p = p,

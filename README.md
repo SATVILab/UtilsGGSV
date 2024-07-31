@@ -142,8 +142,7 @@ get_trans("log10")
 #> Transformer: log-10 [1e-100, Inf]
 ```
 
-The function `ggcorr` plots correlation coefficients between two or more
-groups.
+The function `ggcorr` plots correlation coefficients:
 
 ``` r
 set.seed(3)
@@ -159,12 +158,112 @@ response_tbl <- data.frame(
 )
 
 ggcorr(
-  data = response_tbl,
+  data = response_tbl |> dplyr::filter(group %in% c("a", "b")),
   grp = "group",
   y = "response",
-  id = "pid",
-  limits_equal = TRUE
+  id = "pid"
 )
 ```
 
 <img src="man/figures/README-unnamed-chunk-6-1.png" width="100%" />
+
+We can display multiple correlation coefficients:
+
+``` r
+ggcorr(
+  data = response_tbl |> dplyr::filter(group %in% c("a", "b")),
+  grp = "group",
+  y = "response",
+  id = "pid",
+  corr_method = c("spearman", "pearson")
+)
+```
+
+<img src="man/figures/README-unnamed-chunk-7-1.png" width="100%" />
+
+We can compare more than two groups:
+
+``` r
+ggcorr(
+  data = response_tbl,
+  grp = "group",
+  y = "response",
+  id = "pid",
+  corr_method = "kendall"
+)
+```
+
+<img src="man/figures/README-unnamed-chunk-8-1.png" width="100%" />
+
+We can compare more than two groups and multiple correlation
+coefficients:
+
+``` r
+ggcorr(
+  data = response_tbl,
+  grp = "group",
+  y = "response",
+  id = "pid",
+  corr_method = c("spearman", "pearson")
+)
+```
+
+<img src="man/figures/README-unnamed-chunk-9-1.png" width="100%" />
+
+Specific functionality to make appropriate plots for the concordance
+correlation coefficient is available:
+
+``` r
+ggcorr(
+  data = response_tbl |> dplyr::filter(group %in% c("a", "b")),
+  grp = "group",
+  y = "response",
+  id = "pid",
+  corr_method = "concordance",
+  abline = TRUE,
+  limits_equal = TRUE
+)
+```
+
+<img src="man/figures/README-unnamed-chunk-10-1.png" width="100%" />
+
+Text in table can be moved around and resized:
+
+``` r
+ggcorr(
+  data = response_tbl |> dplyr::filter(group %in% c("a", "b")),
+  grp = "group",
+  y = "response",
+  id = "pid",
+  corr_method = c("spearman", "pearson", "concordance"),
+  abline = TRUE,
+  limits_equal = TRUE,
+  coord = c(0.4, 0.17),
+  font_size = 3,
+  skip = 0.04,
+  pval_signif = 2,
+  est_signif = 2,
+  ci_signif = 2
+)
+```
+
+<img src="man/figures/README-unnamed-chunk-11-1.png" width="100%" />
+
+Finally, the text placement is kept consistent when the axes are
+visually transformed:
+
+``` r
+ggcorr(
+  data = response_tbl |> dplyr::mutate(response = abs(response + 1)^4),
+  grp = "group",
+  y = "response",
+  id = "pid",
+  corr_method = "spearman",
+  abline = TRUE,
+  limits_equal = TRUE,
+  trans = "log10",
+  skip = 0.06
+)
+```
+
+<img src="man/figures/README-unnamed-chunk-12-1.png" width="100%" />

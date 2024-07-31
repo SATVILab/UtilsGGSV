@@ -16,7 +16,7 @@
 #' @return \code{invisible(filename)}.
 save_plot <- function(filename, plot, device = c("png", "pdf"), ...) {
   if (!requireNamespace("cowplot", quietly = TRUE)) {
-    install.packages("cowplot", quiet = TRUE)
+    .utilsggsv_dep_install("cowplot")
   }
 
   filename_orig <- filename
@@ -57,7 +57,7 @@ save_plot <- function(filename, plot, device = c("png", "pdf"), ...) {
 ggsave2 <- function(filename, plot, device = c("png", "pdf"), ...) {
 
   if (!requireNamespace("cowplot", quietly = TRUE)) {
-      install.packages("cowplot", quiet = TRUE)
+    .utilsggsv_dep_install("cowplot")
   }
 
   filename_orig <- filename

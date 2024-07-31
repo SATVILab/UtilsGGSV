@@ -24,6 +24,7 @@ root, log, and other transformations.
 x_vec <- seq(1, 5, length.out = 1000)
 y_vec <- get_trans("root_fifth")$transform(x_vec)
 plot_tbl <- data.frame(x = x_vec, y = y_vec)
+library(ggplot2)
 ggplot(plot_tbl, aes(x, y)) +
   geom_line() +
   geom_point() +

@@ -10,7 +10,7 @@ axis_limits(p, limits_expand = NULL, limits_equal = FALSE)
 \item{p}{object of class 'ggplot'. Limits are adjusted for this plot.}
 
 \item{limits_expand}{list. If not \code{NULL},
-then it is (effectively) passed onto \code{ggplot2::limits_expand} to
+then it is (effectively) passed onto \code{ggplot2::expand_limits} to
 ensure that certain values are included in the plot (such as, for example, 0
 if that is the minimum value possible but it may not be plotted). If not named, then # nolint
 must consist of one numeric vector that will then force all values in the numeric value # nolint

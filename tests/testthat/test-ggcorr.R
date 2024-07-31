@@ -11,33 +11,54 @@ test_that("ggcorr works", {
     pid = rep(paste0("id_", 1:5), 3)
   )
 
-  p_std <- ggcorr(
+  path_fig_save <- "/workspaces/UtilsGGSV/_tmp/test-ggcorr.png"
+  ggsavetest <- function(p = p_test, path_fig_save_par = path_fig_save) { # nolint
+    try(ggsave(path_fig_save_par, p_test, units = "cm", width = 10, height = 10), silent = TRUE)
+  }
+
+  p_test <- ggcorr(
     data = response_tbl,
     grp = "group",
     y = "response",
     id = "pid"
   )
-  p_std <- ggcorr(
+  
+  p_test <- ggcorr(
     data = response_tbl,
     grp = "group",
     corr_method = "pearson",
     y = "response",
     id = "pid"
   )
-  p_std <- ggcorr(
+  
+  p_test <- ggcorr(
     data = response_tbl,
     grp = "group",
-    corr_method = c("ccc", "pearson"),
+    corr_method = "kendall",
     y = "response",
     id = "pid"
   )
-
-  expect_s3_class(
-    p_std,
-    "gg"
+  
+  p_test <- ggcorr(
+    data = response_tbl,
+    grp = "group",
+    corr_method = c("concordance"),
+    y = "response",
+    id = "pid"
   )
+  p_test <- ggcorr(
+    data = response_tbl,
+    grp = "group",
+    corr_method = c("concordance", "pearson"),
+    y = "response",
+    id = "pid"
+  )
+  
 
-  p_group_2 <- ggcorr(
+  expect_s3_class(p_test, "gg")
+
+  # only two groups
+  p_test <- ggcorr(
     data = response_tbl |>
       dplyr::filter(group != "c"),
     grp = "group",
@@ -46,11 +67,12 @@ test_that("ggcorr works", {
   )
 
   expect_identical(
-    as.character(p_group_2$labels$y),
+    as.character(p_test$labels$y),
     "b"
   )
 
-  p_lab_id <- ggcorr(
+  # labelling ids
+  p_test <- ggcorr(
     data = response_tbl |>
       dplyr::filter(group != "c"),
     grp = "group",
@@ -60,11 +82,12 @@ test_that("ggcorr works", {
   )
 
   expect_identical(
-    length(p_lab_id$layers),
-    6L
+    length(p_test$layers),
+    5L
   )
 
-  p_abline <- ggcorr(
+  # test adding the abline
+  p_test <- ggcorr(
     data = response_tbl |>
       dplyr::filter(group != "c"),
     grp = "group",
@@ -74,11 +97,11 @@ test_that("ggcorr works", {
   )
 
   expect_identical(
-    length(p_abline$layers),
+    length(p_test$layers),
     4L
   )
 
-  p_smooth <- ggcorr(
+  p_test <- ggcorr(
     data = response_tbl |>
       dplyr::filter(group != "c"),
     grp = "group",
@@ -86,11 +109,14 @@ test_that("ggcorr works", {
     id = "pid",
     smooth = FALSE
   )
+  
   expect_identical(
-    length(p_smooth$layers),
-    4L
+    length(p_test$layers),
+    3L
   )
-  p_smooth_loess <- ggcorr(
+
+  # loess smooth
+  p_test <- ggcorr(
     data = response_tbl |>
       dplyr::filter(group != "c"),
     grp = "group",
@@ -100,11 +126,11 @@ test_that("ggcorr works", {
     smooth_method = "loess"
   )
   expect_identical(
-    length(p_smooth_loess$layers),
-    5L
+    length(p_test$layers),
+    4L
   )
 
-  p_equal <- ggcorr(
+  p_test <- ggcorr(
     data = response_tbl |>
       dplyr::filter(group != "c"),
     grp = "group",
@@ -113,7 +139,7 @@ test_that("ggcorr works", {
     limits_equal = TRUE
   )
   expect_identical(
-    p_equal$layers[[2]]$data$x,
-    p_equal$layers[[2]]$data$y
+    p_test$layers[[2]]$data$x,
+    p_test$layers[[2]]$data$y
   )
 })

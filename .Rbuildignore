@@ -7,3 +7,9 @@
 ^renv\.lock$
 ^data\-raw/.*$
 ^\.github$
+^_tmp$
+^\.devcontainer$
+^\.vscode$
+^data-raw$
+^README\.html$
+^_dependencies\.R$

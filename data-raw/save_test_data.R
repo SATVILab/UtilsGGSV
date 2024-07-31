@@ -3,16 +3,12 @@ devtools::load_all()
 if (!requireNamespace("flowCore", quietly = TRUE)) {
   renv::install("bioc::flowCore")
 }
-data("GvHD", package = "flowCore")
+utils::data("GvHD", package = "flowCore")
 ex_tbl <- flowCore::exprs(GvHD[[1]]) |>
   tibble::as_tibble()
 saveRDS(
   object = ex_tbl,
-  file = file.path(
-    here::here(),
-    "tests",
-    "ex_tbl.rds"
-  )
+  file = testthat::test_path("ex_tbl.rds")
 )
 
 # save p
@@ -29,9 +25,5 @@ p_axis_limits <- UtilsCytoRSV::plot_cyto(
 
 saveRDS(
   object = p_axis_limits,
-  file = file.path(
-    here::here(),
-    "tests",
-    "p_axis_limits.rds"
-  )
+  file = testthat::test_path("p_axis_limits.rds")
 )

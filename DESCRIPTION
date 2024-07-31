@@ -1,7 +1,7 @@
 Package: UtilsGGSV
 Type: Package
 Title: Utility functions for ggplot2
-Version: 0.3.3
+Version: 0.4.0
 Author: Miguel Rodo
 Maintainer: Miguel Rodo <rdxmig002@myuct.ac.za>
 Description: Provides utility functions for working with `ggplot2` objects.
@@ -12,6 +12,8 @@ RoxygenNote: 7.3.2
 Suggests: 
     cccrm,
     ggrepel,
+    here,
+    remotes,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
 Imports: 
@@ -21,5 +23,6 @@ Imports:
     scales,
     rprojroot,
     purrr,
-    dplyr
+    dplyr,
+    tibble
 Roxygen: list(markdown = TRUE)
