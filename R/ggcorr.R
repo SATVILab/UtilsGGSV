@@ -22,10 +22,14 @@
 #' are displayed using `ggrepel::geom_text_repel`. Default is `FALSE`.
 #' @param label_id_size numeric. Size of labels. Default is `3`.
 #' @param thm ggplot2 theme. Specifies `ggplot2` theme. Default is
-#' `cowplot::theme_cowplot()`.
-#' @param grid ggplot2 theme. Specifies background grid. If not using
-#' `cowplot::theme_cowplot()` for theme, then likely best to set to `NULL`.
-#' Default is `cowplot::background_grid(major = "xy")`.
+#' `cowplot::theme_cowplot()`,
+#' with a white plot background (as opposed to transparent).
+#' @param grid The value from calling `cowplot::background_grid`.
+#' Specifies display of grid lines.
+#' If `NULL`, then no background grid is displayed
+#' (recommended for non-cowplot-themed plots).
+#' Default is `cowplot::background_grid(major = "xy")`, which displays
+#' major grid lines on both x- and y-axes.
 #' @param grp_to_col character vector. Specifies colours for elements in `grp`.
 #' Elements are colours. If named, the names specify the level within `grp` to
 #' which the colours are matched. If `NULL` and only two groups are compared,
@@ -34,10 +38,27 @@
 #' Default is `NULL`.
 #' @param abline logical. If `TRUE`, then the y=x line is plotted in colour
 #' "gray85". Default is `TRUE`.
-#' @param smooth_method character. Smoothing method to pass to `geom_smooth`.
-#' Default is `"lm"`. If `NULL`, no smoothed line is drawn.
 #' @param corr_method character vector. Correlation method. One or more of
 #' `c("ccc", "pearson", "spearman", "kendall")`. Default is `"spearman"`.
+#' @param corr_lab `"never"``, `"auto"``, `"always"` or a named character vector.
+#' Whether, and how, to label the correlation methods in the plot. 
+#' If "always" or "never", then the correlation labels are always or never
+#' displayed, respectively.
+#' If `"auto"`, then they are displayed only if multiple correlation methods
+#' are used.
+#' If displaye dusing `"always"` or `"never"`, then default labels are used.
+#' If a named character vector, then the names are the correlation methods and
+#' the values are the labels,
+#' e.g. `c("spearman" = "Spearman", "kendall" = "Kendall")`.
+#' Default is `"auto"`.
+#' correlation methods are used.
+#' @param grp_lab `"always"`, `"auto"` or `"never"`. Whether to label the groups
+#' being compared for a specific displayed correlation coefficients.
+#' If `"always"` or `"never"`, then the groups are always or never labelled,
+#' respectively.
+#' If `"auto"`, then the groups are labelled only if multiple groups 
+#' are compared.
+#' Default is `"auto"`.
 #' @param trans character or trans object. Specifies scaling of y- and x-axes.
 #' If class is character, it is converted to a trans object. Adds "root_cube",
 #' "root_fourth", "root_fifth" and "asinh" transformations, as well as "sqrt"
@@ -52,6 +73,14 @@
 #' @param vjust numeric. Vertical justification for text. Default is `0.5`.
 #' @param limits_expand list. Expand the axis limits. Default is `NULL`.
 #' @param limits_equal logical. Set axis limits equal. Default is `FALSE`.
+#' @param legend_title logical.
+#' If `FALSE`, then the legend title is removed. Default is `FALSE`.
+#' @param legend_position character. Position of the legend. Default is `"bottom"`.
+#' If `NULL`, then the legend's positioning is not jadjusted.
+#' @param smooth logical. If `TRUE`, then a linear regression line is plotted.
+#' @param smooth_se logical.
+#' Whether to display 95% confidence interval.
+#' Default is `FALSE`.
 #' @export
 #' @examples
 #' response_vec_a <- rnorm(5)
@@ -72,15 +101,11 @@
 #' )
 ggcorr <- function(data,
                    corr_method = "spearman",
-                   corr_lab = c(
-                     "ccc" = "(Concordance)",
-                     "pearson" = "(Pearson)",
-                     "spearman" = "(Spearman)",
-                     "kendall" = "(Kendall)"
-                   ),
+                   corr_lab = "auto",
                    grp,
                    grp_base = NULL,
                    grp_x = NULL,
+                   grp_lab = "auto",
                    y,
                    id,
                    label_id = FALSE,
@@ -93,12 +118,15 @@ ggcorr <- function(data,
                    vjust = 0.5,
                    limits_expand = NULL,
                    limits_equal = FALSE,
-                   thm = cowplot::theme_cowplot(),
+                   legend_title = FALSE,
+                   legend_position = "bottom",
+                   thm = cowplot::theme_cowplot() +
+                     theme(plot.background = element_rect(fill = "white")),
                    grid = cowplot::background_grid(major = "xy"),
                    grp_to_col = NULL,
                    abline = FALSE,
                    smooth = TRUE,
-                   smooth_method = "lm") {
+                   smooth_se = FALSE) {
   
   .ggcorr_check(corr_method)
   
@@ -119,7 +147,9 @@ ggcorr <- function(data,
     trans = trans, results_tbl = results_tbl, coord = coord,
     skip = skip, hjust = hjust, vjust = vjust,
     abline = abline, smooth = smooth, label_id = label_id,
-    label_id_size = label_id_size, combn_mat = prep_list$combn_mat
+    label_id_size = label_id_size, combn_mat = prep_list$combn_mat,
+    grp_lab = grp_lab, legend_title = legend_title,
+    legend_position = legend_position, smooth_se = smooth_se
   )
 }
 
@@ -207,26 +237,38 @@ ggcorr <- function(data,
 
 # results
 # ---------------------
-.ggcorr_results_get <- function(combn_mat, data, corr_method, corr_lab) {
+.ggcorr_results_get <- function(combn_mat,
+                                data,
+                                corr_method,
+                                corr_lab,
+                                grp_lab) {
   purrr::map_df(seq_len(ncol(combn_mat)), function(i) {
     grp_vec_curr <- combn_mat[, i]
     data_curr <- data |> dplyr::filter(.grp %in% grp_vec_curr)
     purrr::map_df(corr_method, function(mthd) {
       switch(mthd,
-             "ccc" = .ggcorr_results_get_ccc(data_curr, grp_vec_curr, corr_lab),
+             "ccc" = .ggcorr_results_get_ccc(
+                data_curr, grp_vec_curr, corr_lab, grp_lab, length(corr_method)
+              ),
              "pearson" = ,
              "spearman" = ,
-             "kendall" = .ggcorr_results_get_stats(data, grp_vec_curr, mthd, corr_lab),
+             "kendall" = .ggcorr_results_get_stats(
+                data, grp_vec_curr, mthd, corr_lab
+                ),
              stop(paste0("method ", mthd, " not recognised"))
       )
     })
   })
 }
 
-.ggcorr_results_get_ccc <- function(data, grp_vec, corr_lab) {
+.ggcorr_results_get_ccc <- function(data,
+                                    grp_vec,
+                                    corr_lab,
+                                    grp_lab,
+                                    n_corr_method) {
   .utilsggsv_dep_install("cccrm")
   corr <- .ggcorr_results_get_ccc_corr(data)
-  .ggcorr_results_get_ccc_tbl(corr, grp_vec, corr_lab)
+  .ggcorr_results_get_ccc_tbl(corr, grp_vec, corr_lab, grp_lab, n_corr_method)
 }
 
 .ggcorr_results_get_ccc_corr <- function(data) {
@@ -237,9 +279,13 @@ ggcorr <- function(data,
   corr |> signif(2)
 }
 
-.ggcorr_results_get_ccc_tbl <- function(corr, grp_vec, corr_lab) {
+.ggcorr_results_get_ccc_tbl <- function(corr,
+                                        grp_vec,
+                                        corr_lab,
+                                        grp_lab,
+                                        n_corr_method) {
   .ggcorr_results_get_ccc_tbl_init(corr, grp_vec) |>
-    .ggcorr_results_get_ccc_tbl_final(corr_lab)
+    .ggcorr_results_get_ccc_tbl_final(corr_lab, grp_vec, n_corr_method)
 }
 
 .ggcorr_results_get_ccc_tbl_init <- function(corr, grp_vec) {
@@ -249,14 +295,41 @@ ggcorr <- function(data,
   )
 }
 
-.ggcorr_results_get_ccc_tbl_final <- function(out_tbl, corr_lab) {
+.ggcorr_results_get_ccc_tbl_final <- function(out_tbl,
+                                              corr_lab,
+                                              grp_vec,
+                                              n_corr_method) {
   out_tbl |>
     dplyr::mutate(
       txt = paste0(
-        g1, " vs ", g2,
+        g2, " vs ", g1,
         .ggcorr_results_get_method_txt(corr_lab, "ccc"),
         ": ", est,
         " (", lb, "; ", ub, ")"
+      )
+    )
+}
+
+.ggcorr_results_get_ccc_tbl_final_grp_mult <- function(out_tbl, corr_lab) {
+  out_tbl |>
+    dplyr::mutate(
+      txt = paste0(
+        g2, " vs ", g1,
+        .ggcorr_results_get_method_txt(corr_lab, "ccc"),
+        ": ", est,
+        " (", lb, "; ", ub, ")"
+      )
+    )
+}
+
+.ggcorr_results_get_ccc_tbl_final_grp_single <- function(out_tbl, corr_lab) {
+  out_tbl |>
+    dplyr::mutate(
+      txt = paste0(
+        g2, " vs ", g1,
+        gsub("^(\)", 
+          .ggcorr_results_get_method_txt(corr_lab, "ccc"),
+        ": ", est
       )
     )
 }
@@ -304,7 +377,7 @@ ggcorr <- function(data,
   out_tbl_init |>
     dplyr::mutate(
       txt = paste0(
-        g1, " vs ", g2,
+        g2, " vs ", g1,
         .ggcorr_results_get_method_txt(corr_lab, "spearman"),
         ": ", est
       )
@@ -312,10 +385,12 @@ ggcorr <- function(data,
 }
 
 .ggcorr_results_get_stats_tbl_final_other <- function(out_tbl_init, mthd, corr_lab) {
+  switch(as.character(.ggcorr_results_get_n_group_y(out_tbl_init)),
+  "1" = )
   out_tbl_init |>
     dplyr::mutate(
       txt = paste0(
-        g1, " vs ", g2,
+        g2, " vs ", g1,
         .ggcorr_results_get_method_txt(corr_lab, mthd),
         ": ", est,
         " (", lb, "; ", ub, ")"
@@ -323,11 +398,26 @@ ggcorr <- function(data,
     )
 }
 
-.ggcorr_results_get_method_txt <- function(corr_lab, mthd) {
+.ggcorr_results_get_n_group_y <- function(data) {
+  length(unique(data$g2))
+}
+
+.ggcorr_results_get_method_txt <- function(corr_lab, mthd, mult) {
   if (is.null(corr_lab) || !mthd %in% names(corr_lab)) {
     return(character(1L))
   }
-  paste0(" ", corr_lab[[mthd]])
+  if (mult) {
+    return(paste0(" ", corr_lab[[mthd]]))
+  }
+  .ggcorr_results_get_method_txt_single(corr_lab[[mthd]])  
+}
+
+.ggcorr_results_get_method_txt_single <- function(txt) {
+  if (grepl("^\\(", txt) && grepl("\\)$", txt)) {
+    # remove opening and closing brackets, if both present
+    return(gsub("^\\(", "", gsub("\\)$", "", txt)))
+  }
+  txt
 }
 
 # plot
@@ -349,17 +439,21 @@ ggcorr <- function(data,
                          smooth,
                          label_id,
                          label_id_size,
-                         combn_mat) {
+                         combn_mat,
+                         grp_lab,
+                         legend_title,
+                         legend_position,
+                         smooth_se) {
   plot_tbl_raw <- .ggcorr_plot_tbl_get_raw(data, grp_vec)
   .ggcorr_plot_init(plot_tbl_raw) |>
-    .ggcorr_plot_theme(thm, grid) |>
+    .ggcorr_plot_theme(thm, grid, legend_title, legend_position) |>
     .ggcorr_plot_colour(plot_tbl_raw, grp_to_col, grp_vec) |>
     .ggcorr_plot_limits(limits_expand, limits_equal, plot_tbl_raw) |>
     .ggcorr_plot_results(results_tbl, coord, skip, hjust, vjust, trans) |>
     .ggcorr_plot_trans(trans) |>
     .ggcorr_plot_label_axes(grp_vec, combn_mat) |>
     .ggcorr_plot_abline(abline) |>
-    .ggcorr_plot_smooth(smooth) |>
+    .ggcorr_plot_smooth(smooth, smooth_se) |>
     .ggcorr_plot_label_points(label_id, label_id_size)
 }
 
@@ -391,14 +485,22 @@ ggcorr <- function(data,
     geom_point()
 }
 
-.ggcorr_plot_theme <- function(p, thm, grid) {
+# theme
+# -------------------------
+.ggcorr_plot_theme <- function(p,
+                               thm,
+                               grid,
+                               legend_title,
+                               legend_position) {
   p <- .ggcorr_plot_init_theme(p, thm) |>
     .ggcorr_plot_init_grid(grid)
-  p +
-    theme(
-      legend.position = "bottom",
-      legend.title = element_blank()
-    )
+  if (isFALSE(legend_title)) {
+    p <- p + theme(legend.title = element_blank())
+  }
+  if (!is.null(legend_position)) {
+    p <- p + theme(legend.position = legend_position)
+  }
+  p
 }
 
 .ggcorr_plot_init_theme <- function(p, thm) {
@@ -411,6 +513,8 @@ ggcorr <- function(data,
   p + grid
 }
 
+# colours
+# --------------------------------
 .ggcorr_plot_colour <- function(p, plot_tbl_raw, grp_to_col, grp_vec) {
   if (!is.null(grp_to_col)) {
     p <- .ggcorr_plot_colour_manual(p, plot_tbl_raw, grp_to_col, grp_vec)
@@ -423,8 +527,13 @@ ggcorr <- function(data,
   p
 }
 
-.ggcorr_plot_colour_manual <- function(p, plot_tbl_raw, grp_to_col, grp_vec) {
-  grp_to_col <- .ggcorr_plot_colour_manual_ensure_name(grp_to_col, plot_tbl_raw, grp_vec)
+.ggcorr_plot_colour_manual <- function(p,
+                                       plot_tbl_raw,
+                                       grp_to_col,
+                                       grp_vec) {
+  grp_to_col <- .ggcorr_plot_colour_manual_ensure_name(
+    grp_to_col, plot_tbl_raw, grp_vec
+  )
   p +
     scale_colour_manual(
       values = grp_to_col,
@@ -433,14 +542,21 @@ ggcorr <- function(data,
     )
 }
 
-.ggcorr_plot_colour_manual_ensure_name <- function(grp_to_col, plot_tbl_raw, grp_vec) {
+.ggcorr_plot_colour_manual_ensure_name <- function(grp_to_col,
+                                                   plot_tbl_raw,
+                                                   grp_vec) {
   if (!is.null(names(grp_to_col))) {
-    return(.ggcorr_plot_colour_manual_ensure_name_specified(grp_to_col, plot_tbl_raw))
+    return(.ggcorr_plot_colour_manual_ensure_name_specified(
+      grp_to_col, plot_tbl_raw
+    ))
   }
-  .ggcorr_plot_colour_manual_ensure_name_unspecified(grp_to_col, plot_tbl_raw, grp_vec)
+  .ggcorr_plot_colour_manual_ensure_name_unspecified(
+    grp_to_col, plot_tbl_raw, grp_vec
+  )
 }
 
-.ggcorr_plot_colour_manual_ensure_name_specified <- function(grp_to_col, plot_tbl_raw) {
+.ggcorr_plot_colour_manual_ensure_name_specified <- function(grp_to_col,
+                                                             plot_tbl_raw) {
   if (!all(names(grp_to_col) %in% unique(plot_tbl_raw$grp_y))) {
     stop("names of grp_to_col must be in .grp column of data")
   }
@@ -460,17 +576,19 @@ ggcorr <- function(data,
   )
 }
 
-.ggcorr_plot_colour_manual_ensure_name_unspecified_one <- function(grp_to_col,
-                                                                   plot_tbl_raw) {
+.ggcorr_plot_colour_manual_ensure_name_unspecified_one <-
+  function(grp_to_col,
+           plot_tbl_raw) {
   stats::setNames(
     rep(grp_to_col, length(unique(plot_tbl_raw$grp_y))),
     unique(plot_tbl_raw$grp_y)
   )
 }
 
-.ggcorr_plot_colour_manual_ensure_name_unspecified_mult <- function(grp_to_col,
-                                                                    grp_vec,
-                                                                    plot_tbl_raw) {
+.ggcorr_plot_colour_manual_ensure_name_unspecified_mult <- 
+  function(grp_to_col,
+           grp_vec,
+           plot_tbl_raw) {
   if (length(grp_to_col) < length(grp_vec) - 1) {
     stop(paste0(
       "If more than length one and not named, the number of elements in grp_to_col must be at least as many as the number of groups less one in data[[grp]]"
@@ -556,10 +674,10 @@ ggcorr <- function(data,
     )
 }
 
-.ggcorr_plot_smooth <- function(p, smooth) {
+.ggcorr_plot_smooth <- function(p, smooth, smooth_se) {
   if (!smooth) return(p)
   p +
-    geom_smooth(method = "lm", formula = y ~ x, se = FALSE)
+    geom_smooth(method = "lm", formula = y ~ x, se = smooth_se)
 }
 
 .ggcorr_plot_label_points <- function(p, label_id, label_id_size) {
