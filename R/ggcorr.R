@@ -199,7 +199,7 @@ ggcorr <- function(data,
 .ggcorr_check_corr_method <- function(x) {
   if (!all(x %in% c("concordance", "pearson", "spearman", "kendall"))) {
     stop(
-      "corr_method must be one or more of c('ccc', 'pearson', 'spearman', 'kendall')" # no lint
+      "corr_method must be one or more of c('concordance', 'pearson', 'spearman', 'kendall')" # no lint
     )
   }
   if ("concordance" %in% x) {
