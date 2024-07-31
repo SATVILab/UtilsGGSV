@@ -591,7 +591,7 @@ ggcorr <- function(data,
                                                                    pval_trunc) {
   vapply(pval, function(p) {
     if (p < pval_trunc) {
-      return(paste0(" (p = ", pval_trunc), ")")
+      return(paste0(" (p = ", pval_trunc, ")"))
     }
     paste0(" (p = ", signif(pval, pval_signif), ")")
   }, character(1))
