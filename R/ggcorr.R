@@ -44,6 +44,8 @@
 #' Default is `NULL`.
 #' @param abline logical. If `TRUE`, then the y=x line is plotted in colour
 #' "gray85". Default is `TRUE`.
+#' @param point_size numeric. Size of points. Default is `1`.
+#' @param point_alpha numeric. Alpha value for points. Default is `0.9`.
 #' @param corr_lab `"never"``, `"auto"``, `"always"` or a named character vector.
 #' Whether, and how, to label the correlation methods in the plot. 
 #' If "always" or "never", then the correlation labels are always or never
@@ -145,6 +147,8 @@ ggcorr <- function(data,
                    font_size = 4.2,
                    hjust = 0,
                    vjust = 0.5,
+                   point_size = 1,
+                   point_alpha = 0.9,
                    limits_expand = NULL,
                    limits_equal = FALSE,
                    legend_title = FALSE,
@@ -184,7 +188,8 @@ ggcorr <- function(data,
     label_id_size = label_id_size, combn_mat = prep_list$combn_mat,
     grp_lab = grp_lab, legend_title = legend_title,
     legend_position = legend_position, smooth_se = smooth_se,
-    smooth_method = smooth_method, font_size = font_size
+    smooth_method = smooth_method, font_size = font_size,
+    point_size = point_size, point_alpha = point_alpha
   )
 }
 
@@ -624,20 +629,22 @@ ggcorr <- function(data,
                          legend_position,
                          smooth_se,
                          smooth_method,
-                         font_size) {
+                         font_size,
+                         point_size,
+                         point_alpha) {
   plot_tbl_raw <- .ggcorr_plot_tbl_get_raw(data, grp_vec)
-  .ggcorr_plot_init(plot_tbl_raw) |>
+  .ggcorr_plot_init(plot_tbl_raw, point_size, point_alpha) |>
     .ggcorr_plot_theme(thm, grid, legend_title, legend_position) |>
     .ggcorr_plot_colour(plot_tbl_raw, grp_to_col, grp_vec) |>
     .ggcorr_plot_limits(limits_expand, limits_equal, plot_tbl_raw) |>
-    .ggcorr_plot_results(
-      results_tbl, coord, skip, hjust, vjust, trans, font_size
-     ) |>
-    .ggcorr_plot_trans(trans) |>
     .ggcorr_plot_label_axes(grp_vec, combn_mat) |>
     .ggcorr_plot_abline(abline) |>
     .ggcorr_plot_smooth(smooth, smooth_se, smooth_method) |>
-    .ggcorr_plot_label_points(label_id, label_id_size)
+    .ggcorr_plot_label_points(label_id, label_id_size) |>
+    .ggcorr_plot_results(
+      results_tbl, coord, skip, hjust, vjust, trans, font_size
+     ) |>
+    .ggcorr_plot_trans(trans)
 }
 
 .ggcorr_plot_tbl_get_raw <- function(data, grp_vec) {
@@ -660,10 +667,11 @@ ggcorr <- function(data,
   )
 }
 
-.ggcorr_plot_init <- function(plot_tbl_raw) {
+.ggcorr_plot_init <- function(plot_tbl_raw, point_size, point_alpha) {
   ggplot(
     plot_tbl_raw,
-    aes(x = x, y = y, col = grp_y)
+    aes(x = x, y = y, col = grp_y),
+    size = point_size, alpha = point_alpha
   ) +
     geom_point()
 }
@@ -790,7 +798,7 @@ ggcorr <- function(data,
     switch(as.character(length(unique(plot_tbl_raw$grp_y))),
            "1" = scale_colour_manual(
              values = stats::setNames(
-               rep("black", length(unique(plot_tbl_raw$grp_y))),
+               rep("gray15", length(unique(plot_tbl_raw$grp_y))),
                unique(plot_tbl_raw$grp_y)
              )
            ),
