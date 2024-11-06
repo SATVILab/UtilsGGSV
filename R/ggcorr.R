@@ -750,7 +750,7 @@ ggcorr <- function(data,
 
 .ggcorr_plot_colour_manual_ensure_name_specified <- function(grp_to_col,
                                                              plot_tbl_raw) {
-  if (!all(names(grp_to_col) %in% unique(plot_tbl_raw$grp_y))) {
+  if (!all(unique(plot_tbl_raw$grp_y) %in% names(grp_to_col))) {
     stop("names of grp_to_col must be in .grp column of data")
   }
   grp_to_col
