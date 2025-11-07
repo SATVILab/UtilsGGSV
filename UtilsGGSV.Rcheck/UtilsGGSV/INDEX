@@ -1,0 +1,9 @@
+add_text_column         Add a column of text to a ggplot
+axis_limits             Manage axis limits
+get_trans               Get transformation object
+ggcorr                  Plot scatterplot with correlation coefficients
+                        and ab-line overlaid
+ggsave2                 Save plot in multiple formats using
+                        cowplot::ggsave2
+save_plot               Save plot in multiple formats using
+                        cowplot::save_plot

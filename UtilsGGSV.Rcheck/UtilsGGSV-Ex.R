@@ -1,0 +1,188 @@
+pkgname <- "UtilsGGSV"
+source(file.path(R.home("share"), "R", "examples-header.R"))
+options(warn = 1)
+library('UtilsGGSV')
+
+base::assign(".oldSearch", base::search(), pos = 'CheckExEnv')
+base::assign(".old_wd", base::getwd(), pos = 'CheckExEnv')
+cleanEx()
+nameEx("add_text_column")
+### * add_text_column
+
+flush(stderr()); flush(stdout())
+
+### Name: add_text_column
+### Title: Add a column of text to a ggplot
+### Aliases: add_text_column
+
+### ** Examples
+
+data_mod <- data.frame(x = rnorm(10))
+data_mod$y <- data_mod$x * 3 + rnorm(10, sd = 0.5)
+fit <- lm(y ~ x, data = data_mod)
+coef_tbl <- coefficients(summary(fit))
+results_vec <- c(
+  paste0(
+    "Intercept: ", signif(coef_tbl[1, "Estimate"][[1]], 2), " (",
+    signif(coef_tbl[1, 1][[1]] - 2 * coef_tbl[1, 2][[1]], 3), ", ",
+    signif(coef_tbl[1, 1][[1]] + 2 * coef_tbl[1, 2][[1]], 3), "; p = ",
+    signif(coef_tbl[1, 4][[1]], 3), ")"
+  ),
+  paste0(
+    "Slope: ", signif(coef_tbl[2, "Estimate"][[1]], 2), " (",
+    signif(coef_tbl[2, 1][[1]] - 2 * coef_tbl[2, 2][[1]], 3), ", ",
+    signif(coef_tbl[2, 1][[1]] + 2 * coef_tbl[2, 2][[1]], 3), "; p = ",
+    signif(coef_tbl[2, 4][[1]], 3), ")"
+  )
+)
+library(ggplot2)
+library(UtilsGGSV)
+p <- ggplot(data_mod, aes(x = x, y = y)) + geom_point()
+add_text_column(
+  p = p,
+  x = data_mod$x,
+  y = data_mod$y,
+  text = results_vec
+)
+
+# Works even if y-axis is transformed
+p <- p + scale_y_continuous(trans = get_trans("asinh"))
+add_text_column(
+  p = p,
+  x = data_mod$x,
+  y = data_mod$y,
+  text = results_vec,
+  trans = "asinh"
+)
+
+
+
+cleanEx()
+nameEx("axis_limits")
+### * axis_limits
+
+flush(stderr()); flush(stdout())
+
+### Name: axis_limits
+### Title: Manage axis limits
+### Aliases: axis_limits
+
+### ** Examples
+
+data("cars", package = "datasets")
+library(ggplot2)
+p <- ggplot(cars, aes(speed, dist)) +
+  geom_point()
+
+axis_limits(
+  p,
+  limits_equal = TRUE
+)
+
+# both axes
+axis_limits(
+  p,
+  limits_expand = list(200)
+)
+# x only
+axis_limits(
+  p,
+  limits_expand = list(x = 75)
+)
+# y only
+axis_limits(
+  p,
+  limits_expand = list(y = 200)
+)
+# lower and upper expansion
+axis_limits(
+  p,
+  limits_expand = list(
+    y = c(-50, 200),
+    x = c(-10, 75)
+  )
+)
+
+# note that when fixing range and expanding, range is fixed
+# after expansions are applied, so effectively the larger expansions apply to both.
+# compare the following output to the previous output:
+axis_limits(
+  p,
+  limits_expand = list(
+    y = c(-50, 200),
+    x = c(-10, 75)
+  ),
+  limits_equal = TRUE
+)
+
+
+
+cleanEx()
+nameEx("get_trans")
+### * get_trans
+
+flush(stderr()); flush(stdout())
+
+### Name: get_trans
+### Title: Get transformation object
+### Aliases: get_trans
+
+### ** Examples
+
+x_vec <- seq(1, 5, length.out = 1000)
+y_vec <- get_trans("root_fifth")$transform(x_vec)
+plot_tbl <- data.frame(x = x_vec, y = y_vec)
+library(ggplot2)
+ggplot(plot_tbl, aes(x, y)) +
+  geom_line() +
+  geom_point() +
+  coord_equal() +
+  expand_limits(x = 5, y = 5)
+
+
+
+cleanEx()
+nameEx("ggcorr")
+### * ggcorr
+
+flush(stderr()); flush(stdout())
+
+### Name: ggcorr
+### Title: Plot scatterplot with correlation coefficients and ab-line
+###   overlaid
+### Aliases: ggcorr
+
+### ** Examples
+
+response_vec_a <- rnorm(5)
+response_tbl <- data.frame(
+  group = rep(letters[1:3], each = 5),
+  response = c(
+    response_vec_a,
+    response_vec_a * 1.2 + rnorm(5, sd = 0.2),
+    response_vec_a * 2 + rnorm(5, sd = 2)
+  ),
+  pid = rep(paste0("id_", 1:5), 3)
+)
+library(UtilsGGSV)
+ggcorr(
+  data = response_tbl,
+  grp = "group",
+  y = "response",
+  id = "pid"
+)
+
+
+
+### * <FOOTER>
+###
+cleanEx()
+options(digits = 7L)
+base::cat("Time elapsed: ", proc.time() - base::get("ptime", pos = 'CheckExEnv'),"\n")
+grDevices::dev.off()
+###
+### Local variables: ***
+### mode: outline-minor ***
+### outline-regexp: "\\(> \\)?### [*]+" ***
+### End: ***
+quit('no')
