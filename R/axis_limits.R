@@ -188,15 +188,11 @@ axis_limits <- function(p,
     }
   }
 
-  limits_expand_arg <- purrr::map_chr(seq_along(limits_expand), function(i) {
-    vals <- paste0(limits_expand[[i]], collapse = ", ")
-    paste0(names(limits_expand)[i], " = c(", vals, ")")
-  }) |>
-    paste0(collapse = ", ")
-
-  parse_text <- paste0("p <- p + expand_limits(", limits_expand_arg, ")")
-  env <- environment()
-  eval(parse(text = parse_text), envir = env)
-
+  # Build the expand_limits call arguments
+  expand_args <- limits_expand
+  
+  # Add expand_limits layer to the plot
+  p <- p + do.call(expand_limits, expand_args)
+  
   p
 }

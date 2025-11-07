@@ -670,10 +670,9 @@ ggcorr <- function(data,
 .ggcorr_plot_init <- function(plot_tbl_raw, point_size, point_alpha) {
   ggplot(
     plot_tbl_raw,
-    aes(x = x, y = y, col = grp_y),
-    size = point_size, alpha = point_alpha
+    aes(x = x, y = y, col = grp_y)
   ) +
-    geom_point()
+    geom_point(size = point_size, alpha = point_alpha)
 }
 
 # theme
