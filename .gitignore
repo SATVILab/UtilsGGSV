@@ -6,3 +6,7 @@ _tmp/*
 
 .vscode/settings.json
 tests/testthat/Rplots.pdf
+
+# R CMD check output
+*.Rcheck/
+*.tar.gz
