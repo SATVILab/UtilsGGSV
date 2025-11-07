@@ -58,7 +58,7 @@ For CI/CD validation, the package uses R CMD check via GitHub Actions. The workf
 - `_dependencies.R`: Additional development dependencies
 - `.github/workflows/`: CI/CD workflows
   - `R-CMD-check.yaml`: Standard R package check
-  - `copilot-setup-steps.yml`: Copilot environment setup
+  - `copilot-setup-steps.yml`: Copilot environment setup (note: .yml extension)
 
 ## Code Style and Conventions
 
@@ -95,7 +95,8 @@ For CI/CD validation, the package uses R CMD check via GitHub Actions. The workf
 
 1. **ggplot2 Integration**
    - Functions should accept and return ggplot objects where possible
-   - Maintain compatibility with the tidyverse pipe (`|>` or `%>%`)
+   - Maintain compatibility with both the base R pipe (`|>`, R 4.1+) and magrittr pipe (`%>%`)
+   - Examples in documentation can use either pipe; native pipe `|>` is preferred
    - Use `ggplot2::` namespace prefix for ggplot2 functions to avoid conflicts
 
 2. **Transformation Handling**
@@ -148,6 +149,8 @@ devtools::document()
 The repository uses `renv` for dependency management. When working locally (not in GitHub Actions):
 - Dependencies are loaded via `renv/activate.R` (automatically sourced from `.Rprofile`)
 - Run `renv::restore()` to install dependencies from `renv.lock`
+- If `renv.lock` doesn't exist, run `renv::init()` to initialize renv for the project
+- After adding new dependencies, run `renv::snapshot()` to update `renv.lock`
 
 In GitHub Actions/Copilot environments:
 - Dependencies are managed via `r-lib/actions/setup-r-dependencies@v2`
