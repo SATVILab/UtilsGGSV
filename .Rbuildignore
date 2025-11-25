@@ -13,3 +13,6 @@
 ^data-raw$
 ^README\.html$
 ^_dependencies\.R$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$

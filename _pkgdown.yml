@@ -1,0 +1,45 @@
+url: https://satvilab.github.io/UtilsGGSV/
+
+template:
+  bootstrap: 5
+
+home:
+  title: UtilsGGSV
+  description: Utility functions for ggplot2 plotting
+
+navbar:
+  structure:
+    left:  [intro, reference, articles]
+    right: [search, github]
+  components:
+    articles:
+      text: Articles
+      menu:
+      - text: Getting Started with UtilsGGSV
+        href: articles/UtilsGGSV.html
+
+reference:
+- title: Correlation Plotting
+  desc: Functions for plotting correlation coefficients
+  contents:
+  - ggcorr
+
+- title: Axis Management
+  desc: Functions for managing plot axes
+  contents:
+  - axis_limits
+
+- title: Text Annotations
+  desc: Functions for adding text to plots
+  contents:
+  - add_text_column
+
+- title: Transformations
+  desc: Scale transformation utilities
+  contents:
+  - get_trans
+
+- title: Plot Saving
+  desc: Utilities for saving plots
+  contents:
+  - save_plot
