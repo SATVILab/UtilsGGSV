@@ -109,7 +109,7 @@ devtools::test()
 testthat::test_file("tests/testthat/test-axis_limits.R")
 
 # Run with verbose output
-devtools::test(reporter = "progress")
+devtools::test(reporter = testthat::ProgressReporter)
 ```
 
 ## Test Patterns
