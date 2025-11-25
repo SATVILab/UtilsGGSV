@@ -154,3 +154,51 @@ test_that("axis_limits works", {
     c(1e4, 9222)
   )
 })
+
+test_that("axis_limits errors for invalid input", {
+  p <- readRDS(testthat::test_path("p_axis_limits.rds"))
+
+  # limits_equal must be logical
+  expect_error(
+    axis_limits(p, limits_equal = "TRUE"),
+    "limits_equal must be logical"
+  )
+
+  # p must be ggplot object
+  expect_error(
+    axis_limits(p = "not a plot", limits_equal = TRUE),
+    "p must be of class"
+  )
+
+  # limits_expand must be a list
+  expect_error(
+    axis_limits(p, limits_expand = c(1, 2)),
+    "limits_expand must be a list"
+  )
+
+  # limits_expand with more than 2 elements
+  expect_error(
+    axis_limits(p, limits_expand = list(x = 1, y = 2, z = 3)),
+    "limits_expand must have length 1 or 2"
+  )
+
+  # limits_expand with invalid names
+  expect_error(
+    axis_limits(p, limits_expand = list(a = 1, b = 2)),
+    "limits_expand must have names of 'x' and/or 'y'"
+  )
+
+  # limits_expand with non-numeric input
+  expect_error(
+    axis_limits(p, limits_expand = list(x = "a")),
+    "input to limits_expand must be numeric"
+  )
+})
+
+test_that("axis_limits returns plot unchanged when no changes needed", {
+  p <- readRDS(testthat::test_path("p_axis_limits.rds"))
+
+  # When both limits_expand is NULL and limits_equal is FALSE
+  p_unchanged <- axis_limits(p, limits_expand = NULL, limits_equal = FALSE)
+  expect_identical(p_unchanged, p)
+})
