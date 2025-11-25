@@ -1,49 +1,38 @@
 ---
-output: github_document
+title: "Getting Started with UtilsGGSV"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting Started with UtilsGGSV}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
-<!-- README.md is generated from README.Rmd. Please edit that file -->
-
-```{r , include = FALSE}
+```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  fig.path = "man/figures/README-",
-  out.width = "100%"
+  fig.width = 7,
+  fig.height = 5
 )
 ```
 
-# UtilsGGSV
+## Introduction
 
-<!-- badges: start -->
-[![R-CMD-check](https://github.com/SATVILab/UtilsGGSV/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/SATVILab/UtilsGGSV/actions/workflows/R-CMD-check.yaml)
-[![Codecov test coverage](https://codecov.io/gh/SATVILab/UtilsGGSV/graph/badge.svg)](https://codecov.io/gh/SATVILab/UtilsGGSV)
-<!-- badges: end -->
+UtilsGGSV provides utility functions for plotting in R using `ggplot2`. This vignette demonstrates the main functions of the package.
 
-The goal of UtilsGGSV is to provide utility functions for plotting in R using `ggplot2`. 
-
-## Installation
-
-You can install `UtilsGGSV` from [GitHub](https://github.com/) with:
-
-```{r, eval = FALSE}
-if (!requireNamespace("remotes", quietly = TRUE)) install.packages("remotes")
-remotes::install_github("SATVILab/UtilsGGSV")
-```
-
-## Examples
-
-```{r example}
+```{r setup}
 library(UtilsGGSV)
 library(ggplot2)
 theme_set(cowplot::theme_cowplot())
 ```
 
-### Correlation Plots with `ggcorr`
+## Correlation Plots with `ggcorr`
+ 
+The `ggcorr` function creates scatterplots with correlation coefficients overlaid. This is the primary function of the package and is useful for visualizing relationships between groups of measurements.
 
-The function `ggcorr` plots correlation coefficients:
+### Basic Usage
 
-```{r }
+```{r ggcorr-basic}
 set.seed(3)
 response_vec_a <- rnorm(5)
 response_tbl <- data.frame(
@@ -64,9 +53,11 @@ ggcorr(
 )
 ```
 
-We can display multiple correlation coefficients:
+### Multiple Correlation Methods
 
-```{r}
+You can display multiple correlation coefficients simultaneously:
+
+```{r ggcorr-multiple}
 ggcorr(
   data = response_tbl |> dplyr::filter(group %in% c("a", "b")),
   grp = "group",
@@ -76,9 +67,11 @@ ggcorr(
 )
 ```
 
-We can compare more than two groups:
+### Comparing Multiple Groups
 
-```{r}
+When comparing more than two groups, the function creates pairwise comparisons:
+
+```{r ggcorr-groups}
 ggcorr(
   data = response_tbl,
   grp = "group",
@@ -88,22 +81,11 @@ ggcorr(
 )
 ```
 
-We can compare more than two groups and multiple correlation coefficients:
+### Concordance Correlation Coefficient
 
-```{r}
-ggcorr(
-  data = response_tbl,
-  grp = "group",
-  y = "response",
-  id = "pid",
-  corr_method = c("spearman", "pearson")
-)
-```
+The concordance correlation coefficient is useful when assessing agreement between two methods:
 
-Specific functionality to make appropriate plots for the concordance
-correlation coefficient is available:
-
-```{r}
+```{r ggcorr-concordance}
 ggcorr(
   data = response_tbl |> dplyr::filter(group %in% c("a", "b")),
   grp = "group",
@@ -115,9 +97,11 @@ ggcorr(
 )
 ```
 
-Text in table can be moved around and resized:
+### Customizing Appearance
 
-```{r}
+Text placement, font size, and other visual elements can be customized:
+ 
+```{r ggcorr-custom}
 ggcorr(
   data = response_tbl |> dplyr::filter(group %in% c("a", "b")),
   grp = "group",
@@ -135,10 +119,11 @@ ggcorr(
 )
 ```
 
-Finally, the text placement is kept consistent when the axes are visually
-transformed:
+### Axis Transformations
 
-```{r}
+The text placement remains consistent even when axes are transformed:
+
+```{r ggcorr-trans}
 ggcorr(
   data = response_tbl |> dplyr::mutate(response = abs(response + 1)^4),
   grp = "group",
@@ -152,11 +137,11 @@ ggcorr(
 )
 ```
 
-### Axis Limits with `axis_limits`
+## Managing Axis Limits with `axis_limits`
 
-Fix axis limits to be equal between x- and y-axes, and/or expand axis coordinates. The primary use of `axis_limits` is forcing the x- and y-axes to have the same limits "automatically" (i.e. by inspecting the `ggplot` object, thus not requiring the user to manually calculate limits to pass to `ggplot2::expand_limits`). 
+The `axis_limits` function helps manage axis limits, particularly useful for forcing equal limits on both axes or expanding axis coordinates.
 
-```{r axis_limits}
+```{r axis-limits}
 data("cars", package = "datasets")
 
 p0 <- ggplot(cars, aes(speed, dist)) +
@@ -165,11 +150,13 @@ p0 <- ggplot(cars, aes(speed, dist)) +
   theme(plot.title = element_text(hjust = 0.5)) +
   labs(title = "Axes unadjusted") +
   labs(x = "Speed", y = "Distance")
+
 p1 <- axis_limits(
   p = p0,
   limits_equal = TRUE
 ) +
   labs(title = "Axes limits equal")
+
 p2 <- axis_limits(
   p = p0,
   limits_expand = list(
@@ -178,14 +165,15 @@ p2 <- axis_limits(
   )
 ) +
   labs(title = "Axes limits expanded")
+
 cowplot::plot_grid(p0, p1, p2)
 ```
 
-### Text Annotations with `add_text_column`
+## Adding Text Annotations with `add_text_column`
 
-Add a column of text easily to a plot, regardless of underlying transformation, using `add_text_column`. 
+The `add_text_column` function adds text annotations to plots at consistent positions, regardless of underlying axis transformations.
 
-```{r add_text_column}
+```{r add-text-column}
 data_mod <- data.frame(x = rnorm(mean = 1, 10)^2)
 data_mod$y <- data_mod$x * 3 + rnorm(10, sd = 0.5)
 fit <- lm(y ~ x, data = data_mod)
@@ -214,12 +202,14 @@ results_vec <- c(
     ")"
   )
 )
+
 p <- ggplot(
   data = data_mod,
   aes(x = x, y = y)
 ) +
   geom_point() +
-  cowplot::background_grid(major = "xy") 
+  cowplot::background_grid(major = "xy")
+
 add_text_column(
   p = p,
   x = data_mod$x,
@@ -230,29 +220,12 @@ add_text_column(
 )
 ```
 
-Note that `add_text_column` places text in the same position, regardless of underlying transformation. 
+## Transformations with `get_trans`
 
-```{r add_text_column_trans}
-p <- p +
-  scale_y_continuous(
-    trans = UtilsGGSV::get_trans("asinh")
-  )
-add_text_column(
-  p = p,
-  x = data_mod$x,
-  y = data_mod$y,
-  text = results_vec,
-  trans = UtilsGGSV::get_trans("asinh"),
-  coord = c(0.05, 0.95),
-  skip = 0.07
-)
-```
+The `get_trans` function returns transformation objects from the `scales` package. It adds support for additional transformations like higher roots and `asinh`:
 
-### Transformations with `get_trans`
-
-The utility function `get_trans` returns `trans` objects (as implemented by the `scales` package) when given characters. It also adds various higher roots (such as cubic and quartic) and adds the `asinh` transformation. 
-
-```{r get_trans}
+```{r get-trans}
 get_trans("log10")
+get_trans("asinh")
+get_trans("root_cube")
 ```
-

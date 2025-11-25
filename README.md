@@ -6,10 +6,12 @@
 <!-- badges: start -->
 
 [![R-CMD-check](https://github.com/SATVILab/UtilsGGSV/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/SATVILab/UtilsGGSV/actions/workflows/R-CMD-check.yaml)
+[![Codecov test
+coverage](https://codecov.io/gh/SATVILab/UtilsGGSV/graph/badge.svg)](https://codecov.io/gh/SATVILab/UtilsGGSV)
 <!-- badges: end -->
 
 The goal of UtilsGGSV is to provide utility functions for plotting in R
-using .
+using `ggplot2`.
 
 ## Installation
 
@@ -24,18 +26,148 @@ remotes::install_github("SATVILab/UtilsGGSV")
 
 ``` r
 library(UtilsGGSV)
+library(ggplot2)
+theme_set(cowplot::theme_cowplot())
 ```
+
+### Correlation Plots with `ggcorr`
+
+The function `ggcorr` plots correlation coefficients:
+
+``` r
+set.seed(3)
+response_vec_a <- rnorm(5)
+response_tbl <- data.frame(
+  group = rep(letters[1:3], each = 5),
+  response = c(
+    response_vec_a,
+    response_vec_a * 1.2 + rnorm(5, sd = 0.2),
+    response_vec_a * 2 + rnorm(5, sd = 2)
+  ),
+  pid = rep(paste0("id_", 1:5), 3)
+)
+
+ggcorr(
+  data = response_tbl |> dplyr::filter(group %in% c("a", "b")),
+  grp = "group",
+  y = "response",
+  id = "pid"
+)
+```
+
+<img src="man/figures/README-unnamed-chunk-3-1.png" width="100%" />
+
+We can display multiple correlation coefficients:
+
+``` r
+ggcorr(
+  data = response_tbl |> dplyr::filter(group %in% c("a", "b")),
+  grp = "group",
+  y = "response",
+  id = "pid",
+  corr_method = c("spearman", "pearson")
+)
+```
+
+<img src="man/figures/README-unnamed-chunk-4-1.png" width="100%" />
+
+We can compare more than two groups:
+
+``` r
+ggcorr(
+  data = response_tbl,
+  grp = "group",
+  y = "response",
+  id = "pid",
+  corr_method = "kendall"
+)
+```
+
+<img src="man/figures/README-unnamed-chunk-5-1.png" width="100%" />
+
+We can compare more than two groups and multiple correlation
+coefficients:
+
+``` r
+ggcorr(
+  data = response_tbl,
+  grp = "group",
+  y = "response",
+  id = "pid",
+  corr_method = c("spearman", "pearson")
+)
+```
+
+<img src="man/figures/README-unnamed-chunk-6-1.png" width="100%" />
+
+Specific functionality to make appropriate plots for the concordance
+correlation coefficient is available:
+
+``` r
+ggcorr(
+  data = response_tbl |> dplyr::filter(group %in% c("a", "b")),
+  grp = "group",
+  y = "response",
+  id = "pid",
+  corr_method = "concordance",
+  abline = TRUE,
+  limits_equal = TRUE
+)
+```
+
+<img src="man/figures/README-unnamed-chunk-7-1.png" width="100%" />
+
+Text in table can be moved around and resized:
+
+``` r
+ggcorr(
+  data = response_tbl |> dplyr::filter(group %in% c("a", "b")),
+  grp = "group",
+  y = "response",
+  id = "pid",
+  corr_method = c("spearman", "pearson", "concordance"),
+  abline = TRUE,
+  limits_equal = TRUE,
+  coord = c(0.4, 0.17),
+  font_size = 3,
+  skip = 0.04,
+  pval_signif = 2,
+  est_signif = 2,
+  ci_signif = 2
+)
+```
+
+<img src="man/figures/README-unnamed-chunk-8-1.png" width="100%" />
+
+Finally, the text placement is kept consistent when the axes are
+visually transformed:
+
+``` r
+ggcorr(
+  data = response_tbl |> dplyr::mutate(response = abs(response + 1)^4),
+  grp = "group",
+  y = "response",
+  id = "pid",
+  corr_method = "spearman",
+  abline = TRUE,
+  limits_equal = TRUE,
+  trans = "log10",
+  skip = 0.06
+)
+```
+
+<img src="man/figures/README-unnamed-chunk-9-1.png" width="100%" />
+
+### Axis Limits with `axis_limits`
 
 Fix axis limits to be equal between x- and y-axes, and/or expand axis
 coordinates. The primary use of `axis_limits` is forcing the x- and
 y-axes to have the same limits “automatically” (i.e. by inspecting the
-`ggplot` object, thus not requiring the user to automatically calculate
+`ggplot` object, thus not requiring the user to manually calculate
 limits to pass to `ggplot2::expand_limits`).
 
 ``` r
 data("cars", package = "datasets")
-library(ggplot2)
-theme_set(cowplot::theme_cowplot())
 
 p0 <- ggplot(cars, aes(speed, dist)) +
   cowplot::background_grid(major = "xy") +
@@ -60,6 +192,8 @@ cowplot::plot_grid(p0, p1, p2)
 ```
 
 <img src="man/figures/README-axis_limits-1.png" width="100%" />
+
+### Text Annotations with `add_text_column`
 
 Add a column of text easily to a plot, regardless of underlying
 transformation, using `add_text_column`.
@@ -109,7 +243,7 @@ add_text_column(
 )
 ```
 
-<img src="man/figures/README-unnamed-chunk-3-1.png" width="100%" />
+<img src="man/figures/README-add_text_column-1.png" width="100%" />
 
 Note that `add_text_column` places text in the same position, regardless
 of underlying transformation.
@@ -130,7 +264,9 @@ add_text_column(
 )
 ```
 
-<img src="man/figures/README-unnamed-chunk-4-1.png" width="100%" />
+<img src="man/figures/README-add_text_column_trans-1.png" width="100%" />
+
+### Transformations with `get_trans`
 
 The utility function `get_trans` returns `trans` objects (as implemented
 by the `scales` package) when given characters. It also adds various
@@ -141,129 +277,3 @@ transformation.
 get_trans("log10")
 #> Transformer: log-10 [1e-100, Inf]
 ```
-
-The function `ggcorr` plots correlation coefficients:
-
-``` r
-set.seed(3)
-response_vec_a <- rnorm(5)
-response_tbl <- data.frame(
-  group = rep(letters[1:3], each = 5),
-  response = c(
-    response_vec_a,
-    response_vec_a * 1.2 + rnorm(5, sd = 0.2),
-    response_vec_a * 2 + rnorm(5, sd = 2)
-  ),
-  pid = rep(paste0("id_", 1:5), 3)
-)
-
-ggcorr(
-  data = response_tbl |> dplyr::filter(group %in% c("a", "b")),
-  grp = "group",
-  y = "response",
-  id = "pid"
-)
-```
-
-<img src="man/figures/README-unnamed-chunk-6-1.png" width="100%" />
-
-We can display multiple correlation coefficients:
-
-``` r
-ggcorr(
-  data = response_tbl |> dplyr::filter(group %in% c("a", "b")),
-  grp = "group",
-  y = "response",
-  id = "pid",
-  corr_method = c("spearman", "pearson")
-)
-```
-
-<img src="man/figures/README-unnamed-chunk-7-1.png" width="100%" />
-
-We can compare more than two groups:
-
-``` r
-ggcorr(
-  data = response_tbl,
-  grp = "group",
-  y = "response",
-  id = "pid",
-  corr_method = "kendall"
-)
-```
-
-<img src="man/figures/README-unnamed-chunk-8-1.png" width="100%" />
-
-We can compare more than two groups and multiple correlation
-coefficients:
-
-``` r
-ggcorr(
-  data = response_tbl,
-  grp = "group",
-  y = "response",
-  id = "pid",
-  corr_method = c("spearman", "pearson")
-)
-```
-
-<img src="man/figures/README-unnamed-chunk-9-1.png" width="100%" />
-
-Specific functionality to make appropriate plots for the concordance
-correlation coefficient is available:
-
-``` r
-ggcorr(
-  data = response_tbl |> dplyr::filter(group %in% c("a", "b")),
-  grp = "group",
-  y = "response",
-  id = "pid",
-  corr_method = "concordance",
-  abline = TRUE,
-  limits_equal = TRUE
-)
-```
-
-<img src="man/figures/README-unnamed-chunk-10-1.png" width="100%" />
-
-Text in table can be moved around and resized:
-
-``` r
-ggcorr(
-  data = response_tbl |> dplyr::filter(group %in% c("a", "b")),
-  grp = "group",
-  y = "response",
-  id = "pid",
-  corr_method = c("spearman", "pearson", "concordance"),
-  abline = TRUE,
-  limits_equal = TRUE,
-  coord = c(0.4, 0.17),
-  font_size = 3,
-  skip = 0.04,
-  pval_signif = 2,
-  est_signif = 2,
-  ci_signif = 2
-)
-```
-
-<img src="man/figures/README-unnamed-chunk-11-1.png" width="100%" />
-
-Finally, the text placement is kept consistent when the axes are
-visually transformed:
-
-``` r
-ggcorr(
-  data = response_tbl |> dplyr::mutate(response = abs(response + 1)^4),
-  grp = "group",
-  y = "response",
-  id = "pid",
-  corr_method = "spearman",
-  abline = TRUE,
-  limits_equal = TRUE,
-  trans = "log10",
-  skip = 0.06
-)
-```
-
-<img src="man/figures/README-unnamed-chunk-12-1.png" width="100%" />
