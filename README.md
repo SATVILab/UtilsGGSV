@@ -6,8 +6,8 @@
 <!-- badges: start -->
 
 [![R-CMD-check](https://github.com/SATVILab/UtilsGGSV/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/SATVILab/UtilsGGSV/actions/workflows/R-CMD-check.yaml)
-[![Codecov test
-coverage](https://codecov.io/gh/SATVILab/UtilsGGSV/graph/badge.svg)](https://codecov.io/gh/SATVILab/UtilsGGSV)
+[![Codecov test coverage](https://codecov.io/gh/SATVILab/UtilsGGSV/branch/main/graph/badge.svg)](https://app.codecov.io/gh/SATVILab/UtilsGGSV?branch=main)
+
 
 <!-- badges: end -->
 
