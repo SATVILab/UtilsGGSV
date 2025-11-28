@@ -43,3 +43,4 @@ reference:
   desc: Utilities for saving plots
   contents:
   - save_plot
+  - ggsave2
