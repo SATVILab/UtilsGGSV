@@ -33,6 +33,8 @@ devtools::test()      # Run tests
 devtools::check()     # Full package check
 ```
 
+**IMPORTANT**: If adding or removing exported functions, update `_pkgdown.yml` reference index to include all exported functions.
+
 ## Topic-Specific Instructions
 
 See `.github/instructions/` for detailed guidelines:

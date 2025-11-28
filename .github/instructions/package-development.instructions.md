@@ -49,7 +49,8 @@ devtools::check()     # Full R CMD check
 4. Create `tests/testthat/test-{function_name}.R`
 5. Run `devtools::test()`
 6. Update README.Rmd if user-facing
-7. Run `devtools::check()`
+7. **Update `_pkgdown.yml` reference index if function is exported**
+8. Run `devtools::check()`
 
 ### Example New Function
 
@@ -104,6 +105,23 @@ new_function <- function(p, option = FALSE) {
 - Located in `vignettes/`
 - Built during `R CMD check`
 - Use `rmarkdown::html_vignette` output format
+
+### pkgdown Reference Index
+
+- **ALWAYS** update `_pkgdown.yml` when adding or removing exported functions
+- Every exported function (`@export`) must be listed in the `reference:` section
+- Group related functions under appropriate titles
+- Run `pkgdown::build_site()` locally to verify the build succeeds
+
+```yaml
+# Example _pkgdown.yml reference section
+reference:
+- title: Section Title
+  desc: Description of the section
+  contents:
+  - function_name
+  - another_function
+```
 
 ---
 
