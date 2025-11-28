@@ -8,6 +8,7 @@
 [![R-CMD-check](https://github.com/SATVILab/UtilsGGSV/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/SATVILab/UtilsGGSV/actions/workflows/R-CMD-check.yaml)
 [![Codecov test
 coverage](https://codecov.io/gh/SATVILab/UtilsGGSV/graph/badge.svg)](https://codecov.io/gh/SATVILab/UtilsGGSV)
+
 <!-- badges: end -->
 
 The goal of UtilsGGSV is to provide utility functions for plotting in R
