@@ -3,7 +3,7 @@ pkgdown: 2.2.0
 pkgdown_sha: ~
 articles:
   UtilsGGSV: UtilsGGSV.html
-last_built: 2025-11-28T09:12Z
+last_built: 2025-11-28T14:09Z
 urls:
   reference: https://satvilab.github.io/UtilsGGSV/reference
   article: https://satvilab.github.io/UtilsGGSV/articles
