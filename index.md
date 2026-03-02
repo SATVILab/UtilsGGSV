@@ -257,6 +257,26 @@ add_text_column(
 
 ![](reference/figures/README-add_text_column_trans-1.png)
 
+### Heat Maps with `plot_heatmap_cluster`
+
+The function `plot_heatmap_cluster` creates a heat map where each tile
+shows the percentile of the median value of a variable for a cluster.
+This percentile is compared against the ECDF of that variable across all
+observations not in the cluster. Clusters and variables are ordered by
+hierarchical clustering.
+
+``` r
+set.seed(1)
+cluster_data <- data.frame(
+  cluster = rep(paste0("C", 1:3), each = 20),
+  var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+  var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
+)
+plot_heatmap_cluster(cluster_data, cluster = "cluster")
+```
+
+![](reference/figures/README-plot_heatmap_cluster-1.png)
+
 ### Transformations with `get_trans`
 
 The utility function `get_trans` returns `trans` objects (as implemented
