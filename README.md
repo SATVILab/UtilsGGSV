@@ -6,9 +6,8 @@
 <!-- badges: start -->
 
 [![R-CMD-check](https://github.com/SATVILab/UtilsGGSV/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/SATVILab/UtilsGGSV/actions/workflows/R-CMD-check.yaml)
-[![Codecov test coverage](https://codecov.io/gh/SATVILab/UtilsGGSV/branch/main/graph/badge.svg)](https://app.codecov.io/gh/SATVILab/UtilsGGSV?branch=main)
-
-
+[![Codecov test
+coverage](https://codecov.io/gh/SATVILab/UtilsGGSV/graph/badge.svg)](https://codecov.io/gh/SATVILab/UtilsGGSV)
 <!-- badges: end -->
 
 The goal of UtilsGGSV is to provide utility functions for plotting in R
@@ -56,7 +55,7 @@ ggcorr(
 )
 ```
 
-<img src="man/figures/README-unnamed-chunk-3-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-3-1.png" alt="" width="100%" />
 
 We can display multiple correlation coefficients:
 
@@ -70,7 +69,7 @@ ggcorr(
 )
 ```
 
-<img src="man/figures/README-unnamed-chunk-4-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-4-1.png" alt="" width="100%" />
 
 We can compare more than two groups:
 
@@ -84,7 +83,7 @@ ggcorr(
 )
 ```
 
-<img src="man/figures/README-unnamed-chunk-5-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-5-1.png" alt="" width="100%" />
 
 We can compare more than two groups and multiple correlation
 coefficients:
@@ -99,7 +98,7 @@ ggcorr(
 )
 ```
 
-<img src="man/figures/README-unnamed-chunk-6-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-6-1.png" alt="" width="100%" />
 
 Specific functionality to make appropriate plots for the concordance
 correlation coefficient is available:
@@ -116,7 +115,7 @@ ggcorr(
 )
 ```
 
-<img src="man/figures/README-unnamed-chunk-7-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-7-1.png" alt="" width="100%" />
 
 Text in table can be moved around and resized:
 
@@ -138,7 +137,7 @@ ggcorr(
 )
 ```
 
-<img src="man/figures/README-unnamed-chunk-8-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-8-1.png" alt="" width="100%" />
 
 Finally, the text placement is kept consistent when the axes are
 visually transformed:
@@ -157,7 +156,7 @@ ggcorr(
 )
 ```
 
-<img src="man/figures/README-unnamed-chunk-9-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-9-1.png" alt="" width="100%" />
 
 ### Axis Limits with `axis_limits`
 
@@ -192,7 +191,7 @@ p2 <- axis_limits(
 cowplot::plot_grid(p0, p1, p2)
 ```
 
-<img src="man/figures/README-axis_limits-1.png" width="100%" />
+<img src="man/figures/README-axis_limits-1.png" alt="" width="100%" />
 
 ### Text Annotations with `add_text_column`
 
@@ -244,7 +243,7 @@ add_text_column(
 )
 ```
 
-<img src="man/figures/README-add_text_column-1.png" width="100%" />
+<img src="man/figures/README-add_text_column-1.png" alt="" width="100%" />
 
 Note that `add_text_column` places text in the same position, regardless
 of underlying transformation.
@@ -265,7 +264,27 @@ add_text_column(
 )
 ```
 
-<img src="man/figures/README-add_text_column_trans-1.png" width="100%" />
+<img src="man/figures/README-add_text_column_trans-1.png" alt="" width="100%" />
+
+### Heat Maps with `plot_heatmap_cluster`
+
+The function `plot_heatmap_cluster` creates a heat map where each tile
+shows the percentile of the median value of a variable for a cluster.
+This percentile is compared against the ECDF of that variable across all
+observations not in the cluster. Clusters and variables are ordered by
+hierarchical clustering.
+
+``` r
+set.seed(1)
+cluster_data <- data.frame(
+  cluster = rep(paste0("C", 1:3), each = 20),
+  var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+  var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
+)
+plot_heatmap_cluster(cluster_data, cluster = "cluster")
+```
+
+<img src="man/figures/README-plot_heatmap_cluster-1.png" alt="" width="100%" />
 
 ### Transformations with `get_trans`
 
