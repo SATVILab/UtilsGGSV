@@ -44,3 +44,8 @@ reference:
   contents:
   - save_plot
   - ggsave2
+
+- title: Heat Maps
+  desc: Functions for plotting heat maps
+  contents:
+  - plot_heatmap_cluster
