@@ -55,7 +55,10 @@ plot_heatmap_cluster <- function(data,
                                  ) +
                                    ggplot2::theme(
                                      plot.background = ggplot2::element_rect(
-                                       fill = "white"
+                                       fill = "white", colour = NA
+                                     ),
+                                     panel.background = ggplot2::element_rect(
+                                      fill = "white", colour = NA
                                      )
                                    ),
                                  grid = cowplot::background_grid(

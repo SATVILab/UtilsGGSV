@@ -10,3 +10,4 @@ tests/testthat/Rplots.pdf
 # R CMD check output
 *.Rcheck/
 *.tar.gz
+Rplots.pdf
