@@ -1,2 +1,0 @@
-library(ggrepel)
-library(DescTools)
