@@ -5,5 +5,6 @@
 utils::globalVariables(c(
   'x', 'y', 'grp_y', '.id', '.grp', 'grp_x',
   'txt', 'lb', 'ub', 'est', 'data', 'pval', 'g2',
-  'g1', '.y'
+  'g1', '.y',
+  'cluster', 'variable', 'perc'
   ))
