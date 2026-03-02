@@ -36,3 +36,10 @@ Utilities for saving plots
   : Save plot in multiple formats using cowplot::save_plot
 - [`ggsave2()`](https://satvilab.github.io/UtilsGGSV/reference/ggsave2.md)
   : Save plot in multiple formats using cowplot::ggsave2
+
+## Heat Maps
+
+Functions for plotting heat maps
+
+- [`plot_heatmap_cluster()`](https://satvilab.github.io/UtilsGGSV/reference/plot_heatmap_cluster.md)
+  : Plot heat map of ECDF-standardised variable values per cluster
