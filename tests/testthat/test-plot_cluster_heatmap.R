@@ -215,3 +215,102 @@ test_that("plot_cluster_heatmap med column is present in plot data", {
   row <- p$data[p$data$cluster == "C1" & p$data$variable == "var1", ]
   expect_equal(row$med, expected_med)
 })
+
+test_that("plot_cluster_heatmap scale_method zscore returns ggplot and perc can be negative", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
+  )
+  p <- plot_cluster_heatmap(data, cluster = "cluster", scale_method = "zscore")
+  expect_s3_class(p, "ggplot")
+  expect_true(any(p$data$perc < 0))
+})
+
+test_that("plot_cluster_heatmap scale_method zscore perc equals z-score of cluster median", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
+  )
+  p <- plot_cluster_heatmap(data, cluster = "cluster", scale_method = "zscore")
+  med_c1_v1 <- stats::median(data$var1[data$cluster == "C1"])
+  expected_z <- (med_c1_v1 - mean(data$var1)) / stats::sd(data$var1)
+  row <- p$data[p$data$cluster == "C1" & p$data$variable == "var1", ]
+  expect_equal(row$perc, expected_z)
+})
+
+test_that("plot_cluster_heatmap scale_method raw returns ggplot with perc equal to med", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
+  )
+  p <- plot_cluster_heatmap(data, cluster = "cluster", scale_method = "raw")
+  expect_s3_class(p, "ggplot")
+  expect_equal(p$data$perc, p$data$med)
+})
+
+test_that("plot_cluster_heatmap scale_method minmax returns ggplot with perc in [0, 1]", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
+  )
+  p <- plot_cluster_heatmap(data, cluster = "cluster", scale_method = "minmax")
+  expect_s3_class(p, "ggplot")
+  expect_true(all(p$data$perc >= 0 & p$data$perc <= 1))
+})
+
+test_that("plot_cluster_heatmap scale_method minmax_var returns ggplot with perc in [0, 1]", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
+  )
+  p <- plot_cluster_heatmap(data, cluster = "cluster", scale_method = "minmax_var")
+  expect_s3_class(p, "ggplot")
+  expect_true(all(p$data$perc >= 0 & p$data$perc <= 1))
+})
+
+test_that("plot_cluster_heatmap invalid scale_method gives an error", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
+  )
+  expect_error(
+    plot_cluster_heatmap(data, cluster = "cluster", scale_method = "invalid"),
+    "should be one of"
+  )
+})
+
+test_that("plot_cluster_heatmap scale_method zscore legend name is Z-score", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
+  )
+  p <- plot_cluster_heatmap(data, cluster = "cluster", scale_method = "zscore")
+  fill_scale <- p$scales$get_scales("fill")
+  expect_equal(fill_scale$name, "Z-score")
+})
+
+test_that("plot_cluster_heatmap scale_method raw legend name is Median", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
+  )
+  p <- plot_cluster_heatmap(data, cluster = "cluster", scale_method = "raw")
+  fill_scale <- p$scales$get_scales("fill")
+  expect_equal(fill_scale$name, "Median")
+})
