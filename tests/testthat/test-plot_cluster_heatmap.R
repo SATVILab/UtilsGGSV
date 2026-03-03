@@ -139,3 +139,79 @@ test_that("plot_cluster_heatmap custom white_range is applied to the scale", {
   expect_equal(sc_wide$palette(0.35), "#F7F7F7")
   expect_false(sc_default$palette(0.35) == "#F7F7F7")
 })
+
+test_that("plot_cluster_heatmap show_values adds a GeomText layer", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
+  )
+  p <- plot_cluster_heatmap(data, cluster = "cluster", show_values = TRUE)
+  has_text <- any(sapply(p$layers, function(l) inherits(l$geom, "GeomText")))
+  expect_true(has_text)
+})
+
+test_that("plot_cluster_heatmap show_values FALSE adds no GeomText layer", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
+  )
+  p <- plot_cluster_heatmap(data, cluster = "cluster", show_values = FALSE)
+  has_text <- any(sapply(p$layers, function(l) inherits(l$geom, "GeomText")))
+  expect_false(has_text)
+})
+
+test_that("plot_cluster_heatmap values_format custom function is applied", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
+  )
+  fmt <- function(x) paste0(round(x, 1), "!")
+  p <- plot_cluster_heatmap(
+    data,
+    cluster = "cluster",
+    show_values = TRUE,
+    values_format = fmt
+  )
+  text_layer <- Filter(function(l) inherits(l$geom, "GeomText"), p$layers)[[1]]
+  labels <- text_layer$data$label
+  expect_true(all(grepl("!$", labels)))
+})
+
+test_that("plot_cluster_heatmap values_col and values_size are passed to text layer", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
+  )
+  p <- plot_cluster_heatmap(
+    data,
+    cluster = "cluster",
+    show_values = TRUE,
+    values_col = "white",
+    values_size = 5
+  )
+  text_layer <- Filter(function(l) inherits(l$geom, "GeomText"), p$layers)[[1]]
+  expect_equal(text_layer$aes_params$colour, "white")
+  expect_equal(text_layer$aes_params$size, 5)
+})
+
+test_that("plot_cluster_heatmap med column is present in plot data", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
+  )
+  p <- plot_cluster_heatmap(data, cluster = "cluster")
+  expect_true("med" %in% names(p$data))
+  expected_med <- stats::median(data$var1[data$cluster == "C1"])
+  row <- p$data[p$data$cluster == "C1" & p$data$variable == "var1", ]
+  expect_equal(row$med, expected_med)
+})

@@ -30,6 +30,18 @@
 #'   background. Set to `NULL` to apply no theme adjustment.
 #' @param grid ggplot2 panel grid or `NULL`. Default is
 #'   `cowplot::background_grid(major = "xy")`. Set to `NULL` for no grid.
+#' @param show_values logical. Whether to overlay the median value for each
+#'   cluster-variable combination as a text label on each tile. Default is
+#'   `FALSE`.
+#' @param values_format function or `NULL`. A function that takes a numeric
+#'   vector and returns a character vector of formatted labels. Applied to
+#'   the per-cluster median values when `show_values = TRUE`. When `NULL`,
+#'   values are formatted to three significant figures using
+#'   `formatC(x, digits = 3, format = "g")`. Default is `NULL`.
+#' @param values_col character. Colour for the overlaid text labels.
+#'   Default is `"black"`.
+#' @param values_size numeric. Font size (in `ggplot2` units) for the
+#'   overlaid text labels. Default is `3`.
 #'
 #' @return A ggplot object.
 #' @export
@@ -42,6 +54,7 @@
 #'   var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
 #' )
 #' plot_cluster_heatmap(data, cluster = "cluster")
+#' plot_cluster_heatmap(data, cluster = "cluster", show_values = TRUE)
 plot_cluster_heatmap <- function(data,
                                  cluster,
                                  vars = NULL,
@@ -63,7 +76,11 @@ plot_cluster_heatmap <- function(data,
                                    ),
                                  grid = cowplot::background_grid(
                                    major = "xy"
-                                 )) {
+                                 ),
+                                 show_values = FALSE,
+                                 values_format = NULL,
+                                 values_col = "black",
+                                 values_size = 3) {
   if (is.null(vars)) {
     vars <- setdiff(colnames(data), cluster)
   }
@@ -82,7 +99,11 @@ plot_cluster_heatmap <- function(data,
     col_low = col_low,
     colour_values = colour_values,
     thm = thm,
-    grid = grid
+    grid = grid,
+    show_values = show_values,
+    values_format = values_format,
+    values_col = values_col,
+    values_size = values_size
   )
 }
 
@@ -96,7 +117,8 @@ plot_cluster_heatmap <- function(data,
       tibble::tibble(
         cluster = clust,
         variable = var,
-        perc = ecdf_fn(med)
+        perc = ecdf_fn(med),
+        med = med
       )
     })
   })
@@ -142,7 +164,11 @@ plot_cluster_heatmap <- function(data,
                                        col_low,
                                        colour_values,
                                        thm,
-                                       grid) {
+                                       grid,
+                                       show_values,
+                                       values_format,
+                                       values_col,
+                                       values_size) {
   plot_tbl <- plot_tbl |>
     dplyr::mutate(
       cluster = factor(.data$cluster, levels = order_list$cluster),
@@ -168,6 +194,24 @@ plot_cluster_heatmap <- function(data,
   }
   if (!is.null(grid)) {
     p <- p + grid
+  }
+  if (show_values) {
+    if (is.null(values_format)) {
+      values_format <- function(x) formatC(x, digits = 3, format = "g")
+    }
+    plot_tbl <- plot_tbl |>
+      dplyr::mutate(label = values_format(.data$med))
+    p <- p + ggplot2::geom_text(
+      data = plot_tbl,
+      mapping = ggplot2::aes(
+        x = .data$cluster,
+        y = .data$variable,
+        label = .data$label
+      ),
+      colour = values_col,
+      size = values_size,
+      inherit.aes = FALSE
+    )
   }
 
   p

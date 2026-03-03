@@ -16,7 +16,11 @@ plot_cluster_heatmap(
   thm = cowplot::theme_cowplot(font_size = font_size) + ggplot2::theme(plot.background =
     ggplot2::element_rect(fill = "white", colour = NA), panel.background =
     ggplot2::element_rect(fill = "white", colour = NA)),
-  grid = cowplot::background_grid(major = "xy")
+  grid = cowplot::background_grid(major = "xy"),
+  show_values = FALSE,
+  values_format = NULL,
+  values_col = "black",
+  values_size = 3
 )
 }
 \arguments{
@@ -51,6 +55,22 @@ background. Set to \code{NULL} to apply no theme adjustment.}
 
 \item{grid}{ggplot2 panel grid or \code{NULL}. Default is
 \code{cowplot::background_grid(major = "xy")}. Set to \code{NULL} for no grid.}
+
+\item{show_values}{logical. Whether to overlay the median value for each
+cluster-variable combination as a text label on each tile. Default is
+\code{FALSE}.}
+
+\item{values_format}{function or \code{NULL}. A function that takes a numeric
+vector and returns a character vector of formatted labels. Applied to
+the per-cluster median values when \code{show_values = TRUE}. When \code{NULL},
+values are formatted to three significant figures using
+\code{formatC(x, digits = 3, format = "g")}. Default is \code{NULL}.}
+
+\item{values_col}{character. Colour for the overlaid text labels.
+Default is \code{"black"}.}
+
+\item{values_size}{numeric. Font size (in \code{ggplot2} units) for the
+overlaid text labels. Default is \code{3}.}
 }
 \value{
 A ggplot object.
@@ -70,4 +90,5 @@ data <- data.frame(
   var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
 )
 plot_cluster_heatmap(data, cluster = "cluster")
+plot_cluster_heatmap(data, cluster = "cluster", show_values = TRUE)
 }
