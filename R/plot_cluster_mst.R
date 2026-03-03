@@ -40,6 +40,12 @@
 #'   `igraph::layout_with_kk`, matching the FlowSOM visualisation style.
 #'   `"mds"` uses classical multidimensional scaling of the full distance
 #'   matrix via `stats::cmdscale`.
+#' @param coord_equal logical. Whether to enforce equal visual scaling on both
+#'   axes (one unit on the x-axis equals one unit on the y-axis) via
+#'   `ggplot2::coord_equal()`. Default is `TRUE`.
+#' @param suppress_axes logical or `NULL`. Whether to suppress axis text,
+#'   ticks, lines, and titles. When `NULL` (default), the value is inherited
+#'   from `coord_equal` — axes are suppressed when equal scaling is active.
 #' @param col_clusters named character vector or `NULL`. Per-cluster colours
 #'   applied to node borders and text labels. Names should match cluster
 #'   labels. When `NULL` (default), the default ggplot2 colour scale is used.
@@ -67,12 +73,6 @@
 #'   mode. Passed to `cowplot::plot_grid`. Default is `1.5`.
 #' @param font_size numeric. Font size passed to `cowplot::theme_cowplot`.
 #'   Default is `14`.
-#' @param coord_equal logical. Whether to enforce equal visual scaling on both
-#'   axes (one unit on the x-axis equals one unit on the y-axis) via
-#'   `ggplot2::coord_equal()`. Default is `TRUE`.
-#' @param suppress_axes logical or `NULL`. Whether to suppress axis text,
-#'   ticks, lines, and titles. When `NULL` (default), the value is inherited
-#'   from `coord_equal` — axes are suppressed when equal scaling is active.
 #' @param thm ggplot2 theme object or `NULL`. Default is
 #'   `cowplot::theme_cowplot(font_size = font_size)` with a white plot
 #'   background. Set to `NULL` to apply no theme adjustment.
