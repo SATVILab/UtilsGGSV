@@ -41,8 +41,8 @@
 #'   var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
 #'   var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
 #' )
-#' plot_heatmap_cluster(data, cluster = "cluster")
-plot_heatmap_cluster <- function(data,
+#' plot_cluster_heatmap(data, cluster = "cluster")
+plot_cluster_heatmap <- function(data,
                                  cluster,
                                  vars = NULL,
                                  col_high = "#B2182B",
@@ -70,11 +70,11 @@ plot_heatmap_cluster <- function(data,
 
   cluster_vec <- unique(data[[cluster]])
 
-  plot_tbl <- .plot_heatmap_cluster_calc(data, cluster, vars, cluster_vec)
-  order_list <- .plot_heatmap_cluster_order(plot_tbl)
+  plot_tbl <- .plot_cluster_heatmap_calc(data, cluster, vars, cluster_vec)
+  order_list <- .plot_cluster_heatmap_order(plot_tbl)
   colour_values <- c(0, white_range[1], white_range[2], 1)
 
-  .plot_heatmap_cluster_plot(
+  .plot_cluster_heatmap_plot(
     plot_tbl = plot_tbl,
     order_list = order_list,
     col_high = col_high,
@@ -86,7 +86,7 @@ plot_heatmap_cluster <- function(data,
   )
 }
 
-.plot_heatmap_cluster_calc <- function(data, cluster, vars, cluster_vec) {
+.plot_cluster_heatmap_calc <- function(data, cluster, vars, cluster_vec) {
   purrr::map_df(cluster_vec, function(clust) {
     obs_in <- data[[cluster]] == clust
     data_out <- data[!obs_in, ]
@@ -102,7 +102,7 @@ plot_heatmap_cluster <- function(data,
   })
 }
 
-.plot_heatmap_cluster_order <- function(plot_tbl) {
+.plot_cluster_heatmap_order <- function(plot_tbl) {
   cluster_vec <- unique(plot_tbl$cluster)
   var_vec <- unique(plot_tbl$variable)
 
@@ -110,7 +110,7 @@ plot_heatmap_cluster <- function(data,
     return(list(cluster = cluster_vec, variable = var_vec))
   }
 
-  expr_mat <- .plot_heatmap_cluster_order_mat(plot_tbl, cluster_vec, var_vec)
+  expr_mat <- .plot_cluster_heatmap_order_mat(plot_tbl, cluster_vec, var_vec)
 
   list(
     cluster = cluster_vec[stats::hclust(stats::dist(expr_mat))$order],
@@ -118,7 +118,7 @@ plot_heatmap_cluster <- function(data,
   )
 }
 
-.plot_heatmap_cluster_order_mat <- function(plot_tbl, cluster_vec, var_vec) {
+.plot_cluster_heatmap_order_mat <- function(plot_tbl, cluster_vec, var_vec) {
   expr_mat <- matrix(
     NA_real_,
     nrow = length(cluster_vec),
@@ -135,7 +135,7 @@ plot_heatmap_cluster <- function(data,
   expr_mat
 }
 
-.plot_heatmap_cluster_plot <- function(plot_tbl,
+.plot_cluster_heatmap_plot <- function(plot_tbl,
                                        order_list,
                                        col_high,
                                        col_mid,
