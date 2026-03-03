@@ -29,6 +29,7 @@ Imports:
     rprojroot,
     purrr,
     dplyr,
-    tibble
+    tibble,
+    igraph
 Roxygen: list(markdown = TRUE)
 VignetteBuilder: knitr
