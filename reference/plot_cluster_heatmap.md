@@ -21,7 +21,11 @@ plot_cluster_heatmap(
   thm = cowplot::theme_cowplot(font_size = font_size) + ggplot2::theme(plot.background =
     ggplot2::element_rect(fill = "white", colour = NA), panel.background =
     ggplot2::element_rect(fill = "white", colour = NA)),
-  grid = cowplot::background_grid(major = "xy")
+  grid = cowplot::background_grid(major = "xy"),
+  show_values = FALSE,
+  values_format = NULL,
+  values_col = "black",
+  values_size = 3
 )
 ```
 
@@ -80,6 +84,28 @@ plot_cluster_heatmap(
   ggplot2 panel grid or `NULL`. Default is
   `cowplot::background_grid(major = "xy")`. Set to `NULL` for no grid.
 
+- show_values:
+
+  logical. Whether to overlay the median value for each cluster-variable
+  combination as a text label on each tile. Default is `FALSE`.
+
+- values_format:
+
+  function or `NULL`. A function that takes a numeric vector and returns
+  a character vector of formatted labels. Applied to the per-cluster
+  median values when `show_values = TRUE`. When `NULL`, values are
+  formatted to three significant figures using
+  `formatC(x, digits = 3, format = "g")`. Default is `NULL`.
+
+- values_col:
+
+  character. Colour for the overlaid text labels. Default is `"black"`.
+
+- values_size:
+
+  numeric. Font size (in `ggplot2` units) for the overlaid text labels.
+  Default is `3`.
+
 ## Value
 
 A ggplot object.
@@ -94,4 +120,6 @@ data <- data.frame(
   var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
 )
 plot_cluster_heatmap(data, cluster = "cluster")
+
+plot_cluster_heatmap(data, cluster = "cluster", show_values = TRUE)
 ```
