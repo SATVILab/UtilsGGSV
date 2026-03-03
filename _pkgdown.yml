@@ -50,3 +50,8 @@ reference:
   contents:
   - plot_cluster_heatmap
   - plot_cluster_density
+
+- title: Cluster Analysis
+  desc: Functions for analysing and merging clusters
+  contents:
+  - cluster_merge_bin
