@@ -37,14 +37,20 @@
 #'     using the minimum and maximum of all observations within each variable
 #'     separately. Fill values are in \[0, 1\] and the legend uses percent
 #'     labels.
-#' @param col_high character. Colour for high values (100th percentile).
-#'   Default is `"#B2182B"`.
-#' @param col_mid character. Colour for the middle of the value range.
-#'   Default is `"#F7F7F7"`.
-#' @param col_low character. Colour for low values (0th percentile).
-#'   Default is `"#2166AC"`.
-#' @param white_range numeric vector of length 2. The range of percentile
-#'   values (on a 0-1 scale) that map to `col_mid`. Default is `c(0.4, 0.6)`.
+#' @param col character vector. Colours used to fill tiles, ordered from low
+#'   to high values. Default is `c("#2166AC", "#F7F7F7", "#B2182B")` (blue,
+#'   white, red). Any number of colours (>= 2) is accepted.
+#' @param col_positions numeric vector or `"auto"`. Positions (in \[0, 1\]) at
+#'   which each colour in `col` is placed on the fill scale. Must be the same
+#'   length as `col`, sorted in ascending order, with the first value `0` and
+#'   the last value `1`. When `"auto"` (default) and `col` has exactly three
+#'   colours and `scale_method = "ecdf"`, the middle colour is stretched over
+#'   `white_range` (the current default behaviour). In all other `"auto"` cases
+#'   the colours are evenly spaced from 0 to 1.
+#' @param white_range numeric vector of length 2. The range of positions (on a
+#'   0-1 scale) over which the middle colour is stretched. Only used when `col`
+#'   has exactly three colours, `scale_method = "ecdf"`, and `col_positions =
+#'   "auto"`. Default is `c(0.4, 0.6)`.
 #' @param font_size numeric. Font size passed to `cowplot::theme_cowplot`.
 #'   Default is `14`.
 #' @param thm ggplot2 theme object or `NULL`. Default is
@@ -81,9 +87,8 @@ plot_cluster_heatmap <- function(data,
                                  cluster,
                                  vars = NULL,
                                  scale_method = "ecdf",
-                                 col_high = "#B2182B",
-                                 col_mid = "#F7F7F7",
-                                 col_low = "#2166AC",
+                                 col = c("#2166AC", "#F7F7F7", "#B2182B"),
+                                 col_positions = "auto",
                                  white_range = c(0.4, 0.6),
                                  font_size = 14,
                                  thm = cowplot::theme_cowplot(
@@ -116,15 +121,13 @@ plot_cluster_heatmap <- function(data,
 
   plot_tbl <- .plot_cluster_heatmap_calc(data, cluster, vars, cluster_vec, scale_method)
   order_list <- .plot_cluster_heatmap_order(plot_tbl)
-  colour_values <- c(0, white_range[1], white_range[2], 1)
 
   .plot_cluster_heatmap_plot(
     plot_tbl = plot_tbl,
     order_list = order_list,
-    col_high = col_high,
-    col_mid = col_mid,
-    col_low = col_low,
-    colour_values = colour_values,
+    col = col,
+    col_positions = col_positions,
+    white_range = white_range,
     thm = thm,
     grid = grid,
     show_values = show_values,
@@ -234,10 +237,9 @@ plot_cluster_heatmap <- function(data,
 
 .plot_cluster_heatmap_plot <- function(plot_tbl,
                                        order_list,
-                                       col_high,
-                                       col_mid,
-                                       col_low,
-                                       colour_values,
+                                       col,
+                                       col_positions,
+                                       white_range,
                                        thm,
                                        grid,
                                        show_values,
@@ -251,11 +253,25 @@ plot_cluster_heatmap <- function(data,
       variable = factor(.data$variable, levels = order_list$variable)
     )
 
+  n_col <- length(col)
+  if (identical(col_positions, "auto")) {
+    if (n_col == 3 && scale_method == "ecdf") {
+      plot_colours <- c(col[1], col[2], col[2], col[3])
+      plot_positions <- c(0, white_range[1], white_range[2], 1)
+    } else {
+      plot_colours <- col
+      plot_positions <- seq(0, 1, length.out = n_col)
+    }
+  } else {
+    plot_colours <- col
+    plot_positions <- col_positions
+  }
+
   bounded <- scale_method %in% c("ecdf", "minmax", "minmax_var")
   fill_scale <- if (bounded) {
     ggplot2::scale_fill_gradientn(
-      colours = c(col_low, col_mid, col_mid, col_high),
-      values = colour_values,
+      colours = plot_colours,
+      values = plot_positions,
       limits = c(0, 1),
       name = "Relative\nvalue",
       labels = scales::percent
@@ -263,8 +279,8 @@ plot_cluster_heatmap <- function(data,
   } else {
     legend_name <- if (scale_method == "zscore") "Z-score" else "Median"
     ggplot2::scale_fill_gradientn(
-      colours = c(col_low, col_mid, col_mid, col_high),
-      values = colour_values,
+      colours = plot_colours,
+      values = plot_positions,
       name = legend_name
     )
   }
