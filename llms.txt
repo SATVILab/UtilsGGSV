@@ -328,12 +328,14 @@ Utilities for saving plots
 - [`ggsave2()`](https://satvilab.github.io/UtilsGGSV/reference/ggsave2.md)
   : Save plot in multiple formats using cowplot::ggsave2
 
-## Heat Maps
+## Cluster Plots
 
-Functions for plotting heat maps
+Functions for visualising cluster characteristics
 
-- [`plot_heatmap_cluster()`](https://satvilab.github.io/UtilsGGSV/reference/plot_heatmap_cluster.md)
+- [`plot_cluster_heatmap()`](https://satvilab.github.io/UtilsGGSV/reference/plot_cluster_heatmap.md)
   : Plot heat map of ECDF-standardised variable values per cluster
+- [`plot_clust_density()`](https://satvilab.github.io/UtilsGGSV/reference/plot_clust_density.md)
+  : Plot density of variable values with per-cluster median lines
 
 # Articles
 

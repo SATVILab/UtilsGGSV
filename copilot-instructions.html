@@ -62,6 +62,29 @@
 <code>vignettes/</code> - Package vignettes</li>
 </ul></div>
 <div class="section level2">
+<h2 id="key-functions">Key Functions<a class="anchor" aria-label="anchor" href="#key-functions"></a></h2>
+<div class="section level3">
+<h3 id="cluster-specific-plots">Cluster-Specific Plots<a class="anchor" aria-label="anchor" href="#cluster-specific-plots"></a></h3>
+<ul><li>
+<code>plot_cluster_heatmap</code> - Heat map of ECDF-standardised variable values per cluster. Tiles show the percentile of a cluster’s median value compared against observations outside the cluster.</li>
+<li>
+<code>plot_clust_density</code> - Density plot for each variable with per-cluster median lines. Plots the overall density and overlays a coloured vertical line for each cluster at its median.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="other-plotting-utilities">Other Plotting Utilities<a class="anchor" aria-label="anchor" href="#other-plotting-utilities"></a></h3>
+<ul><li>
+<code>ggcorr</code> - Scatter plots with correlation coefficients overlaid</li>
+<li>
+<code>axis_limits</code> - Force equal axis limits or expand axis coordinates</li>
+<li>
+<code>add_text_column</code> - Add a column of text annotations to a plot</li>
+<li>
+<code>save_plot</code> / <code>ggsave2</code> - Save plots to disk</li>
+<li>
+<code>get_trans</code> - Return <code>scales</code> transformation objects by name</li>
+</ul></div>
+</div>
+<div class="section level2">
 <h2 id="code-quality">Code Quality<a class="anchor" aria-label="anchor" href="#code-quality"></a></h2>
 <ul><li>Make minimal, surgical changes to fix issues</li>
 <li>Maintain backward compatibility when possible</li>
