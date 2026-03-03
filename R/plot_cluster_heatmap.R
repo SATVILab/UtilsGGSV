@@ -1,12 +1,14 @@
 #' @md
-#' @title Plot heat map of ECDF-standardised variable values per cluster
+#' @title Plot heat map of scaled variable values per cluster
 #'
 #' @description
-#' Creates a heat map where each tile shows the percentile of the median
-#' value of a variable for a cluster, compared against the empirical cumulative
-#' distribution function (ECDF) of that variable across all observations not
-#' belonging to the cluster. Clusters and variables are ordered along the axes
-#' via hierarchical clustering.
+#' Creates a heat map where each tile shows a scaled summary of a variable for
+#' a cluster. The scaling method is controlled by the `scale_method` parameter.
+#' By default (`scale_method = "ecdf"`), each tile shows the percentile of the
+#' cluster's median value compared against the empirical cumulative distribution
+#' function (ECDF) of that variable across all observations not belonging to the
+#' cluster. Clusters and variables are ordered along the axes via hierarchical
+#' clustering.
 #'
 #' @param data data.frame. Rows are observations. Must contain a column
 #'   identifying cluster membership and columns for variable values.
@@ -15,6 +17,26 @@
 #' @param vars character vector or `NULL`. Names of columns in `data` to
 #'   use as variables. If `NULL`, all columns except `cluster` are used.
 #'   Default is `NULL`.
+#' @param scale_method character. Method used to scale variable values for
+#'   colouring cells. One of `"ecdf"` (default), `"zscore"`, `"raw"`,
+#'   `"minmax"`, or `"minmax_var"`.
+#'
+#'   - `"ecdf"`: Each cell shows the percentile of the cluster's median value
+#'     compared to all observations outside the cluster (empirical CDF).
+#'     Fill values are in \[0, 1\] and the legend uses percent labels.
+#'   - `"zscore"`: Each cell shows the z-score of the cluster's median
+#'     relative to all observations of that variable
+#'     (`(median - mean) / sd`). Fill values are unbounded.
+#'   - `"raw"`: Each cell shows the raw median value. Fill values are
+#'     unbounded.
+#'   - `"minmax"`: Each cell shows the cluster median scaled to \[0, 1\]
+#'     using the global minimum and maximum across all observations of all
+#'     variables. Fill values are in \[0, 1\] and the legend uses percent
+#'     labels.
+#'   - `"minmax_var"`: Each cell shows the cluster median scaled to \[0, 1\]
+#'     using the minimum and maximum of all observations within each variable
+#'     separately. Fill values are in \[0, 1\] and the legend uses percent
+#'     labels.
 #' @param col_high character. Colour for high values (100th percentile).
 #'   Default is `"#B2182B"`.
 #' @param col_mid character. Colour for the middle of the value range.
@@ -58,6 +80,7 @@
 plot_cluster_heatmap <- function(data,
                                  cluster,
                                  vars = NULL,
+                                 scale_method = "ecdf",
                                  col_high = "#B2182B",
                                  col_mid = "#F7F7F7",
                                  col_low = "#2166AC",
@@ -85,9 +108,13 @@ plot_cluster_heatmap <- function(data,
     vars <- setdiff(colnames(data), cluster)
   }
 
+  scale_method <- match.arg(
+    scale_method, c("ecdf", "zscore", "raw", "minmax", "minmax_var")
+  )
+
   cluster_vec <- unique(data[[cluster]])
 
-  plot_tbl <- .plot_cluster_heatmap_calc(data, cluster, vars, cluster_vec)
+  plot_tbl <- .plot_cluster_heatmap_calc(data, cluster, vars, cluster_vec, scale_method)
   order_list <- .plot_cluster_heatmap_order(plot_tbl)
   colour_values <- c(0, white_range[1], white_range[2], 1)
 
@@ -103,25 +130,73 @@ plot_cluster_heatmap <- function(data,
     show_values = show_values,
     values_format = values_format,
     values_col = values_col,
-    values_size = values_size
+    values_size = values_size,
+    scale_method = scale_method
   )
 }
 
-.plot_cluster_heatmap_calc <- function(data, cluster, vars, cluster_vec) {
-  purrr::map_df(cluster_vec, function(clust) {
+.plot_cluster_heatmap_calc <- function(data, cluster, vars, cluster_vec, scale_method) {
+  if (scale_method == "ecdf") {
+    return(purrr::map_df(cluster_vec, function(clust) {
+      obs_in <- data[[cluster]] == clust
+      data_out <- data[!obs_in, ]
+      purrr::map_df(vars, function(var) {
+        med <- stats::median(data[[var]][obs_in])
+        ecdf_fn <- stats::ecdf(data_out[[var]])
+        tibble::tibble(
+          cluster = clust,
+          variable = var,
+          perc = ecdf_fn(med),
+          med = med
+        )
+      })
+    }))
+  }
+
+  med_tbl <- purrr::map_df(cluster_vec, function(clust) {
     obs_in <- data[[cluster]] == clust
-    data_out <- data[!obs_in, ]
     purrr::map_df(vars, function(var) {
-      med <- stats::median(data[[var]][obs_in])
-      ecdf_fn <- stats::ecdf(data_out[[var]])
       tibble::tibble(
         cluster = clust,
         variable = var,
-        perc = ecdf_fn(med),
-        med = med
+        med = stats::median(data[[var]][obs_in])
       )
     })
   })
+
+  if (scale_method == "zscore") {
+    perc_vec <- numeric(nrow(med_tbl))
+    for (var in vars) {
+      all_vals <- data[[var]]
+      mu <- mean(all_vals, na.rm = TRUE)
+      sigma <- stats::sd(all_vals, na.rm = TRUE)
+      idx <- med_tbl$variable == var
+      perc_vec[idx] <- if (is.na(sigma) || sigma == 0) 0 else
+        (med_tbl$med[idx] - mu) / sigma
+    }
+    med_tbl$perc <- perc_vec
+  } else if (scale_method == "raw") {
+    med_tbl$perc <- med_tbl$med
+  } else if (scale_method == "minmax") {
+    all_vals <- unlist(lapply(vars, function(v) data[[v]]))
+    global_min <- min(all_vals, na.rm = TRUE)
+    global_max <- max(all_vals, na.rm = TRUE)
+    med_tbl$perc <- if (global_max == global_min) 0.5 else
+      (med_tbl$med - global_min) / (global_max - global_min)
+  } else if (scale_method == "minmax_var") {
+    perc_vec <- numeric(nrow(med_tbl))
+    for (var in vars) {
+      all_vals <- data[[var]]
+      var_min <- min(all_vals, na.rm = TRUE)
+      var_max <- max(all_vals, na.rm = TRUE)
+      idx <- med_tbl$variable == var
+      perc_vec[idx] <- if (var_max == var_min) 0.5 else
+        (med_tbl$med[idx] - var_min) / (var_max - var_min)
+    }
+    med_tbl$perc <- perc_vec
+  }
+
+  med_tbl
 }
 
 .plot_cluster_heatmap_order <- function(plot_tbl) {
@@ -168,25 +243,38 @@ plot_cluster_heatmap <- function(data,
                                        show_values,
                                        values_format,
                                        values_col,
-                                       values_size) {
+                                       values_size,
+                                       scale_method) {
   plot_tbl <- plot_tbl |>
     dplyr::mutate(
       cluster = factor(.data$cluster, levels = order_list$cluster),
       variable = factor(.data$variable, levels = order_list$variable)
     )
 
-  p <- ggplot2::ggplot(
-    plot_tbl,
-    ggplot2::aes(x = .data$cluster, y = .data$variable, fill = .data$perc)
-  ) +
-    ggplot2::geom_raster() +
+  bounded <- scale_method %in% c("ecdf", "minmax", "minmax_var")
+  fill_scale <- if (bounded) {
     ggplot2::scale_fill_gradientn(
       colours = c(col_low, col_mid, col_mid, col_high),
       values = colour_values,
       limits = c(0, 1),
       name = "Relative\nvalue",
       labels = scales::percent
-    ) +
+    )
+  } else {
+    legend_name <- if (scale_method == "zscore") "Z-score" else "Median"
+    ggplot2::scale_fill_gradientn(
+      colours = c(col_low, col_mid, col_mid, col_high),
+      values = colour_values,
+      name = legend_name
+    )
+  }
+
+  p <- ggplot2::ggplot(
+    plot_tbl,
+    ggplot2::aes(x = .data$cluster, y = .data$variable, fill = .data$perc)
+  ) +
+    ggplot2::geom_raster() +
+    fill_scale +
     ggplot2::labs(x = "Cluster", y = "Variable")
 
   if (!is.null(thm)) {
