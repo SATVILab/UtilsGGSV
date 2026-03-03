@@ -4,9 +4,18 @@
 #' @description
 #' Computes the minimum-spanning tree (MST) over clusters, where the distance
 #' between two clusters is the Euclidean distance between their median variable
-#' profiles. The MST layout is determined once using classical multidimensional
-#' scaling (MDS) of the distance matrix and is shared across all per-variable
-#' plots.
+#' profiles. The MST is built from the full pairwise Euclidean distance matrix
+#' (i.e. a fully connected undirected weighted graph), matching the approach
+#' used by FlowSOM (`BuildMST`). The node layout is determined once and shared
+#' across all per-variable plots.
+#'
+#' Two layout algorithms are supported via `layout_algorithm`:
+#'
+#' - `"kamada-kawai"` (default): uses the Kamada-Kawai force-directed algorithm
+#'   (`igraph::layout_with_kk`) on the MST graph, matching the FlowSOM
+#'   visualisation style.
+#' - `"mds"`: uses classical multidimensional scaling (`stats::cmdscale`) of
+#'   the full Euclidean distance matrix.
 #'
 #' For each variable, a separate plot is produced in which each cluster node
 #' is **filled** according to the ECDF-standardised percentile of that
@@ -25,6 +34,12 @@
 #' @param vars character vector or `NULL`. Names of columns in `data` to
 #'   use as variables. If `NULL`, all columns except `cluster` are used.
 #'   Default is `NULL`.
+#' @param layout_algorithm character. Layout algorithm for positioning nodes.
+#'   One of `"kamada-kawai"` (default) or `"mds"`. `"kamada-kawai"` uses the
+#'   Kamada-Kawai force-directed algorithm on the MST graph via
+#'   `igraph::layout_with_kk`, matching the FlowSOM visualisation style.
+#'   `"mds"` uses classical multidimensional scaling of the full distance
+#'   matrix via `stats::cmdscale`.
 #' @param col_clusters named character vector or `NULL`. Per-cluster colours
 #'   applied to node borders and text labels. Names should match cluster
 #'   labels. When `NULL` (default), the default ggplot2 colour scale is used.
@@ -52,6 +67,12 @@
 #'   mode. Passed to `cowplot::plot_grid`. Default is `1.5`.
 #' @param font_size numeric. Font size passed to `cowplot::theme_cowplot`.
 #'   Default is `14`.
+#' @param coord_equal logical. Whether to enforce equal visual scaling on both
+#'   axes (one unit on the x-axis equals one unit on the y-axis) via
+#'   `ggplot2::coord_equal()`. Default is `TRUE`.
+#' @param suppress_axes logical or `NULL`. Whether to suppress axis text,
+#'   ticks, lines, and titles. When `NULL` (default), the value is inherited
+#'   from `coord_equal` — axes are suppressed when equal scaling is active.
 #' @param thm ggplot2 theme object or `NULL`. Default is
 #'   `cowplot::theme_cowplot(font_size = font_size)` with a white plot
 #'   background. Set to `NULL` to apply no theme adjustment.
@@ -70,14 +91,20 @@
 #'   var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
 #'   var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
 #' )
-#' # Default: returns a named list of plots, one per variable
+#' # Default: Kamada-Kawai layout, returns a named list of plots
 #' plot_list <- plot_cluster_mst(data, cluster = "cluster")
+#'
+#' # MDS layout
+#' plot_cluster_mst(data, cluster = "cluster", layout_algorithm = "mds")
 #'
 #' # Combined grid with 2 columns
 #' plot_cluster_mst(data, cluster = "cluster", n_col = 2)
 plot_cluster_mst <- function(data,
                               cluster,
                               vars = NULL,
+                              layout_algorithm = c("kamada-kawai", "mds"),
+                              coord_equal = TRUE,
+                              suppress_axes = NULL,
                               col_clusters = NULL,
                               col_high = "#B2182B",
                               col_mid = "#F7F7F7",
@@ -104,6 +131,10 @@ plot_cluster_mst <- function(data,
                               grid = cowplot::background_grid(
                                 major = "xy"
                               )) {
+  layout_algorithm <- match.arg(layout_algorithm)
+
+  if (is.null(suppress_axes)) suppress_axes <- coord_equal
+
   if (is.null(vars)) {
     vars <- setdiff(colnames(data), cluster)
   }
@@ -116,7 +147,9 @@ plot_cluster_mst <- function(data,
 
   med_mat <- .plot_cluster_mst_medians(data, cluster, vars, cluster_vec)
   dist_mat <- as.matrix(stats::dist(med_mat))
-  node_tbl_base <- .plot_cluster_mst_layout(dist_mat, cluster_vec)
+  node_tbl_base <- .plot_cluster_mst_layout(
+    dist_mat, cluster_vec, layout_algorithm
+  )
   edge_tbl <- .plot_cluster_mst_edges(dist_mat, node_tbl_base)
   perc_tbl <- .plot_cluster_mst_percentiles(data, cluster, vars, cluster_vec)
   colour_values <- c(0, white_range[1], white_range[2], 1)
@@ -134,6 +167,9 @@ plot_cluster_mst <- function(data,
         col_mid = col_mid,
         col_low = col_low,
         colour_values = colour_values,
+        layout_algorithm = layout_algorithm,
+        coord_equal = coord_equal,
+        suppress_axes = suppress_axes,
         thm = thm,
         grid = grid
       )
@@ -169,11 +205,21 @@ plot_cluster_mst <- function(data,
   med_mat
 }
 
-.plot_cluster_mst_layout <- function(dist_mat, cluster_vec) {
-  k <- min(2L, length(cluster_vec) - 1L)
-  coords <- stats::cmdscale(stats::as.dist(dist_mat), k = k)
-  if (!is.matrix(coords)) {
-    coords <- matrix(coords, ncol = 1L)
+.plot_cluster_mst_layout <- function(dist_mat, cluster_vec, layout_algorithm) {
+  if (layout_algorithm == "kamada-kawai") {
+    mst_tbl <- .plot_cluster_mst_kruskal(dist_mat)
+    g <- igraph::graph_from_data_frame(
+      mst_tbl,
+      directed = FALSE,
+      vertices = data.frame(name = cluster_vec)
+    )
+    coords <- igraph::layout_with_kk(g)
+  } else {
+    k <- min(2L, length(cluster_vec) - 1L)
+    coords <- stats::cmdscale(stats::as.dist(dist_mat), k = k)
+    if (!is.matrix(coords)) {
+      coords <- matrix(coords, ncol = 1L)
+    }
   }
   tibble::tibble(
     cluster = cluster_vec,
@@ -256,7 +302,14 @@ plot_cluster_mst <- function(data,
 
 .plot_cluster_mst_plot_one <- function(node_tbl, edge_tbl, col_clusters,
                                         col_high, col_mid, col_low,
-                                        colour_values, thm, grid) {
+                                        colour_values, layout_algorithm,
+                                        coord_equal, suppress_axes,
+                                        thm, grid) {
+  axis_labels <- if (layout_algorithm == "kamada-kawai") {
+    list(x = "KK 1", y = "KK 2")
+  } else {
+    list(x = "MDS 1", y = "MDS 2")
+  }
   p <- ggplot2::ggplot() +
     ggplot2::geom_segment(
       data = edge_tbl,
@@ -289,7 +342,9 @@ plot_cluster_mst <- function(data,
       name = "Relative\nvalue",
       labels = scales::percent
     ) +
-    ggplot2::labs(x = "MDS 1", y = "MDS 2", colour = "Cluster")
+    ggplot2::labs(x = axis_labels$x, y = axis_labels$y, colour = "Cluster")
+
+  if (coord_equal) p <- p + ggplot2::coord_equal()
 
   if (!is.null(col_clusters)) {
     p <- p + ggplot2::scale_colour_manual(values = col_clusters)
@@ -297,6 +352,15 @@ plot_cluster_mst <- function(data,
 
   if (!is.null(thm)) p <- p + thm
   if (!is.null(grid)) p <- p + grid
+
+  if (suppress_axes) {
+    p <- p + ggplot2::theme(
+      axis.text  = ggplot2::element_blank(),
+      axis.ticks = ggplot2::element_blank(),
+      axis.line  = ggplot2::element_blank(),
+      axis.title = ggplot2::element_blank()
+    )
+  }
 
   p
 }

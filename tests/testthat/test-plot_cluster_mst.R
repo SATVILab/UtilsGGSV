@@ -203,3 +203,97 @@ test_that("plot_cluster_mst NULL grid applies no grid", {
   for (p in result) expect_s3_class(p, "ggplot")
 })
 
+test_that("plot_cluster_mst default layout_algorithm is kamada-kawai", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
+  )
+  result <- plot_cluster_mst(data, cluster = "cluster")
+  for (p in result) {
+    expect_s3_class(p, "ggplot")
+    expect_equal(p$labels$x, "KK 1")
+    expect_equal(p$labels$y, "KK 2")
+  }
+})
+
+test_that("plot_cluster_mst layout_algorithm mds uses MDS axis labels", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
+  )
+  result <- plot_cluster_mst(data, cluster = "cluster", layout_algorithm = "mds")
+  for (p in result) {
+    expect_equal(p$labels$x, "MDS 1")
+    expect_equal(p$labels$y, "MDS 2")
+  }
+})
+
+test_that("plot_cluster_mst coord_equal TRUE applies CoordEqual", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
+  )
+  result <- plot_cluster_mst(data, cluster = "cluster", coord_equal = TRUE)
+  for (p in result) expect_equal(p$coordinates$ratio, 1)
+})
+
+test_that("plot_cluster_mst coord_equal FALSE does not apply CoordEqual", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
+  )
+  result <- plot_cluster_mst(data, cluster = "cluster", coord_equal = FALSE)
+  for (p in result) expect_true(is.null(p$coordinates$ratio))
+})
+
+test_that("plot_cluster_mst suppress_axes NULL inherits coord_equal", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
+  )
+  # coord_equal = TRUE => axes suppressed by default
+  result_eq <- plot_cluster_mst(
+    data, cluster = "cluster", coord_equal = TRUE, suppress_axes = NULL
+  )
+  for (p in result_eq) {
+    theme_elements <- p$theme
+    expect_true(inherits(theme_elements$axis.text, "element_blank"))
+  }
+  # coord_equal = FALSE => axes not suppressed by default
+  result_no <- plot_cluster_mst(
+    data, cluster = "cluster", coord_equal = FALSE, suppress_axes = NULL
+  )
+  for (p in result_no) {
+    theme_elements <- p$theme
+    expect_false(isTRUE(inherits(theme_elements$axis.text, "element_blank")))
+  }
+})
+
+test_that("plot_cluster_mst suppress_axes TRUE suppresses axes regardless of coord_equal", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
+  )
+  result <- plot_cluster_mst(
+    data, cluster = "cluster", coord_equal = FALSE, suppress_axes = TRUE
+  )
+  for (p in result) {
+    expect_true(inherits(p$theme$axis.text, "element_blank"))
+    expect_true(inherits(p$theme$axis.ticks, "element_blank"))
+    expect_true(inherits(p$theme$axis.line, "element_blank"))
+    expect_true(inherits(p$theme$axis.title, "element_blank"))
+  }
+})
+
