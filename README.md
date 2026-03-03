@@ -314,6 +314,40 @@ plot_cluster_density(cluster_data, cluster = "cluster")
 
 <img src="man/figures/README-plot_cluster_density-2.png" alt="" width="100%" />
 
+#### Minimum-Spanning Tree with `plot_cluster_mst`
+
+The function `plot_cluster_mst` computes the minimum-spanning tree (MST)
+over clusters, using Euclidean distance between cluster median profiles.
+Clusters are laid out in two dimensions via classical multidimensional
+scaling (MDS). For each variable, a separate plot is produced in which
+each node is filled according to the ECDF-standardised percentile of
+that cluster’s median — the same colour scale used by
+`plot_cluster_heatmap`. By default a named list of plots is returned;
+supplying `n_col` or `n_row` returns a combined `cowplot::plot_grid`
+figure.
+
+``` r
+set.seed(1)
+cluster_data <- data.frame(
+  cluster = rep(paste0("C", 1:3), each = 20),
+  var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+  var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
+)
+# Default: returns a named list of plots, one per variable
+plot_list <- plot_cluster_mst(cluster_data, cluster = "cluster")
+plot_list[["var1"]]
+```
+
+<img src="man/figures/README-plot_cluster_mst-1.png" alt="" width="100%" />
+
+Combine into a grid with variable-name labels:
+
+``` r
+plot_cluster_mst(cluster_data, cluster = "cluster", n_col = 2)
+```
+
+<img src="man/figures/README-plot_cluster_mst_grid-1.png" alt="" width="100%" />
+
 ### Transformations with `get_trans`
 
 The utility function `get_trans` returns `trans` objects (as implemented

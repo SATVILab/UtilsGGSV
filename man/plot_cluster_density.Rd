@@ -8,6 +8,7 @@ plot_cluster_density(
   data,
   cluster,
   vars = NULL,
+  col_clusters = NULL,
   n_col = NULL,
   n_row = NULL,
   scales = "free_y",
@@ -30,6 +31,10 @@ cluster membership.}
 \item{vars}{character vector or \code{NULL}. Names of columns in \code{data} to
 use as variables. If \code{NULL}, all columns except \code{cluster} are used.
 Default is \code{NULL}.}
+
+\item{col_clusters}{named character vector or \code{NULL}. Per-cluster colours.
+Names should match cluster labels. When \code{NULL} (default), the default
+ggplot2 colour scale is used.}
 
 \item{n_col}{integer or \code{NULL}. Number of columns passed to
 \code{ggplot2::facet_wrap}. If supplied (or if \code{n_row} is supplied) a single
