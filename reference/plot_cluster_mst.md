@@ -2,14 +2,26 @@
 
 Computes the minimum-spanning tree (MST) over clusters, where the
 distance between two clusters is the Euclidean distance between their
-median variable profiles. The MST layout is determined once using
-classical multidimensional scaling (MDS) of the distance matrix and is
-shared across all per-variable plots.
+median variable profiles. The MST is built from the full pairwise
+Euclidean distance matrix (i.e. a fully connected undirected weighted
+graph), matching the approach used by FlowSOM (`BuildMST`). The node
+layout is determined once and shared across all per-variable plots.
+
+Two layout algorithms are supported via `layout_algorithm`:
+
+- `"kamada-kawai"` (default): uses the Kamada-Kawai force-directed
+  algorithm
+  ([`igraph::layout_with_kk`](https://r.igraph.org/reference/layout_with_kk.html))
+  on the MST graph, matching the FlowSOM visualisation style.
+
+- `"mds"`: uses classical multidimensional scaling
+  ([`stats::cmdscale`](https://rdrr.io/r/stats/cmdscale.html)) of the
+  full Euclidean distance matrix.
 
 For each variable, a separate plot is produced in which each cluster
 node is **filled** according to the ECDF-standardised percentile of that
 cluster's median value for the variable — the same scaling used by
-[`plot_cluster_heatmap`](https://satvilab.github.io/UtilsGGSV/reference/plot_cluster_heatmap.md).
+[`plot_cluster_heatmap()`](https://satvilab.github.io/UtilsGGSV/reference/plot_cluster_heatmap.md).
 The node border and label colour encode cluster identity and can be
 overridden via `col_clusters`.
 
@@ -26,6 +38,9 @@ plot_cluster_mst(
   data,
   cluster,
   vars = NULL,
+  layout_algorithm = c("kamada-kawai", "mds"),
+  coord_equal = TRUE,
+  suppress_axes = NULL,
   col_clusters = NULL,
   col_high = "#B2182B",
   col_mid = "#F7F7F7",
@@ -62,6 +77,29 @@ plot_cluster_mst(
   character vector or `NULL`. Names of columns in `data` to use as
   variables. If `NULL`, all columns except `cluster` are used. Default
   is `NULL`.
+
+- layout_algorithm:
+
+  character. Layout algorithm for positioning nodes. One of
+  `"kamada-kawai"` (default) or `"mds"`. `"kamada-kawai"` uses the
+  Kamada-Kawai force-directed algorithm on the MST graph via
+  [`igraph::layout_with_kk`](https://r.igraph.org/reference/layout_with_kk.html),
+  matching the FlowSOM visualisation style. `"mds"` uses classical
+  multidimensional scaling of the full distance matrix via
+  [`stats::cmdscale`](https://rdrr.io/r/stats/cmdscale.html).
+
+- coord_equal:
+
+  logical. Whether to enforce equal visual scaling on both axes (one
+  unit on the x-axis equals one unit on the y-axis) via
+  [`ggplot2::coord_equal()`](https://ggplot2.tidyverse.org/reference/coord_fixed.html).
+  Default is `TRUE`.
+
+- suppress_axes:
+
+  logical or `NULL`. Whether to suppress axis text, ticks, lines, and
+  titles. When `NULL` (default), the value is inherited from
+  `coord_equal` — axes are suppressed when equal scaling is active.
 
 - col_clusters:
 
@@ -164,8 +202,17 @@ data <- data.frame(
   var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
   var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
 )
-# Default: returns a named list of plots, one per variable
+# Default: Kamada-Kawai layout, returns a named list of plots
 plot_list <- plot_cluster_mst(data, cluster = "cluster")
+
+# MDS layout
+plot_cluster_mst(data, cluster = "cluster", layout_algorithm = "mds")
+#> $var1
+
+#> 
+#> $var2
+
+#> 
 
 # Combined grid with 2 columns
 plot_cluster_mst(data, cluster = "cluster", n_col = 2)
