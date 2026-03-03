@@ -49,4 +49,4 @@ reference:
   desc: Functions for visualising cluster characteristics
   contents:
   - plot_cluster_heatmap
-  - plot_clust_density
+  - plot_cluster_density
