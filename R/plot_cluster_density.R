@@ -48,9 +48,6 @@
 #' @param thm ggplot2 theme object or `NULL`. Default is
 #'   `cowplot::theme_cowplot(font_size = font_size)` with a white plot
 #'   background. Set to `NULL` to apply no theme adjustment.
-#' @param col_clusters named character vector or `NULL`. Per-cluster colours.
-#'   Names should match cluster labels. When `NULL` (default), the default
-#'   ggplot2 colour scale is used.
 #' @param grid ggplot2 panel grid or `NULL`. Default is
 #'   `cowplot::background_grid(major = "xy")`. Set to `NULL` for no grid.
 #'

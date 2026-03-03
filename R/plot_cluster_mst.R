@@ -1,12 +1,22 @@
 #' @md
-#' @title Plot minimum-spanning tree of clusters
+#' @title Plot minimum-spanning tree of clusters with per-variable node colouring
 #'
 #' @description
 #' Computes the minimum-spanning tree (MST) over clusters, where the distance
 #' between two clusters is the Euclidean distance between their median variable
-#' profiles. The clusters are positioned in two dimensions using classical
-#' multidimensional scaling (MDS) of the distance matrix. MST edges are drawn
-#' as line segments and each cluster is shown as a labelled point.
+#' profiles. The MST layout is determined once using classical multidimensional
+#' scaling (MDS) of the distance matrix and is shared across all per-variable
+#' plots.
+#'
+#' For each variable, a separate plot is produced in which each cluster node
+#' is **filled** according to the ECDF-standardised percentile of that
+#' cluster's median value for the variable — the same scaling used by
+#' [plot_cluster_heatmap()]. The node border and label colour encode cluster
+#' identity and can be overridden via `col_clusters`.
+#'
+#' By default the function returns a **named list of ggplot2 objects**, one
+#' per variable. If `n_col` or `n_row` is supplied the plots are combined into
+#' a single figure using `cowplot::plot_grid`, with variable names as labels.
 #'
 #' @param data data.frame. Rows are observations. Must contain a column
 #'   identifying cluster membership and columns for variable values.
@@ -15,9 +25,31 @@
 #' @param vars character vector or `NULL`. Names of columns in `data` to
 #'   use as variables. If `NULL`, all columns except `cluster` are used.
 #'   Default is `NULL`.
-#' @param col_clusters named character vector or `NULL`. Per-cluster colours.
-#'   Names should match cluster labels. When `NULL` (default), the default
-#'   ggplot2 colour scale is used.
+#' @param col_clusters named character vector or `NULL`. Per-cluster colours
+#'   applied to node borders and text labels. Names should match cluster
+#'   labels. When `NULL` (default), the default ggplot2 colour scale is used.
+#' @param col_high character. Colour for high values (100th percentile).
+#'   Default is `"#B2182B"`.
+#' @param col_mid character. Colour for the middle of the value range.
+#'   Default is `"#F7F7F7"`.
+#' @param col_low character. Colour for low values (0th percentile).
+#'   Default is `"#2166AC"`.
+#' @param white_range numeric vector of length 2. The range of percentile
+#'   values (on a 0-1 scale) that map to `col_mid`. Default is `c(0.4, 0.6)`.
+#' @param n_col integer or `NULL`. Number of columns passed to
+#'   `cowplot::plot_grid`. If supplied (or if `n_row` is supplied) a single
+#'   combined figure is returned instead of a list. Default is `NULL`.
+#' @param n_row integer or `NULL`. Number of rows passed to
+#'   `cowplot::plot_grid`. If supplied (or if `n_col` is supplied) a single
+#'   combined figure is returned instead of a list. Default is `NULL`.
+#' @param label_x numeric. x position of the plot labels within each panel
+#'   in grid mode. Passed to `cowplot::plot_grid`. Default is `0`.
+#' @param label_y numeric. y position of the plot labels within each panel
+#'   in grid mode. Passed to `cowplot::plot_grid`. Default is `1`.
+#' @param hjust numeric. Horizontal justification of the plot labels in grid
+#'   mode. Passed to `cowplot::plot_grid`. Default is `-0.5`.
+#' @param vjust numeric. Vertical justification of the plot labels in grid
+#'   mode. Passed to `cowplot::plot_grid`. Default is `1.5`.
 #' @param font_size numeric. Font size passed to `cowplot::theme_cowplot`.
 #'   Default is `14`.
 #' @param thm ggplot2 theme object or `NULL`. Default is
@@ -26,7 +58,9 @@
 #' @param grid ggplot2 panel grid or `NULL`. Default is
 #'   `cowplot::background_grid(major = "xy")`. Set to `NULL` for no grid.
 #'
-#' @return A ggplot object.
+#' @return A named list of ggplot2 objects (one per variable) when neither
+#'   `n_col` nor `n_row` is specified. A `cowplot::plot_grid` figure when
+#'   `n_col` or `n_row` is specified.
 #' @export
 #'
 #' @examples
@@ -36,11 +70,25 @@
 #'   var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
 #'   var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
 #' )
-#' plot_cluster_mst(data, cluster = "cluster")
+#' # Default: returns a named list of plots, one per variable
+#' plot_list <- plot_cluster_mst(data, cluster = "cluster")
+#'
+#' # Combined grid with 2 columns
+#' plot_cluster_mst(data, cluster = "cluster", n_col = 2)
 plot_cluster_mst <- function(data,
                               cluster,
                               vars = NULL,
                               col_clusters = NULL,
+                              col_high = "#B2182B",
+                              col_mid = "#F7F7F7",
+                              col_low = "#2166AC",
+                              white_range = c(0.4, 0.6),
+                              n_col = NULL,
+                              n_row = NULL,
+                              label_x = 0,
+                              label_y = 1,
+                              hjust = -0.5,
+                              vjust = 1.5,
                               font_size = 14,
                               thm = cowplot::theme_cowplot(
                                 font_size = font_size
@@ -68,15 +116,42 @@ plot_cluster_mst <- function(data,
 
   med_mat <- .plot_cluster_mst_medians(data, cluster, vars, cluster_vec)
   dist_mat <- as.matrix(stats::dist(med_mat))
-  node_tbl <- .plot_cluster_mst_layout(dist_mat, cluster_vec)
-  edge_tbl <- .plot_cluster_mst_edges(dist_mat, node_tbl)
+  node_tbl_base <- .plot_cluster_mst_layout(dist_mat, cluster_vec)
+  edge_tbl <- .plot_cluster_mst_edges(dist_mat, node_tbl_base)
+  perc_tbl <- .plot_cluster_mst_percentiles(data, cluster, vars, cluster_vec)
+  colour_values <- c(0, white_range[1], white_range[2], 1)
 
-  .plot_cluster_mst_plot(
-    node_tbl = node_tbl,
-    edge_tbl = edge_tbl,
-    col_clusters = col_clusters,
-    thm = thm,
-    grid = grid
+  plot_list <- stats::setNames(
+    lapply(vars, function(v) {
+      perc_v <- perc_tbl[perc_tbl$variable == v, ]
+      node_tbl <- node_tbl_base
+      node_tbl$fill <- perc_v$perc[match(node_tbl$cluster, perc_v$cluster)]
+      .plot_cluster_mst_plot_one(
+        node_tbl = node_tbl,
+        edge_tbl = edge_tbl,
+        col_clusters = col_clusters,
+        col_high = col_high,
+        col_mid = col_mid,
+        col_low = col_low,
+        colour_values = colour_values,
+        thm = thm,
+        grid = grid
+      )
+    }),
+    vars
+  )
+
+  if (is.null(n_col) && is.null(n_row)) return(plot_list)
+
+  cowplot::plot_grid(
+    plotlist = plot_list,
+    ncol = n_col,
+    nrow = n_row,
+    labels = vars,
+    label_x = label_x,
+    label_y = label_y,
+    hjust = hjust,
+    vjust = vjust
   )
 }
 
@@ -129,7 +204,10 @@ plot_cluster_mst <- function(data,
   names(parent) <- cluster_vec
 
   find_root <- function(i) {
-    while (parent[i] != i) i <- parent[i]
+    while (parent[i] != i) {
+      parent[i] <<- parent[parent[i]]
+      i <- parent[i]
+    }
     i
   }
 
@@ -160,7 +238,25 @@ plot_cluster_mst <- function(data,
   )
 }
 
-.plot_cluster_mst_plot <- function(node_tbl, edge_tbl, col_clusters, thm, grid) {
+.plot_cluster_mst_percentiles <- function(data, cluster, vars, cluster_vec) {
+  purrr::map_df(cluster_vec, function(clust) {
+    obs_in <- data[[cluster]] == clust
+    data_out <- data[!obs_in, ]
+    purrr::map_df(vars, function(var) {
+      med <- stats::median(data[[var]][obs_in], na.rm = TRUE)
+      ecdf_fn <- stats::ecdf(data_out[[var]])
+      tibble::tibble(
+        cluster = clust,
+        variable = var,
+        perc = ecdf_fn(med)
+      )
+    })
+  })
+}
+
+.plot_cluster_mst_plot_one <- function(node_tbl, edge_tbl, col_clusters,
+                                        col_high, col_mid, col_low,
+                                        colour_values, thm, grid) {
   p <- ggplot2::ggplot() +
     ggplot2::geom_segment(
       data = edge_tbl,
@@ -171,7 +267,11 @@ plot_cluster_mst <- function(data,
     ) +
     ggplot2::geom_point(
       data = node_tbl,
-      ggplot2::aes(x = .data$x, y = .data$y, colour = .data$cluster),
+      ggplot2::aes(
+        x = .data$x, y = .data$y,
+        fill = .data$fill, colour = .data$cluster
+      ),
+      shape = 21L,
       size = 4
     ) +
     ggplot2::geom_text(
@@ -181,6 +281,13 @@ plot_cluster_mst <- function(data,
         label = .data$cluster, colour = .data$cluster
       ),
       vjust = -1
+    ) +
+    ggplot2::scale_fill_gradientn(
+      colours = c(col_low, col_mid, col_mid, col_high),
+      values = colour_values,
+      limits = c(0, 1),
+      name = "Relative\nvalue",
+      labels = scales::percent
     ) +
     ggplot2::labs(x = "MDS 1", y = "MDS 2", colour = "Cluster")
 

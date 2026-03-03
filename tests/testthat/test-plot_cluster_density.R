@@ -238,3 +238,33 @@ test_that("plot_cluster_density scales parameter is passed to facet_wrap", {
   p <- plot_cluster_density(data, cluster = "cluster", n_col = 2, scales = "free")
   expect_s3_class(p, "ggplot")
 })
+
+test_that("plot_cluster_density col_clusters applies colour scale (list mode)", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
+  )
+  cols <- c(C1 = "#FF0000", C2 = "#00FF00", C3 = "#0000FF")
+  result <- plot_cluster_density(data, cluster = "cluster", col_clusters = cols)
+  for (p in result) {
+    colour_scale <- p$scales$get_scales("colour")
+    expect_false(is.null(colour_scale))
+  }
+})
+
+test_that("plot_cluster_density col_clusters applies colour scale (facet mode)", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
+  )
+  cols <- c(C1 = "#FF0000", C2 = "#00FF00", C3 = "#0000FF")
+  p <- plot_cluster_density(
+    data, cluster = "cluster", n_col = 2, col_clusters = cols
+  )
+  colour_scale <- p$scales$get_scales("colour")
+  expect_false(is.null(colour_scale))
+})

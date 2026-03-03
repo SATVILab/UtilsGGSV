@@ -2,13 +2,23 @@
 % Please edit documentation in R/plot_cluster_mst.R
 \name{plot_cluster_mst}
 \alias{plot_cluster_mst}
-\title{Plot minimum-spanning tree of clusters}
+\title{Plot minimum-spanning tree of clusters with per-variable node colouring}
 \usage{
 plot_cluster_mst(
   data,
   cluster,
   vars = NULL,
   col_clusters = NULL,
+  col_high = "#B2182B",
+  col_mid = "#F7F7F7",
+  col_low = "#2166AC",
+  white_range = c(0.4, 0.6),
+  n_col = NULL,
+  n_row = NULL,
+  label_x = 0,
+  label_y = 1,
+  hjust = -0.5,
+  vjust = 1.5,
   font_size = 14,
   thm = cowplot::theme_cowplot(font_size = font_size) + ggplot2::theme(plot.background =
     ggplot2::element_rect(fill = "white", colour = NA), panel.background =
@@ -27,9 +37,41 @@ cluster membership.}
 use as variables. If \code{NULL}, all columns except \code{cluster} are used.
 Default is \code{NULL}.}
 
-\item{col_clusters}{named character vector or \code{NULL}. Per-cluster colours.
-Names should match cluster labels. When \code{NULL} (default), the default
-ggplot2 colour scale is used.}
+\item{col_clusters}{named character vector or \code{NULL}. Per-cluster colours
+applied to node borders and text labels. Names should match cluster
+labels. When \code{NULL} (default), the default ggplot2 colour scale is used.}
+
+\item{col_high}{character. Colour for high values (100th percentile).
+Default is \code{"#B2182B"}.}
+
+\item{col_mid}{character. Colour for the middle of the value range.
+Default is \code{"#F7F7F7"}.}
+
+\item{col_low}{character. Colour for low values (0th percentile).
+Default is \code{"#2166AC"}.}
+
+\item{white_range}{numeric vector of length 2. The range of percentile
+values (on a 0-1 scale) that map to \code{col_mid}. Default is \code{c(0.4, 0.6)}.}
+
+\item{n_col}{integer or \code{NULL}. Number of columns passed to
+\code{cowplot::plot_grid}. If supplied (or if \code{n_row} is supplied) a single
+combined figure is returned instead of a list. Default is \code{NULL}.}
+
+\item{n_row}{integer or \code{NULL}. Number of rows passed to
+\code{cowplot::plot_grid}. If supplied (or if \code{n_col} is supplied) a single
+combined figure is returned instead of a list. Default is \code{NULL}.}
+
+\item{label_x}{numeric. x position of the plot labels within each panel
+in grid mode. Passed to \code{cowplot::plot_grid}. Default is \code{0}.}
+
+\item{label_y}{numeric. y position of the plot labels within each panel
+in grid mode. Passed to \code{cowplot::plot_grid}. Default is \code{1}.}
+
+\item{hjust}{numeric. Horizontal justification of the plot labels in grid
+mode. Passed to \code{cowplot::plot_grid}. Default is \code{-0.5}.}
+
+\item{vjust}{numeric. Vertical justification of the plot labels in grid
+mode. Passed to \code{cowplot::plot_grid}. Default is \code{1.5}.}
 
 \item{font_size}{numeric. Font size passed to \code{cowplot::theme_cowplot}.
 Default is \code{14}.}
@@ -42,14 +84,26 @@ background. Set to \code{NULL} to apply no theme adjustment.}
 \code{cowplot::background_grid(major = "xy")}. Set to \code{NULL} for no grid.}
 }
 \value{
-A ggplot object.
+A named list of ggplot2 objects (one per variable) when neither
+\code{n_col} nor \code{n_row} is specified. A \code{cowplot::plot_grid} figure when
+\code{n_col} or \code{n_row} is specified.
 }
 \description{
 Computes the minimum-spanning tree (MST) over clusters, where the distance
 between two clusters is the Euclidean distance between their median variable
-profiles. The clusters are positioned in two dimensions using classical
-multidimensional scaling (MDS) of the distance matrix. MST edges are drawn
-as line segments and each cluster is shown as a labelled point.
+profiles. The MST layout is determined once using classical multidimensional
+scaling (MDS) of the distance matrix and is shared across all per-variable
+plots.
+
+For each variable, a separate plot is produced in which each cluster node
+is \strong{filled} according to the ECDF-standardised percentile of that
+cluster's median value for the variable — the same scaling used by
+\code{\link{plot_cluster_heatmap}}. The node border and label colour encode cluster
+identity and can be overridden via \code{col_clusters}.
+
+By default the function returns a \strong{named list of ggplot2 objects}, one
+per variable. If \code{n_col} or \code{n_row} is supplied the plots are combined into
+a single figure using \code{cowplot::plot_grid}, with variable names as labels.
 }
 \examples{
 set.seed(1)
@@ -58,5 +112,9 @@ data <- data.frame(
   var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
   var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
 )
-plot_cluster_mst(data, cluster = "cluster")
+# Default: returns a named list of plots, one per variable
+plot_list <- plot_cluster_mst(data, cluster = "cluster")
+
+# Combined grid with 2 columns
+plot_cluster_mst(data, cluster = "cluster", n_col = 2)
 }
