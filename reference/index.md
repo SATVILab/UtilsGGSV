@@ -45,3 +45,10 @@ Functions for visualising cluster characteristics
   : Plot heat map of ECDF-standardised variable values per cluster
 - [`plot_clust_density()`](https://satvilab.github.io/UtilsGGSV/reference/plot_clust_density.md)
   : Plot density of variable values with per-cluster median lines
+
+## Cluster Analysis
+
+Functions for analysing and merging clusters
+
+- [`cluster_merge_bin()`](https://satvilab.github.io/UtilsGGSV/reference/cluster_merge_bin.md)
+  : Merge clusters based on variable bin thresholds
