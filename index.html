@@ -270,10 +270,13 @@
 <p><img src="reference/figures/README-add_text_column_trans-1.png" alt="" width="100%"></p>
 </div>
 <div class="section level3">
-<h3 id="heat-maps-with-plot_heatmap_cluster">Heat Maps with <code>plot_heatmap_cluster</code>
-<a class="anchor" aria-label="anchor" href="#heat-maps-with-plot_heatmap_cluster"></a>
+<h3 id="cluster-specific-plots">Cluster-Specific Plots<a class="anchor" aria-label="anchor" href="#cluster-specific-plots"></a>
 </h3>
-<p>The function <code>plot_heatmap_cluster</code> creates a heat map where each tile shows the percentile of the median value of a variable for a cluster. This percentile is compared against the ECDF of that variable across all observations not in the cluster. Clusters and variables are ordered by hierarchical clustering.</p>
+<div class="section level4">
+<h4 id="heat-maps-with-plot_cluster_heatmap">Heat Maps with <code>plot_cluster_heatmap</code>
+<a class="anchor" aria-label="anchor" href="#heat-maps-with-plot_cluster_heatmap"></a>
+</h4>
+<p>The function <code>plot_cluster_heatmap</code> creates a heat map where each tile shows the percentile of the median value of a variable for a cluster. This percentile is compared against the ECDF of that variable across all observations not in the cluster. Clusters and variables are ordered by hierarchical clustering.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">cluster_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
@@ -281,15 +284,35 @@
 <span>  var1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fl">2</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fl">0</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">20</span>, <span class="op">-</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  var2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">20</span>, <span class="op">-</span><span class="fl">1</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fl">1</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fl">0</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
-<span><span class="fu">plot_heatmap_cluster</span><span class="op">(</span><span class="va">cluster_data</span>, cluster <span class="op">=</span> <span class="st">"cluster"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-plot_heatmap_cluster-1.png" alt="" width="100%"></p>
+<span><span class="fu"><a href="reference/plot_cluster_heatmap.html">plot_cluster_heatmap</a></span><span class="op">(</span><span class="va">cluster_data</span>, cluster <span class="op">=</span> <span class="st">"cluster"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="reference/figures/README-plot_cluster_heatmap-1.png" alt="" width="100%"></p>
+</div>
+<div class="section level4">
+<h4 id="density-plots-with-plot_cluster_density">Density Plots with <code>plot_cluster_density</code>
+<a class="anchor" aria-label="anchor" href="#density-plots-with-plot_cluster_density"></a>
+</h4>
+<p>The function <code>plot_cluster_density</code> plots, for each variable, the overall density of values across all observations and overlays a vertical line for each cluster at that cluster’s median value. Each cluster is given a distinct colour, making it easy to see how each cluster relates to the overall distribution.</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
+<span><span class="va">cluster_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  cluster <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"C"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">)</span>, each <span class="op">=</span> <span class="fl">20</span><span class="op">)</span>,</span>
+<span>  var1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fl">2</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fl">0</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">20</span>, <span class="op">-</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  var2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">20</span>, <span class="op">-</span><span class="fl">1</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fl">1</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fl">0</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/plot_cluster_density.html">plot_cluster_density</a></span><span class="op">(</span><span class="va">cluster_data</span>, cluster <span class="op">=</span> <span class="st">"cluster"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; $var1</span></span></code></pre></div>
+<p><img src="reference/figures/README-plot_cluster_density-1.png" alt="" width="100%"></p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a><span class="co">#&gt; $var2</span></span></code></pre></div>
+<p><img src="reference/figures/README-plot_cluster_density-2.png" alt="" width="100%"></p>
+</div>
 </div>
 <div class="section level3">
 <h3 id="transformations-with-get_trans">Transformations with <code>get_trans</code>
 <a class="anchor" aria-label="anchor" href="#transformations-with-get_trans"></a>
 </h3>
 <p>The utility function <code>get_trans</code> returns <code>trans</code> objects (as implemented by the <code>scales</code> package) when given characters. It also adds various higher roots (such as cubic and quartic) and adds the <code>asinh</code> transformation.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/get_trans.html">get_trans</a></span><span class="op">(</span><span class="st">"log10"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Transformer: log-10 [1e-100, Inf]</span></span></code></pre></div>
 </div>

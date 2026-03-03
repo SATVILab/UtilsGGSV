@@ -257,9 +257,11 @@ add_text_column(
 
 ![](reference/figures/README-add_text_column_trans-1.png)
 
-### Heat Maps with `plot_heatmap_cluster`
+### Cluster-Specific Plots
 
-The function `plot_heatmap_cluster` creates a heat map where each tile
+#### Heat Maps with `plot_cluster_heatmap`
+
+The function `plot_cluster_heatmap` creates a heat map where each tile
 shows the percentile of the median value of a variable for a cluster.
 This percentile is compared against the ECDF of that variable across all
 observations not in the cluster. Clusters and variables are ordered by
@@ -272,10 +274,38 @@ cluster_data <- data.frame(
   var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
   var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
 )
-plot_heatmap_cluster(cluster_data, cluster = "cluster")
+plot_cluster_heatmap(cluster_data, cluster = "cluster")
 ```
 
-![](reference/figures/README-plot_heatmap_cluster-1.png)
+![](reference/figures/README-plot_cluster_heatmap-1.png)
+
+#### Density Plots with `plot_cluster_density`
+
+The function `plot_cluster_density` plots, for each variable, the
+overall density of values across all observations and overlays a
+vertical line for each cluster at that cluster’s median value. Each
+cluster is given a distinct colour, making it easy to see how each
+cluster relates to the overall distribution.
+
+``` r
+set.seed(1)
+cluster_data <- data.frame(
+  cluster = rep(paste0("C", 1:3), each = 20),
+  var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+  var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
+)
+plot_cluster_density(cluster_data, cluster = "cluster")
+#> $var1
+```
+
+![](reference/figures/README-plot_cluster_density-1.png)
+
+``` R
+#> 
+#> $var2
+```
+
+![](reference/figures/README-plot_cluster_density-2.png)
 
 ### Transformations with `get_trans`
 
