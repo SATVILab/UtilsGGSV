@@ -45,7 +45,8 @@ reference:
   - save_plot
   - ggsave2
 
-- title: Heat Maps
-  desc: Functions for plotting heat maps
+- title: Cluster Plots
+  desc: Functions for visualising cluster characteristics
   contents:
-  - plot_heatmap_cluster
+  - plot_cluster_heatmap
+  - plot_clust_density

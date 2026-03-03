@@ -16,6 +16,25 @@ R package providing utility functions for `ggplot2` plotting.
 - `tests/testthat/` - Tests (use `test-{function}.R` naming)
 - `vignettes/` - Package vignettes
 
+## Key Functions
+
+### Cluster-Specific Plots
+
+- `plot_cluster_heatmap` - Heat map of ECDF-standardised variable values per
+  cluster. Tiles show the percentile of a cluster's median value compared
+  against observations outside the cluster.
+- `plot_clust_density` - Density plot for each variable with per-cluster median
+  lines. Plots the overall density and overlays a coloured vertical line for
+  each cluster at its median.
+
+### Other Plotting Utilities
+
+- `ggcorr` - Scatter plots with correlation coefficients overlaid
+- `axis_limits` - Force equal axis limits or expand axis coordinates
+- `add_text_column` - Add a column of text annotations to a plot
+- `save_plot` / `ggsave2` - Save plots to disk
+- `get_trans` - Return `scales` transformation objects by name
+
 ## Code Quality
 
 - Make minimal, surgical changes to fix issues
