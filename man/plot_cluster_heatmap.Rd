@@ -70,8 +70,7 @@ the colours are evenly spaced from 0 to 1.}
 
 \item{white_range}{numeric vector of length 2. The range of positions (on a
 0-1 scale) over which the middle colour is stretched. Only used when \code{col}
-has exactly three colours, \code{scale_method = "ecdf"}, and \code{col_positions =
-"auto"}. Default is \code{c(0.4, 0.6)}.}
+has exactly three colours, \code{scale_method = "ecdf"}, and \code{col_positions = "auto"}. Default is \code{c(0.4, 0.6)}.}
 
 \item{font_size}{numeric. Font size passed to \code{cowplot::theme_cowplot}.
 Default is \code{14}.}
