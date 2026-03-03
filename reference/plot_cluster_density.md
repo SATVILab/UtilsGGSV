@@ -16,6 +16,7 @@ plot_cluster_density(
   data,
   cluster,
   vars = NULL,
+  col_clusters = NULL,
   n_col = NULL,
   n_row = NULL,
   scales = "free_y",
@@ -46,6 +47,12 @@ plot_cluster_density(
   character vector or `NULL`. Names of columns in `data` to use as
   variables. If `NULL`, all columns except `cluster` are used. Default
   is `NULL`.
+
+- col_clusters:
+
+  named character vector or `NULL`. Per-cluster colours. Names should
+  match cluster labels. When `NULL` (default), the default ggplot2
+  colour scale is used.
 
 - n_col:
 

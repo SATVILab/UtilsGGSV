@@ -276,6 +276,40 @@ plot_cluster_density(cluster_data, cluster = "cluster")
 
 ![](UtilsGGSV_files/figure-html/plot-cluster-density-2.png)
 
+### Minimum-Spanning Tree with `plot_cluster_mst`
+
+The `plot_cluster_mst` function computes the minimum-spanning tree (MST)
+over clusters, using Euclidean distance between cluster median profiles.
+Clusters are positioned in two dimensions via classical multidimensional
+scaling (MDS). For each variable, a separate plot shows each cluster
+node filled by the ECDF-standardised percentile of that cluster’s median
+— the same colour scale used by `plot_cluster_heatmap`. By default a
+named list of plots is returned; supplying `n_col` or `n_row` returns a
+combined
+[`cowplot::plot_grid`](https://wilkelab.org/cowplot/reference/plot_grid.html)
+figure with variable names as labels.
+
+``` r
+set.seed(1)
+cluster_data <- data.frame(
+  cluster = rep(paste0("C", 1:3), each = 20),
+  var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+  var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
+)
+plot_list <- plot_cluster_mst(cluster_data, cluster = "cluster")
+plot_list[["var1"]]
+```
+
+![](UtilsGGSV_files/figure-html/plot-cluster-mst-1.png)
+
+Combine into a labelled grid:
+
+``` r
+plot_cluster_mst(cluster_data, cluster = "cluster", n_col = 2)
+```
+
+![](UtilsGGSV_files/figure-html/plot-cluster-mst-grid-1.png)
+
 ## Transformations with `get_trans`
 
 The `get_trans` function returns transformation objects from the

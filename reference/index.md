@@ -45,6 +45,9 @@ Functions for visualising cluster characteristics
   : Plot heat map of ECDF-standardised variable values per cluster
 - [`plot_cluster_density()`](https://satvilab.github.io/UtilsGGSV/reference/plot_cluster_density.md)
   : Plot density of variable values with per-cluster median lines
+- [`plot_cluster_mst()`](https://satvilab.github.io/UtilsGGSV/reference/plot_cluster_mst.md)
+  : Plot minimum-spanning tree of clusters with per-variable node
+  colouring
 
 ## Cluster Analysis
 

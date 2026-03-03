@@ -1,0 +1,172 @@
+# Plot minimum-spanning tree of clusters with per-variable node colouring
+
+Computes the minimum-spanning tree (MST) over clusters, where the
+distance between two clusters is the Euclidean distance between their
+median variable profiles. The MST layout is determined once using
+classical multidimensional scaling (MDS) of the distance matrix and is
+shared across all per-variable plots.
+
+For each variable, a separate plot is produced in which each cluster
+node is **filled** according to the ECDF-standardised percentile of that
+cluster's median value for the variable — the same scaling used by
+[`plot_cluster_heatmap`](https://satvilab.github.io/UtilsGGSV/reference/plot_cluster_heatmap.md).
+The node border and label colour encode cluster identity and can be
+overridden via `col_clusters`.
+
+By default the function returns a **named list of ggplot2 objects**, one
+per variable. If `n_col` or `n_row` is supplied the plots are combined
+into a single figure using
+[`cowplot::plot_grid`](https://wilkelab.org/cowplot/reference/plot_grid.html),
+with variable names as labels.
+
+## Usage
+
+``` r
+plot_cluster_mst(
+  data,
+  cluster,
+  vars = NULL,
+  col_clusters = NULL,
+  col_high = "#B2182B",
+  col_mid = "#F7F7F7",
+  col_low = "#2166AC",
+  white_range = c(0.4, 0.6),
+  n_col = NULL,
+  n_row = NULL,
+  label_x = 0,
+  label_y = 1,
+  hjust = -0.5,
+  vjust = 1.5,
+  font_size = 14,
+  thm = cowplot::theme_cowplot(font_size = font_size) + ggplot2::theme(plot.background =
+    ggplot2::element_rect(fill = "white", colour = NA), panel.background =
+    ggplot2::element_rect(fill = "white", colour = NA)),
+  grid = cowplot::background_grid(major = "xy")
+)
+```
+
+## Arguments
+
+- data:
+
+  data.frame. Rows are observations. Must contain a column identifying
+  cluster membership and columns for variable values.
+
+- cluster:
+
+  character. Name of the column in `data` that identifies cluster
+  membership.
+
+- vars:
+
+  character vector or `NULL`. Names of columns in `data` to use as
+  variables. If `NULL`, all columns except `cluster` are used. Default
+  is `NULL`.
+
+- col_clusters:
+
+  named character vector or `NULL`. Per-cluster colours applied to node
+  borders and text labels. Names should match cluster labels. When
+  `NULL` (default), the default ggplot2 colour scale is used.
+
+- col_high:
+
+  character. Colour for high values (100th percentile). Default is
+  `"#B2182B"`.
+
+- col_mid:
+
+  character. Colour for the middle of the value range. Default is
+  `"#F7F7F7"`.
+
+- col_low:
+
+  character. Colour for low values (0th percentile). Default is
+  `"#2166AC"`.
+
+- white_range:
+
+  numeric vector of length 2. The range of percentile values (on a 0-1
+  scale) that map to `col_mid`. Default is `c(0.4, 0.6)`.
+
+- n_col:
+
+  integer or `NULL`. Number of columns passed to
+  [`cowplot::plot_grid`](https://wilkelab.org/cowplot/reference/plot_grid.html).
+  If supplied (or if `n_row` is supplied) a single combined figure is
+  returned instead of a list. Default is `NULL`.
+
+- n_row:
+
+  integer or `NULL`. Number of rows passed to
+  [`cowplot::plot_grid`](https://wilkelab.org/cowplot/reference/plot_grid.html).
+  If supplied (or if `n_col` is supplied) a single combined figure is
+  returned instead of a list. Default is `NULL`.
+
+- label_x:
+
+  numeric. x position of the plot labels within each panel in grid mode.
+  Passed to
+  [`cowplot::plot_grid`](https://wilkelab.org/cowplot/reference/plot_grid.html).
+  Default is `0`.
+
+- label_y:
+
+  numeric. y position of the plot labels within each panel in grid mode.
+  Passed to
+  [`cowplot::plot_grid`](https://wilkelab.org/cowplot/reference/plot_grid.html).
+  Default is `1`.
+
+- hjust:
+
+  numeric. Horizontal justification of the plot labels in grid mode.
+  Passed to
+  [`cowplot::plot_grid`](https://wilkelab.org/cowplot/reference/plot_grid.html).
+  Default is `-0.5`.
+
+- vjust:
+
+  numeric. Vertical justification of the plot labels in grid mode.
+  Passed to
+  [`cowplot::plot_grid`](https://wilkelab.org/cowplot/reference/plot_grid.html).
+  Default is `1.5`.
+
+- font_size:
+
+  numeric. Font size passed to
+  [`cowplot::theme_cowplot`](https://wilkelab.org/cowplot/reference/theme_cowplot.html).
+  Default is `14`.
+
+- thm:
+
+  ggplot2 theme object or `NULL`. Default is
+  `cowplot::theme_cowplot(font_size = font_size)` with a white plot
+  background. Set to `NULL` to apply no theme adjustment.
+
+- grid:
+
+  ggplot2 panel grid or `NULL`. Default is
+  `cowplot::background_grid(major = "xy")`. Set to `NULL` for no grid.
+
+## Value
+
+A named list of ggplot2 objects (one per variable) when neither `n_col`
+nor `n_row` is specified. A
+[`cowplot::plot_grid`](https://wilkelab.org/cowplot/reference/plot_grid.html)
+figure when `n_col` or `n_row` is specified.
+
+## Examples
+
+``` r
+set.seed(1)
+data <- data.frame(
+  cluster = rep(paste0("C", 1:3), each = 20),
+  var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+  var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
+)
+# Default: returns a named list of plots, one per variable
+plot_list <- plot_cluster_mst(data, cluster = "cluster")
+
+# Combined grid with 2 columns
+plot_cluster_mst(data, cluster = "cluster", n_col = 2)
+```
