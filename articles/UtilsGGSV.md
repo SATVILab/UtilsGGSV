@@ -250,13 +250,13 @@ plot_cluster_heatmap(cluster_data, cluster = "cluster")
 
 ![](UtilsGGSV_files/figure-html/plot-cluster-heatmap-1.png)
 
-### Density Plots with `plot_clust_density`
+### Density Plots with `plot_cluster_density`
 
-The `plot_clust_density` function plots, for each variable, the overall
-density of values across all observations and overlays a vertical line
-for each cluster at that cluster’s median value. Each cluster is given a
-distinct colour, making it easy to see how each cluster relates to the
-overall distribution.
+The `plot_cluster_density` function plots, for each variable, the
+overall density of values across all observations and overlays a
+vertical line for each cluster at that cluster’s median value. Each
+cluster is given a distinct colour, making it easy to see how each
+cluster relates to the overall distribution.
 
 ``` r
 set.seed(1)
@@ -265,12 +265,16 @@ cluster_data <- data.frame(
   var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
   var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
 )
-plot_clust_density(cluster_data, cluster = "cluster")
-#> Warning: Removed 6 rows containing missing values or values outside the scale range
-#> (`geom_vline()`).
+plot_cluster_density(cluster_data, cluster = "cluster")
+#> $var1
 ```
 
-![](UtilsGGSV_files/figure-html/plot-clust-density-1.png)
+![](UtilsGGSV_files/figure-html/plot-cluster-density-1.png)
+
+    #> 
+    #> $var2
+
+![](UtilsGGSV_files/figure-html/plot-cluster-density-2.png)
 
 ## Transformations with `get_trans`
 

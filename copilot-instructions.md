@@ -23,9 +23,9 @@ R package providing utility functions for `ggplot2` plotting.
 - `plot_cluster_heatmap` - Heat map of ECDF-standardised variable values
   per cluster. Tiles show the percentile of a cluster’s median value
   compared against observations outside the cluster.
-- `plot_clust_density` - Density plot for each variable with per-cluster
-  median lines. Plots the overall density and overlays a coloured
-  vertical line for each cluster at its median.
+- `plot_cluster_density` - Density plot for each variable with
+  per-cluster median lines. Plots the overall density and overlays a
+  coloured vertical line for each cluster at its median.
 
 ### Other Plotting Utilities
 

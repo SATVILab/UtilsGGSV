@@ -334,7 +334,7 @@ Functions for visualising cluster characteristics
 
 - [`plot_cluster_heatmap()`](https://satvilab.github.io/UtilsGGSV/reference/plot_cluster_heatmap.md)
   : Plot heat map of ECDF-standardised variable values per cluster
-- [`plot_clust_density()`](https://satvilab.github.io/UtilsGGSV/reference/plot_clust_density.md)
+- [`plot_cluster_density()`](https://satvilab.github.io/UtilsGGSV/reference/plot_cluster_density.md)
   : Plot density of variable values with per-cluster median lines
 
 ## Cluster Analysis
