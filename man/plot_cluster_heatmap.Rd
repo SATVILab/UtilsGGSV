@@ -2,15 +2,15 @@
 % Please edit documentation in R/plot_cluster_heatmap.R
 \name{plot_cluster_heatmap}
 \alias{plot_cluster_heatmap}
-\title{Plot heat map of ECDF-standardised variable values per cluster}
+\title{Plot heat map of scaled variable values per cluster}
 \usage{
 plot_cluster_heatmap(
   data,
   cluster,
   vars = NULL,
-  col_high = "#B2182B",
-  col_mid = "#F7F7F7",
-  col_low = "#2166AC",
+  scale_method = "ecdf",
+  col = c("#2166AC", "#F7F7F7", "#B2182B"),
+  col_positions = "auto",
   white_range = c(0.4, 0.6),
   font_size = 14,
   thm = cowplot::theme_cowplot(font_size = font_size) + ggplot2::theme(plot.background =
@@ -34,17 +34,44 @@ cluster membership.}
 use as variables. If \code{NULL}, all columns except \code{cluster} are used.
 Default is \code{NULL}.}
 
-\item{col_high}{character. Colour for high values (100th percentile).
-Default is \code{"#B2182B"}.}
+\item{scale_method}{character. Method used to scale variable values for
+colouring cells. One of \code{"ecdf"} (default), \code{"zscore"}, \code{"raw"},
+\code{"minmax"}, or \code{"minmax_var"}.
+\itemize{
+\item \code{"ecdf"}: Each cell shows the percentile of the cluster's median value
+compared to all observations outside the cluster (empirical CDF).
+Fill values are in [0, 1] and the legend uses percent labels.
+\item \code{"zscore"}: Each cell shows the z-score of the cluster's median
+relative to all observations of that variable
+(\code{(median - mean) / sd}). Fill values are unbounded.
+\item \code{"raw"}: Each cell shows the raw median value. Fill values are
+unbounded.
+\item \code{"minmax"}: Each cell shows the cluster median scaled to [0, 1]
+using the global minimum and maximum across all observations of all
+variables. Fill values are in [0, 1] and the legend uses percent
+labels.
+\item \code{"minmax_var"}: Each cell shows the cluster median scaled to [0, 1]
+using the minimum and maximum of all observations within each variable
+separately. Fill values are in [0, 1] and the legend uses percent
+labels.
+}}
 
-\item{col_mid}{character. Colour for the middle of the value range.
-Default is \code{"#F7F7F7"}.}
+\item{col}{character vector. Colours used to fill tiles, ordered from low
+to high values. Default is \code{c("#2166AC", "#F7F7F7", "#B2182B")} (blue,
+white, red). Any number of colours (>= 2) is accepted.}
 
-\item{col_low}{character. Colour for low values (0th percentile).
-Default is \code{"#2166AC"}.}
+\item{col_positions}{numeric vector or \code{"auto"}. Positions (in [0, 1]) at
+which each colour in \code{col} is placed on the fill scale. Must be the same
+length as \code{col}, sorted in ascending order, with the first value \code{0} and
+the last value \code{1}. When \code{"auto"} (default) and \code{col} has exactly three
+colours and \code{scale_method = "ecdf"}, the middle colour is stretched over
+\code{white_range} (the current default behaviour). In all other \code{"auto"} cases
+the colours are evenly spaced from 0 to 1.}
 
-\item{white_range}{numeric vector of length 2. The range of percentile
-values (on a 0-1 scale) that map to \code{col_mid}. Default is \code{c(0.4, 0.6)}.}
+\item{white_range}{numeric vector of length 2. The range of positions (on a
+0-1 scale) over which the middle colour is stretched. Only used when \code{col}
+has exactly three colours, \code{scale_method = "ecdf"}, and \code{col_positions =
+"auto"}. Default is \code{c(0.4, 0.6)}.}
 
 \item{font_size}{numeric. Font size passed to \code{cowplot::theme_cowplot}.
 Default is \code{14}.}
@@ -76,11 +103,13 @@ overlaid text labels. Default is \code{3}.}
 A ggplot object.
 }
 \description{
-Creates a heat map where each tile shows the percentile of the median
-value of a variable for a cluster, compared against the empirical cumulative
-distribution function (ECDF) of that variable across all observations not
-belonging to the cluster. Clusters and variables are ordered along the axes
-via hierarchical clustering.
+Creates a heat map where each tile shows a scaled summary of a variable for
+a cluster. The scaling method is controlled by the \code{scale_method} parameter.
+By default (\code{scale_method = "ecdf"}), each tile shows the percentile of the
+cluster's median value compared against the empirical cumulative distribution
+function (ECDF) of that variable across all observations not belonging to the
+cluster. Clusters and variables are ordered along the axes via hierarchical
+clustering.
 }
 \examples{
 set.seed(1)

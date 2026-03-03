@@ -108,9 +108,7 @@ test_that("plot_cluster_heatmap custom colours are applied to the scale", {
   p <- plot_cluster_heatmap(
     data,
     cluster = "cluster",
-    col_high = "#FF0000",
-    col_mid = "#FFFFFF",
-    col_low = "#0000FF"
+    col = c("#0000FF", "#FFFFFF", "#FF0000")
   )
   expect_s3_class(p, "ggplot")
   fill_scale <- p$scales$get_scales("fill")
@@ -313,4 +311,51 @@ test_that("plot_cluster_heatmap scale_method raw legend name is Median", {
   p <- plot_cluster_heatmap(data, cluster = "cluster", scale_method = "raw")
   fill_scale <- p$scales$get_scales("fill")
   expect_equal(fill_scale$name, "Median")
+})
+
+test_that("plot_cluster_heatmap five colours with auto positions returns ggplot", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
+  )
+  five_cols <- c("#2166AC", "#92C5DE", "#F7F7F7", "#F4A582", "#B2182B")
+  p <- plot_cluster_heatmap(data, cluster = "cluster", col = five_cols)
+  expect_s3_class(p, "ggplot")
+  fill_scale <- p$scales$get_scales("fill")
+  expect_equal(fill_scale$palette(0), "#2166AC")
+  expect_equal(fill_scale$palette(1), "#B2182B")
+})
+
+test_that("plot_cluster_heatmap custom col_positions are used", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
+  )
+  p <- plot_cluster_heatmap(
+    data,
+    cluster = "cluster",
+    col = c("#2166AC", "#F7F7F7", "#B2182B"),
+    col_positions = c(0, 0.2, 1)
+  )
+  expect_s3_class(p, "ggplot")
+  fill_scale <- p$scales$get_scales("fill")
+  expect_equal(fill_scale$palette(0), "#2166AC")
+  expect_equal(fill_scale$palette(1), "#B2182B")
+})
+
+test_that("plot_cluster_heatmap five colours with auto positions evenly spaces colours", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
+  )
+  five_cols <- c("#2166AC", "#92C5DE", "#F7F7F7", "#F4A582", "#B2182B")
+  p <- plot_cluster_heatmap(data, cluster = "cluster", col = five_cols)
+  fill_scale <- p$scales$get_scales("fill")
+  expect_equal(fill_scale$palette(0.5), "#F7F7F7")
 })
