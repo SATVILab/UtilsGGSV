@@ -18,6 +18,9 @@
 #' @param vars character vector or `NULL`. Names of columns in `data` to
 #'   use as variables. If `NULL`, all columns except `cluster` are used.
 #'   Default is `NULL`.
+#' @param col_clusters named character vector or `NULL`. Per-cluster colours.
+#'   Names should match cluster labels. When `NULL` (default), the default
+#'   ggplot2 colour scale is used.
 #' @param n_col integer or `NULL`. Number of columns passed to
 #'   `ggplot2::facet_wrap`. If supplied (or if `n_row` is supplied) a single
 #'   faceted plot is returned instead of a list. Default is `NULL`.
@@ -68,6 +71,7 @@
 plot_cluster_density <- function(data,
                                  cluster,
                                  vars = NULL,
+                                 col_clusters = NULL,
                                  n_col = NULL,
                                  n_row = NULL,
                                  scales = "free_y",
@@ -155,6 +159,9 @@ plot_cluster_density <- function(data,
           if (!is.null(ec)) p <- p + ggplot2::expand_limits(x = ec)
         }
 
+        if (!is.null(col_clusters)) {
+          p <- p + ggplot2::scale_colour_manual(values = col_clusters)
+        }
         if (!is.null(thm)) p <- p + thm
         if (!is.null(grid)) p <- p + grid
 
@@ -198,6 +205,9 @@ plot_cluster_density <- function(data,
     p <- p + ggplot2::expand_limits(x = expand_coord)
   }
 
+  if (!is.null(col_clusters)) {
+    p <- p + ggplot2::scale_colour_manual(values = col_clusters)
+  }
   if (!is.null(thm)) p <- p + thm
   if (!is.null(grid)) p <- p + grid
 
