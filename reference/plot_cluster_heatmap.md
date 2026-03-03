@@ -1,7 +1,9 @@
-# Plot heat map of ECDF-standardised variable values per cluster
+# Plot heat map of scaled variable values per cluster
 
-Creates a heat map where each tile shows the percentile of the median
-value of a variable for a cluster, compared against the empirical
+Creates a heat map where each tile shows a scaled summary of a variable
+for a cluster. The scaling method is controlled by the `scale_method`
+parameter. By default (`scale_method = "ecdf"`), each tile shows the
+percentile of the cluster's median value compared against the empirical
 cumulative distribution function (ECDF) of that variable across all
 observations not belonging to the cluster. Clusters and variables are
 ordered along the axes via hierarchical clustering.
@@ -13,9 +15,9 @@ plot_cluster_heatmap(
   data,
   cluster,
   vars = NULL,
-  col_high = "#B2182B",
-  col_mid = "#F7F7F7",
-  col_low = "#2166AC",
+  scale_method = "ecdf",
+  col = c("#2166AC", "#F7F7F7", "#B2182B"),
+  col_positions = "auto",
   white_range = c(0.4, 0.6),
   font_size = 14,
   thm = cowplot::theme_cowplot(font_size = font_size) + ggplot2::theme(plot.background =
@@ -47,25 +49,56 @@ plot_cluster_heatmap(
   variables. If `NULL`, all columns except `cluster` are used. Default
   is `NULL`.
 
-- col_high:
+- scale_method:
 
-  character. Colour for high values (100th percentile). Default is
-  `"#B2182B"`.
+  character. Method used to scale variable values for colouring cells.
+  One of `"ecdf"` (default), `"zscore"`, `"raw"`, `"minmax"`, or
+  `"minmax_var"`.
 
-- col_mid:
+  - `"ecdf"`: Each cell shows the percentile of the cluster's median
+    value compared to all observations outside the cluster (empirical
+    CDF). Fill values are in \[0, 1\] and the legend uses percent
+    labels.
 
-  character. Colour for the middle of the value range. Default is
-  `"#F7F7F7"`.
+  - `"zscore"`: Each cell shows the z-score of the cluster's median
+    relative to all observations of that variable
+    (`(median - mean) / sd`). Fill values are unbounded.
 
-- col_low:
+  - `"raw"`: Each cell shows the raw median value. Fill values are
+    unbounded.
 
-  character. Colour for low values (0th percentile). Default is
-  `"#2166AC"`.
+  - `"minmax"`: Each cell shows the cluster median scaled to \[0, 1\]
+    using the global minimum and maximum across all observations of all
+    variables. Fill values are in \[0, 1\] and the legend uses percent
+    labels.
+
+  - `"minmax_var"`: Each cell shows the cluster median scaled to \[0,
+    1\] using the minimum and maximum of all observations within each
+    variable separately. Fill values are in \[0, 1\] and the legend uses
+    percent labels.
+
+- col:
+
+  character vector. Colours used to fill tiles, ordered from low to high
+  values. Default is `c("#2166AC", "#F7F7F7", "#B2182B")` (blue, white,
+  red). Any number of colours (\>= 2) is accepted.
+
+- col_positions:
+
+  numeric vector or `"auto"`. Positions (in \[0, 1\]) at which each
+  colour in `col` is placed on the fill scale. Must be the same length
+  as `col`, sorted in ascending order, with the first value `0` and the
+  last value `1`. When `"auto"` (default) and `col` has exactly three
+  colours and `scale_method = "ecdf"`, the middle colour is stretched
+  over `white_range` (the current default behaviour). In all other
+  `"auto"` cases the colours are evenly spaced from 0 to 1.
 
 - white_range:
 
-  numeric vector of length 2. The range of percentile values (on a 0-1
-  scale) that map to `col_mid`. Default is `c(0.4, 0.6)`.
+  numeric vector of length 2. The range of positions (on a 0-1 scale)
+  over which the middle colour is stretched. Only used when `col` has
+  exactly three colours, `scale_method = "ecdf"`, and
+  `col_positions = "auto"`. Default is `c(0.4, 0.6)`.
 
 - font_size:
 
