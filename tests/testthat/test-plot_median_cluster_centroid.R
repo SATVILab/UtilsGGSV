@@ -21,10 +21,11 @@ test_that("plot_median_cluster_centroid creates ggplot with raw method", {
     var3 = c(rnorm(20, 1), rnorm(20, -1), rnorm(20, 0))
   )
 
-  result <- plot_median_cluster_centroid(
+  result <- plot_cluster_scatter(
     data,
     cluster = "cluster",
-    method = "raw"
+    dim_red = "none",
+    vars = c("var1", "var2")
   )
 
   expect_s3_class(result, "ggplot")
@@ -75,8 +76,8 @@ test_that("plot_median_cluster_centroid errors with insufficient variables for P
   )
 
   expect_error(
-    plot_median_cluster_centroid(data, cluster = "cluster", method = "pca"),
-    "requires at least 2 variables"
+    plot_cluster_scatter(data, cluster = "cluster", dim_red = "pca", vars = "var1"),
+    "requires at least two variables"
   )
 })
 
@@ -88,8 +89,8 @@ test_that("plot_median_cluster_centroid errors with insufficient variables for r
   )
 
   expect_error(
-    plot_median_cluster_centroid(data, cluster = "cluster", method = "raw"),
-    "requires at least 2 variables"
+    plot_cluster_scatter(data, cluster = "cluster", dim_red = "none", vars = "var1"),
+    "requires at least two variables"
   )
 })
 
@@ -169,6 +170,43 @@ test_that("plot_median_cluster_centroid works with many clusters", {
   )
 
   result <- plot_median_cluster_centroid(data, cluster = "cluster")
+
+  expect_s3_class(result, "ggplot")
+})
+
+test_that("plot_cluster_scatter works with the new API and point_col_var", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0)),
+    score = runif(60)
+  )
+
+  result <- plot_cluster_scatter(
+    data,
+    cluster = "cluster",
+    point_col_var = "cluster",
+    dim_red = "none",
+    vars = c("var1", "var2"),
+    point_alpha = 0.5
+  )
+
+  expect_s3_class(result, "ggplot")
+})
+
+test_that("plot_cluster_scatter with tsne works when perplexity is reduced", {
+  skip_if_not_installed("Rtsne")
+
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0)),
+    var3 = c(rnorm(20, 1), rnorm(20, -1), rnorm(20, 0))
+  )
+
+  result <- plot_cluster_scatter(data, cluster = "cluster", dim_red = "tsne")
 
   expect_s3_class(result, "ggplot")
 })

@@ -1,7 +1,7 @@
 Package: UtilsGGSV
 Type: Package
 Title: Utility functions for ggplot2
-Version: 0.6.0
+Version: 0.6.1
 Author: Miguel Rodo
 Maintainer: Miguel Rodo <rdxmig002@myuct.ac.za>
 Description: Provides utility functions for working with `ggplot2` objects.
@@ -14,12 +14,13 @@ BugReports: https://github.com/SATVILab/UtilsGGSV/issues
 Suggests: 
     covr,
     DescTools,
-    ggrepel,
     knitr,
     remotes,
     rmarkdown,
     testthat (>= 3.0.0),
-    withr
+    withr,
+    Rtsne,
+    umap
 Config/testthat/edition: 3
 Imports: 
     rlang,
@@ -30,6 +31,7 @@ Imports:
     purrr,
     dplyr,
     tibble,
-    igraph
+    igraph,
+    ggrepel
 Roxygen: list(markdown = TRUE)
 VignetteBuilder: knitr

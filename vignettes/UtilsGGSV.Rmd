@@ -26,6 +26,26 @@ library(ggplot2)
 theme_set(cowplot::theme_cowplot())
 ```
 
+## Scatter Plot with Clusters using `plot_cluster_scatter`
+
+The `plot_cluster_scatter` function creates an overlayed cluster scatter plot with point colouring and cluster centroid labels. It supports `dim_red = "none"`, `"pca"`, `"tsne"`, and `"umap"`.
+
+```{r plot-cluster-scatter}
+set.seed(42)
+cluster_data <- data.frame(
+  cluster = rep(c("A", "B", "C"), each = 15),
+  x = rnorm(45),
+  y = rnorm(45, mean = rep(c(-1, 0, 1), each = 15))
+)
+plot_cluster_scatter(
+  cluster_data,
+  cluster = "cluster",
+  dim_red = "none",
+  vars = c("x", "y"),
+  point_col_var = "cluster"
+)
+```
+
 ## Correlation Plots with `ggcorr`
  
 The `ggcorr` function creates scatterplots with correlation coefficients overlaid. This is the primary function of the package and is useful for visualizing relationships between groups of measurements.

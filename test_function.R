@@ -10,7 +10,7 @@ library(tibble)
 library(purrr)
 
 # Source the function
-source("R/plot_median_cluster_centroid.R")
+source("R/plot_cluster_scatter.R")
 
 # Create test data
 set.seed(1)
@@ -23,7 +23,7 @@ test_data <- data.frame(
 
 cat("Test 1: PCA method (default)\n")
 tryCatch({
-  p1 <- plot_median_cluster_centroid(test_data, cluster = "cluster")
+  p1 <- plot_cluster_scatter(test_data, cluster = "cluster")
   cat("✓ PCA plot created successfully\n")
   class(p1)
 }, error = function(e) {
@@ -32,7 +32,7 @@ tryCatch({
 
 cat("\nTest 2: Raw method\n")
 tryCatch({
-  p2 <- plot_median_cluster_centroid(test_data, cluster = "cluster", method = "raw")
+  p2 <- plot_cluster_scatter(test_data, cluster = "cluster", dim_red = "none")
   cat("✓ Raw plot created successfully\n")
 }, error = function(e) {
   cat("✗ Error:", e$message, "\n")
@@ -41,7 +41,7 @@ tryCatch({
 cat("\nTest 3: Custom colors\n")
 tryCatch({
   colors <- c("C1" = "red", "C2" = "blue", "C3" = "green")
-  p3 <- plot_median_cluster_centroid(test_data, cluster = "cluster", col_clusters = colors)
+  p3 <- plot_cluster_scatter(test_data, cluster = "cluster", point_col = colors)
   cat("✓ Plot with custom colors created successfully\n")
 }, error = function(e) {
   cat("✗ Error:", e$message, "\n")
@@ -49,7 +49,7 @@ tryCatch({
 
 cat("\nTest 4: Subset of variables\n")
 tryCatch({
-  p4 <- plot_median_cluster_centroid(test_data, cluster = "cluster", vars = c("var1", "var2"))
+  p4 <- plot_cluster_scatter(test_data, cluster = "cluster", vars = c("var1", "var2"))
   cat("✓ Plot with subset of variables created successfully\n")
 }, error = function(e) {
   cat("✗ Error:", e$message, "\n")
@@ -59,7 +59,7 @@ cat("\nTest 5: Missing values\n")
 tryCatch({
   test_data_na <- test_data
   test_data_na$var2[c(5, 10, 15)] <- NA
-  p5 <- plot_median_cluster_centroid(test_data_na, cluster = "cluster")
+  p5 <- plot_cluster_scatter(test_data_na, cluster = "cluster")
   cat("✓ Plot with missing values handled successfully\n")
 }, error = function(e) {
   cat("✗ Error:", e$message, "\n")
