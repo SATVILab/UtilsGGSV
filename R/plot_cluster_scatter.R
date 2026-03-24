@@ -28,17 +28,17 @@
 #' @export
 #'
 #' @examples
-set.seed(1)
-data <- data.frame(
-  cluster = rep(paste0("C", 1:3), each = 20),
-  var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
-  var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0)),
-  var3 = c(rnorm(20, 1), rnorm(20, -1), rnorm(20, 0))
-)
-plot_cluster_scatter(data, cluster = "cluster")
-plot_cluster_scatter(data, cluster = "cluster", dim_red = "none", vars = c("var1", "var2"))
-plot_cluster_scatter(data, cluster = "cluster", dim_red = "tsne")
-plot_cluster_scatter(data, cluster = "cluster", show_legend = FALSE) + ggplot2::theme(legend.position = "none")
+# set.seed(1)
+# data <- data.frame(
+#   cluster = rep(paste0("C", 1:3), each = 20),
+#   var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+#   var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0)),
+#   var3 = c(rnorm(20, 1), rnorm(20, -1), rnorm(20, 0))
+# )
+# plot_cluster_scatter(data, cluster = "cluster")
+# plot_cluster_scatter(data, cluster = "cluster", dim_red = "none", vars = c("var1", "var2"))
+# plot_cluster_scatter(data, cluster = "cluster", dim_red = "tsne")
+# plot_cluster_scatter(data, cluster = "cluster", show_legend = FALSE) + ggplot2::theme(legend.position = "none")
 plot_cluster_scatter <- function(.data,
                                  cluster,
                                  dim_red = NULL,
@@ -301,26 +301,6 @@ plot_cluster_scatter <- function(.data,
 
   p
 }
-
-#' @export
-plot_median_cluster_centroid <- function(.data, cluster, dim_red = NULL, method = NULL, ...) {
-  .Deprecated("plot_cluster_scatter", package = "UtilsGGSV")
-
-  if (!is.null(method)) {
-    method <- match.arg(method, c("raw", "pca", "none", "tsne", "umap"))
-    if (method == "raw") {
-      method <- "none"
-    }
-    if (!is.null(dim_red) && dim_red != method) {
-      warning("Both dim_red and method provided; using dim_red")
-    } else {
-      dim_red <- method
-    }
-  }
-
-  plot_cluster_scatter(.data = .data, cluster = cluster, dim_red = dim_red, ...)
-}
-
 
 #' @keywords internal
 #' @noRd
