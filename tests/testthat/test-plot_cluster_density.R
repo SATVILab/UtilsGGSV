@@ -283,7 +283,7 @@ test_that("plot_cluster_density density = 'cluster' returns list of ggplot objec
   for (p in result) expect_s3_class(p, "ggplot")
 })
 
-test_that("plot_cluster_density density = 'cluster' list plots have geom_line layers", {
+test_that("plot_cluster_density density = 'cluster' plot elements have geom_line layers", {
   set.seed(1)
   data <- data.frame(
     cluster = rep(paste0("C", 1:3), each = 20),
@@ -309,7 +309,7 @@ test_that("plot_cluster_density density = 'both' returns list of ggplot objects"
   for (p in result) expect_s3_class(p, "ggplot")
 })
 
-test_that("plot_cluster_density density = 'both' list plots have two geom_line layers", {
+test_that("plot_cluster_density density = 'both' plot elements have two geom_line layers", {
   set.seed(1)
   data <- data.frame(
     cluster = rep(paste0("C", 1:3), each = 20),
