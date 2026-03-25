@@ -268,3 +268,170 @@ test_that("plot_cluster_density col_clusters applies colour scale (facet mode)",
   colour_scale <- p$scales$get_scales("colour")
   expect_false(is.null(colour_scale))
 })
+
+# density and scale parameter tests
+
+test_that("plot_cluster_density density = 'cluster' returns list of ggplot objects", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
+  )
+  result <- plot_cluster_density(data, cluster = "cluster", density = "cluster")
+  expect_type(result, "list")
+  for (p in result) expect_s3_class(p, "ggplot")
+})
+
+test_that("plot_cluster_density density = 'cluster' list plots have geom_line layers", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
+  )
+  result <- plot_cluster_density(data, cluster = "cluster", density = "cluster")
+  for (p in result) {
+    expect_true(any(sapply(p$layers, function(l) inherits(l$geom, "GeomLine"))))
+    expect_false(any(sapply(p$layers, function(l) inherits(l$geom, "GeomVline"))))
+  }
+})
+
+test_that("plot_cluster_density density = 'both' returns list of ggplot objects", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
+  )
+  result <- plot_cluster_density(data, cluster = "cluster", density = "both")
+  expect_type(result, "list")
+  for (p in result) expect_s3_class(p, "ggplot")
+})
+
+test_that("plot_cluster_density density = 'both' list plots have two geom_line layers", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
+  )
+  result <- plot_cluster_density(data, cluster = "cluster", density = "both")
+  for (p in result) {
+    n_lines <- sum(sapply(p$layers, function(l) inherits(l$geom, "GeomLine")))
+    expect_equal(n_lines, 2L)
+  }
+})
+
+test_that("plot_cluster_density density = 'cluster' facet mode returns ggplot", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
+  )
+  p <- plot_cluster_density(
+    data, cluster = "cluster", density = "cluster", n_col = 2
+  )
+  expect_s3_class(p, "ggplot")
+  expect_true(any(sapply(p$layers, function(l) inherits(l$geom, "GeomLine"))))
+})
+
+test_that("plot_cluster_density density = 'both' facet mode returns ggplot", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
+  )
+  p <- plot_cluster_density(
+    data, cluster = "cluster", density = "both", n_col = 2
+  )
+  expect_s3_class(p, "ggplot")
+  n_lines <- sum(sapply(p$layers, function(l) inherits(l$geom, "GeomLine")))
+  expect_equal(n_lines, 2L)
+})
+
+test_that("plot_cluster_density scale = 'max_overall' scales cluster densities", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
+  )
+  result <- plot_cluster_density(
+    data, cluster = "cluster", density = "both", scale = "max_overall"
+  )
+  for (p in result) expect_s3_class(p, "ggplot")
+})
+
+test_that("plot_cluster_density scale = 'max_cluster' returns ggplot objects", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
+  )
+  result <- plot_cluster_density(
+    data, cluster = "cluster", density = "both", scale = "max_cluster"
+  )
+  for (p in result) expect_s3_class(p, "ggplot")
+})
+
+test_that("plot_cluster_density scale = 'free' returns ggplot objects", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
+  )
+  result <- plot_cluster_density(
+    data, cluster = "cluster", density = "both", scale = "free"
+  )
+  for (p in result) expect_s3_class(p, "ggplot")
+})
+
+test_that("plot_cluster_density density invalid value errors", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = rnorm(60)
+  )
+  expect_error(
+    plot_cluster_density(data, cluster = "cluster", density = "all")
+  )
+})
+
+test_that("plot_cluster_density scale invalid value errors", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = rnorm(60)
+  )
+  expect_error(
+    plot_cluster_density(
+      data, cluster = "cluster", density = "both", scale = "none"
+    )
+  )
+})
+
+test_that("plot_cluster_density scale = 'max_overall' max y matches overall max", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2))
+  )
+  result <- plot_cluster_density(
+    data, cluster = "cluster", density = "both", scale = "max_overall"
+  )
+  p <- result[["var1"]]
+  # The overall density line layer (no colour aes) should be the first geom_line
+  overall_layer <- p$layers[[1]]
+  overall_data <- overall_layer$data
+  max_overall <- max(overall_data$y)
+  # Cluster density layers should be scaled to match
+  cluster_layer <- p$layers[[2]]
+  cluster_data <- cluster_layer$data
+  max_cluster_scaled <- max(cluster_data$y)
+  expect_equal(max_cluster_scaled, max_overall, tolerance = 1e-10)
+})
