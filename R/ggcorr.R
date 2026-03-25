@@ -469,9 +469,10 @@ ggcorr <- function(data,
         txt = paste0(.data$txt, " ", gsub("^\\s+", "", corr_lab[[mthd]]))
       )
   } else {
-    out_tbl %>% dplyr::mutate(
-      txt = paste0(data$txt, gsub("^\\s+", "", corr_lab))
-    )
+    out_tbl <- out_tbl %>%
+      dplyr::mutate(
+        txt = paste0(.data$txt, gsub("^\\s+", "", corr_lab))
+      )
   }
   out_tbl
 }

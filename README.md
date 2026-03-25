@@ -79,7 +79,7 @@ response_tbl <- data.frame(
 )
 
 ggcorr(
-  data = response_tbl |> dplyr::filter(group %in% c("a", "b")),
+  data = response_tbl %>% dplyr::filter(group %in% c("a", "b")),
   grp = "group",
   y = "response",
   id = "pid"
@@ -92,7 +92,7 @@ We can display multiple correlation coefficients:
 
 ``` r
 ggcorr(
-  data = response_tbl |> dplyr::filter(group %in% c("a", "b")),
+  data = response_tbl %>% dplyr::filter(group %in% c("a", "b")),
   grp = "group",
   y = "response",
   id = "pid",
@@ -136,7 +136,7 @@ correlation coefficient is available:
 
 ``` r
 ggcorr(
-  data = response_tbl |> dplyr::filter(group %in% c("a", "b")),
+  data = response_tbl %>% dplyr::filter(group %in% c("a", "b")),
   grp = "group",
   y = "response",
   id = "pid",
@@ -152,7 +152,7 @@ Text in table can be moved around and resized:
 
 ``` r
 ggcorr(
-  data = response_tbl |> dplyr::filter(group %in% c("a", "b")),
+  data = response_tbl %>% dplyr::filter(group %in% c("a", "b")),
   grp = "group",
   y = "response",
   id = "pid",
@@ -175,7 +175,7 @@ visually transformed:
 
 ``` r
 ggcorr(
-  data = response_tbl |> dplyr::mutate(response = abs(response + 1)^4),
+  data = response_tbl %>% dplyr::mutate(response = abs(response + 1)^4),
   grp = "group",
   y = "response",
   id = "pid",
