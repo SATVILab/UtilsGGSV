@@ -48,6 +48,8 @@ Functions for visualising cluster characteristics
 - [`plot_cluster_mst()`](https://satvilab.github.io/UtilsGGSV/reference/plot_cluster_mst.md)
   : Plot minimum-spanning tree of clusters with per-variable node
   colouring
+- [`plot_cluster_scatter()`](https://satvilab.github.io/UtilsGGSV/reference/plot_cluster_scatter.md)
+  : Biaxial scatter plot with cluster medians overlaid
 
 ## Cluster Analysis
 

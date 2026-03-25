@@ -20,6 +20,37 @@ library(ggplot2)
 theme_set(cowplot::theme_cowplot())
 ```
 
+### Scatter Plot With Clusters with `plot_cluster_scatter`
+
+``` r
+set.seed(123)
+example_data <- data.frame(
+  cluster = rep(c("A", "B", "C"), each = 20),
+  var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+  var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0)),
+  var3 = c(rnorm(20, 1), rnorm(20, -1), rnorm(20, 0))
+)
+
+# Default: PCA projection (> 2 numeric variables)
+plot_cluster_scatter(example_data, cluster = "cluster")
+#> dim_red automatically set to 'pca' because more than two numeric variables are available.
+```
+
+![](reference/figures/README-unnamed-chunk-3-1.png)
+
+Raw variables can also be used directly:
+
+``` r
+plot_cluster_scatter(
+  example_data,
+  cluster = "cluster",
+  dim_red = "none",
+  vars = c("var1", "var2")
+)
+```
+
+![](reference/figures/README-unnamed-chunk-4-1.png)
+
 ### Correlation Plots with `ggcorr`
 
 The function `ggcorr` plots correlation coefficients:
@@ -38,20 +69,20 @@ response_tbl <- data.frame(
 )
 
 ggcorr(
-  data = response_tbl |> dplyr::filter(group %in% c("a", "b")),
+  data = response_tbl %>% dplyr::filter(group %in% c("a", "b")),
   grp = "group",
   y = "response",
   id = "pid"
 )
 ```
 
-![](reference/figures/README-unnamed-chunk-3-1.png)
+![](reference/figures/README-unnamed-chunk-5-1.png)
 
 We can display multiple correlation coefficients:
 
 ``` r
 ggcorr(
-  data = response_tbl |> dplyr::filter(group %in% c("a", "b")),
+  data = response_tbl %>% dplyr::filter(group %in% c("a", "b")),
   grp = "group",
   y = "response",
   id = "pid",
@@ -59,7 +90,7 @@ ggcorr(
 )
 ```
 
-![](reference/figures/README-unnamed-chunk-4-1.png)
+![](reference/figures/README-unnamed-chunk-6-1.png)
 
 We can compare more than two groups:
 
@@ -73,7 +104,7 @@ ggcorr(
 )
 ```
 
-![](reference/figures/README-unnamed-chunk-5-1.png)
+![](reference/figures/README-unnamed-chunk-7-1.png)
 
 We can compare more than two groups and multiple correlation
 coefficients:
@@ -88,14 +119,14 @@ ggcorr(
 )
 ```
 
-![](reference/figures/README-unnamed-chunk-6-1.png)
+![](reference/figures/README-unnamed-chunk-8-1.png)
 
 Specific functionality to make appropriate plots for the concordance
 correlation coefficient is available:
 
 ``` r
 ggcorr(
-  data = response_tbl |> dplyr::filter(group %in% c("a", "b")),
+  data = response_tbl %>% dplyr::filter(group %in% c("a", "b")),
   grp = "group",
   y = "response",
   id = "pid",
@@ -105,13 +136,13 @@ ggcorr(
 )
 ```
 
-![](reference/figures/README-unnamed-chunk-7-1.png)
+![](reference/figures/README-unnamed-chunk-9-1.png)
 
 Text in table can be moved around and resized:
 
 ``` r
 ggcorr(
-  data = response_tbl |> dplyr::filter(group %in% c("a", "b")),
+  data = response_tbl %>% dplyr::filter(group %in% c("a", "b")),
   grp = "group",
   y = "response",
   id = "pid",
@@ -127,14 +158,14 @@ ggcorr(
 )
 ```
 
-![](reference/figures/README-unnamed-chunk-8-1.png)
+![](reference/figures/README-unnamed-chunk-10-1.png)
 
 Finally, the text placement is kept consistent when the axes are
 visually transformed:
 
 ``` r
 ggcorr(
-  data = response_tbl |> dplyr::mutate(response = abs(response + 1)^4),
+  data = response_tbl %>% dplyr::mutate(response = abs(response + 1)^4),
   grp = "group",
   y = "response",
   id = "pid",
@@ -146,7 +177,7 @@ ggcorr(
 )
 ```
 
-![](reference/figures/README-unnamed-chunk-9-1.png)
+![](reference/figures/README-unnamed-chunk-11-1.png)
 
 ### Axis Limits with `axis_limits`
 

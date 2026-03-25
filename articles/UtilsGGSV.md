@@ -8,8 +8,101 @@ This vignette demonstrates the main functions of the package.
 ``` r
 library(UtilsGGSV)
 library(ggplot2)
+library(magrittr)
 theme_set(cowplot::theme_cowplot())
 ```
+
+## Scatter Plot with Clusters using `plot_cluster_scatter`
+
+The `plot_cluster_scatter` function creates a biaxial scatter plot with
+observations coloured by cluster and median centroids overlaid. It
+supports four dimensionality reduction methods via the `dim_red`
+argument: `"none"`, `"pca"`, `"tsne"`, and `"umap"`.
+
+``` r
+set.seed(42)
+cluster_data <- data.frame(
+  cluster = rep(c("A", "B", "C"), each = 20),
+  var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+  var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0)),
+  var3 = c(rnorm(20, 1), rnorm(20, -1), rnorm(20, 0))
+)
+```
+
+### Raw variables (`dim_red = "none"`)
+
+When exactly two variables are available, or when you pass
+`dim_red = "none"`, the first two selected variables are used directly
+as axes:
+
+``` r
+plot_cluster_scatter(
+  cluster_data,
+  cluster = "cluster",
+  dim_red = "none",
+  vars = c("var1", "var2")
+)
+```
+
+![](UtilsGGSV_files/figure-html/plot-cluster-scatter-none-1.png)
+
+### PCA (`dim_red = "pca"`)
+
+When more than two variables are available the default is `"pca"`, which
+projects all numeric variables onto the first two principal components:
+
+``` r
+plot_cluster_scatter(
+  cluster_data,
+  cluster = "cluster",
+  dim_red = "pca"
+)
+```
+
+![](UtilsGGSV_files/figure-html/plot-cluster-scatter-pca-1.png)
+
+### t-SNE (`dim_red = "tsne"`)
+
+t-SNE is available when the `Rtsne` package is installed:
+
+``` r
+plot_cluster_scatter(
+  cluster_data,
+  cluster = "cluster",
+  dim_red = "tsne"
+)
+```
+
+![](UtilsGGSV_files/figure-html/plot-cluster-scatter-tsne-1.png)
+
+### UMAP (`dim_red = "umap"`)
+
+UMAP is available when the `umap` package is installed:
+
+``` r
+plot_cluster_scatter(
+  cluster_data,
+  cluster = "cluster",
+  dim_red = "umap"
+)
+```
+
+![](UtilsGGSV_files/figure-html/plot-cluster-scatter-umap-1.png)
+
+### Hiding the legend
+
+When centroid labels are sufficient, set `show_legend = FALSE`:
+
+``` r
+plot_cluster_scatter(
+  cluster_data,
+  cluster = "cluster",
+  dim_red = "pca",
+  show_legend = FALSE
+)
+```
+
+![](UtilsGGSV_files/figure-html/plot-cluster-scatter-nolegend-1.png)
 
 ## Correlation Plots with `ggcorr`
 
@@ -33,7 +126,7 @@ response_tbl <- data.frame(
 )
 
 ggcorr(
-  data = response_tbl |> dplyr::filter(group %in% c("a", "b")),
+  data = response_tbl %>% dplyr::filter(group %in% c("a", "b")),
   grp = "group",
   y = "response",
   id = "pid"
@@ -48,7 +141,7 @@ You can display multiple correlation coefficients simultaneously:
 
 ``` r
 ggcorr(
-  data = response_tbl |> dplyr::filter(group %in% c("a", "b")),
+  data = response_tbl %>% dplyr::filter(group %in% c("a", "b")),
   grp = "group",
   y = "response",
   id = "pid",
@@ -82,7 +175,7 @@ agreement between two methods:
 
 ``` r
 ggcorr(
-  data = response_tbl |> dplyr::filter(group %in% c("a", "b")),
+  data = response_tbl %>% dplyr::filter(group %in% c("a", "b")),
   grp = "group",
   y = "response",
   id = "pid",
@@ -100,7 +193,7 @@ Text placement, font size, and other visual elements can be customized:
 
 ``` r
 ggcorr(
-  data = response_tbl |> dplyr::filter(group %in% c("a", "b")),
+  data = response_tbl %>% dplyr::filter(group %in% c("a", "b")),
   grp = "group",
   y = "response",
   id = "pid",
@@ -124,7 +217,7 @@ The text placement remains consistent even when axes are transformed:
 
 ``` r
 ggcorr(
-  data = response_tbl |> dplyr::mutate(response = abs(response + 1)^4),
+  data = response_tbl %>% dplyr::mutate(response = abs(response + 1)^4),
   grp = "group",
   y = "response",
   id = "pid",
