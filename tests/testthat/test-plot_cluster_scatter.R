@@ -1,0 +1,259 @@
+test_that("plot_cluster_scatter creates ggplot with default (pca) method", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0)),
+    var3 = c(rnorm(20, 1), rnorm(20, -1), rnorm(20, 0))
+  )
+
+  result <- plot_cluster_scatter(data, cluster = "cluster")
+
+  expect_s3_class(result, "ggplot")
+})
+
+test_that("plot_cluster_scatter creates ggplot with dim_red = 'none'", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0)),
+    var3 = c(rnorm(20, 1), rnorm(20, -1), rnorm(20, 0))
+  )
+
+  result <- plot_cluster_scatter(
+    data,
+    cluster = "cluster",
+    dim_red = "none",
+    vars = c("var1", "var2")
+  )
+
+  expect_s3_class(result, "ggplot")
+})
+
+test_that("plot_cluster_scatter creates ggplot with dim_red = 'pca'", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0)),
+    var3 = c(rnorm(20, 1), rnorm(20, -1), rnorm(20, 0))
+  )
+
+  result <- plot_cluster_scatter(data, cluster = "cluster", dim_red = "pca")
+
+  expect_s3_class(result, "ggplot")
+})
+
+test_that("plot_cluster_scatter creates ggplot with dim_red = 'tsne'", {
+  skip_if_not_installed("Rtsne")
+
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0)),
+    var3 = c(rnorm(20, 1), rnorm(20, -1), rnorm(20, 0))
+  )
+
+  result <- plot_cluster_scatter(data, cluster = "cluster", dim_red = "tsne")
+
+  expect_s3_class(result, "ggplot")
+})
+
+test_that("plot_cluster_scatter creates ggplot with dim_red = 'umap'", {
+  skip_if_not_installed("umap")
+
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0)),
+    var3 = c(rnorm(20, 1), rnorm(20, -1), rnorm(20, 0))
+  )
+
+  result <- plot_cluster_scatter(data, cluster = "cluster", dim_red = "umap")
+
+  expect_s3_class(result, "ggplot")
+})
+
+test_that("plot_cluster_scatter works with a subset of variables", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0)),
+    var3 = c(rnorm(20, 1), rnorm(20, -1), rnorm(20, 0))
+  )
+
+  result <- plot_cluster_scatter(
+    data,
+    cluster = "cluster",
+    vars = c("var1", "var2")
+  )
+
+  expect_s3_class(result, "ggplot")
+})
+
+test_that("plot_cluster_scatter applies custom colours", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0)),
+    var3 = c(rnorm(20, 1), rnorm(20, -1), rnorm(20, 0))
+  )
+
+  colors <- c("C1" = "red", "C2" = "blue", "C3" = "green")
+  result <- plot_cluster_scatter(
+    data,
+    cluster = "cluster",
+    point_col = colors
+  )
+
+  expect_s3_class(result, "ggplot")
+})
+
+test_that("plot_cluster_scatter handles missing values", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), NA, rnorm(19, 1), rnorm(20, 0)),
+    var3 = c(rnorm(20, 1), rnorm(20, -1), rnorm(20, 0))
+  )
+
+  result <- plot_cluster_scatter(data, cluster = "cluster")
+
+  expect_s3_class(result, "ggplot")
+})
+
+test_that("plot_cluster_scatter works with custom point_col_var", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0)),
+    score = runif(60)
+  )
+
+  result <- plot_cluster_scatter(
+    data,
+    cluster = "cluster",
+    point_col_var = "score",
+    dim_red = "none",
+    vars = c("var1", "var2")
+  )
+
+  expect_s3_class(result, "ggplot")
+})
+
+test_that("plot_cluster_scatter works with show_legend = FALSE", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0)),
+    var3 = c(rnorm(20, 1), rnorm(20, -1), rnorm(20, 0))
+  )
+
+  result <- plot_cluster_scatter(
+    data,
+    cluster = "cluster",
+    show_legend = FALSE
+  )
+
+  expect_s3_class(result, "ggplot")
+})
+
+test_that("plot_cluster_scatter works with custom point sizes", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0)),
+    var3 = c(rnorm(20, 1), rnorm(20, -1), rnorm(20, 0))
+  )
+
+  result <- plot_cluster_scatter(
+    data,
+    cluster = "cluster",
+    point_size = 3,
+    centroid_size = 7
+  )
+
+  expect_s3_class(result, "ggplot")
+})
+
+test_that("plot_cluster_scatter removes theme when thm = NULL and grid = NULL", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0)),
+    var3 = c(rnorm(20, 1), rnorm(20, -1), rnorm(20, 0))
+  )
+
+  result <- plot_cluster_scatter(
+    data,
+    cluster = "cluster",
+    thm = NULL,
+    grid = NULL
+  )
+
+  expect_s3_class(result, "ggplot")
+})
+
+test_that("plot_cluster_scatter works with two clusters", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:2), each = 30),
+    var1 = c(rnorm(30, 2), rnorm(30, -2)),
+    var2 = c(rnorm(30, -1), rnorm(30, 1)),
+    var3 = c(rnorm(30, 1), rnorm(30, -1))
+  )
+
+  result <- plot_cluster_scatter(data, cluster = "cluster")
+
+  expect_s3_class(result, "ggplot")
+})
+
+test_that("plot_cluster_scatter works with many clusters", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:5), each = 20),
+    var1 = rep(c(2, 1, 0, -1, -2), each = 20) + rnorm(100),
+    var2 = rep(c(-2, -1, 0, 1, 2), each = 20) + rnorm(100),
+    var3 = rep(c(1, 0.5, 0, -0.5, -1), each = 20) + rnorm(100)
+  )
+
+  result <- plot_cluster_scatter(data, cluster = "cluster")
+
+  expect_s3_class(result, "ggplot")
+})
+
+test_that("plot_cluster_scatter errors with insufficient variables for pca", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:2), each = 10),
+    var1 = rnorm(20)
+  )
+
+  expect_error(
+    plot_cluster_scatter(data, cluster = "cluster", dim_red = "pca", vars = "var1"),
+    "requires at least two variables"
+  )
+})
+
+test_that("plot_cluster_scatter errors with insufficient variables for none", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:2), each = 10),
+    var1 = rnorm(20)
+  )
+
+  expect_error(
+    plot_cluster_scatter(data, cluster = "cluster", dim_red = "none", vars = "var1"),
+    "requires at least two variables"
+  )
+})

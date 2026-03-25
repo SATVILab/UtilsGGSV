@@ -300,7 +300,7 @@ ggcorr <- function(data,
                                 est_signif) {
   purrr::map_df(seq_len(ncol(combn_mat)), function(i) {
     grp_vec_curr <- combn_mat[, i]
-    data_curr <- data |> dplyr::filter(.grp %in% grp_vec_curr)
+    data_curr <- data %>% dplyr::filter(.grp %in% grp_vec_curr)
     purrr::map_df(corr_method, function(mthd) {
       out_tbl_init <- .ggcorr_results_get_tbl_init(data_curr, grp_vec_curr, mthd)
       .ggcorr_results_get_tbl_final(
@@ -339,7 +339,7 @@ ggcorr <- function(data,
 .ggcorr_results_get_init_conc_corr <- function(data, grp_vec) {
   val1 <- data[[".y"]][data[[".grp"]] == grp_vec[1]]
   val2 <- data[[".y"]][data[[".grp"]] == grp_vec[2]]
-  suppressWarnings(DescTools::CCC(val1, val2)$rho.c |> unlist())
+  suppressWarnings(DescTools::CCC(val1, val2)$rho.c %>% unlist())
 }
 
 .ggcorr_results_get_init_stats <- function(data, grp_vec, mthd) {
@@ -357,12 +357,12 @@ ggcorr <- function(data,
 
 .ggcorr_results_get_init_stats_no_ci <- function(out_tbl,
                                                  corr) {
-  out_tbl |> dplyr::mutate(lb = NA_real_, ub = NA_real_, pval = corr[[2]])
+  out_tbl %>% dplyr::mutate(lb = NA_real_, ub = NA_real_, pval = corr[[2]])
 }
 
 .ggcorr_results_get_init_stats_ci <- function(out_tbl,
                                               corr) {
-  out_tbl |> dplyr::mutate(lb = corr[2], ub = corr[3], pval = corr[[4]])
+  out_tbl %>% dplyr::mutate(lb = corr[2], ub = corr[3], pval = corr[[4]])
 }
 
 .ggcorr_results_get_init_stats_corr <- function(data, grp_vec, mthd) {
@@ -390,13 +390,13 @@ ggcorr <- function(data,
                                           pval_trunc,
                                           est_signif,
                                           n_grp) {
-  out_tbl |>
-    .ggcorr_results_get_all_tbl_final_grp(grp_vec, grp_lab, n_grp) |>
+  out_tbl %>%
+    .ggcorr_results_get_all_tbl_final_grp(grp_vec, grp_lab, n_grp) %>%
     .ggcorr_results_get_all_tbl_final_corr_method(
       corr_lab, n_corr_method, grp_vec, grp_lab, mthd
-    ) |>
-    .ggcorr_results_get_all_tbl_final_corr_est(est_signif) |>
-    .ggcorr_results_get_all_tbl_final_corr_ci(ci, mthd, ci_signif) |>
+    ) %>%
+    .ggcorr_results_get_all_tbl_final_corr_est(est_signif) %>%
+    .ggcorr_results_get_all_tbl_final_corr_ci(ci, mthd, ci_signif) %>%
     .ggcorr_results_get_all_tbl_final_corr_pval(
       pval, pval_signif, pval_trunc, mthd, ci
     )
@@ -413,9 +413,9 @@ ggcorr <- function(data,
   disp_grp_not <- grp_lab[[1]] == "never" ||
     (grp_lab[[1]] == "auto" && n_grp == 2)
   if (disp_grp_not) {
-    return(out_tbl |> dplyr::mutate(txt = ""))
+    return(out_tbl %>% dplyr::mutate(txt = ""))
   }
-  out_tbl |> dplyr::mutate(txt = paste0(g2, " vs ", g1))
+  out_tbl %>% dplyr::mutate(txt = paste0(g2, " vs ", g1))
 }
 
 # ----------------------------
@@ -456,7 +456,7 @@ ggcorr <- function(data,
 
 .ggcorr_results_get_all_tbl_final_corr_method_check_specified <-
   function(corr_lab) {
-    !grepl("^auto$|^never$", corr_lab[[1]] |> trimws())
+    !grepl("^auto$|^never$", corr_lab[[1]] %>% trimws())
 }
 
 .ggcorr_results_get_all_tbl_final_corr_method_get_specified <-
@@ -464,14 +464,15 @@ ggcorr <- function(data,
            corr_lab,
            mthd) {
   if (!is.null(names(corr_lab))) {
-    out_tbl <- out_tbl |>
+    out_tbl <- out_tbl %>%
       dplyr::mutate(
         txt = paste0(.data$txt, " ", gsub("^\\s+", "", corr_lab[[mthd]]))
       )
   } else {
-    out_tbl |> dplyr::mutate(
-      txt = paste0(data$txt, gsub("^\\s+", "", corr_lab))
-    )
+    out_tbl <- out_tbl %>%
+      dplyr::mutate(
+        txt = paste0(.data$txt, gsub("^\\s+", "", corr_lab))
+      )
   }
   out_tbl
 }
@@ -488,9 +489,9 @@ ggcorr <- function(data,
   } else {
     # if we've specified groups, add a 
     # space afterwards
-    out_tbl <- out_tbl |> dplyr::mutate(txt = paste0(txt, " "))
+    out_tbl <- out_tbl %>% dplyr::mutate(txt = paste0(txt, " "))
   }
-  out_tbl |>
+  out_tbl %>%
     dplyr::mutate(txt = paste0(txt, corr_lab_curr))
 }
 
@@ -499,8 +500,8 @@ ggcorr <- function(data,
 # ----------------------------
 
 .ggcorr_results_get_all_tbl_final_corr_est <- function(out_tbl, est_signif) {
-  out_tbl |>
-    .ggcorr_results_get_all_tbl_final_corr_colon() |>
+  out_tbl %>%
+    .ggcorr_results_get_all_tbl_final_corr_colon() %>%
     dplyr::mutate(txt = paste0(txt, signif(est, est_signif)))
 }
 
@@ -508,7 +509,7 @@ ggcorr <- function(data,
   if (out_tbl$txt[[1]] == "") {
     return(out_tbl)
   }
-  out_tbl |> dplyr::mutate(txt = paste0(txt, ": "))
+  out_tbl %>% dplyr::mutate(txt = paste0(txt, ": "))
 }
 
 # ----------------------------
@@ -520,7 +521,7 @@ ggcorr <- function(data,
                                                       mthd,
                                                       ci_signif) {
   if (!ci || mthd == "spearman" || is.na(out_tbl$lb[[1]])) return(out_tbl)
-  out_tbl |>
+  out_tbl %>%
     dplyr::mutate(
       txt = paste0(
         txt, " (", signif(lb, ci_signif), ", ", signif(ub, ci_signif), ")"
@@ -555,8 +556,8 @@ ggcorr <- function(data,
                                                            pval_signif,
                                                            pval_trunc,
                                                            mthd) {
-  out_tbl <- out_tbl |> dplyr::mutate(txt = gsub("\\)$", "", txt)) 
-  out_tbl |>
+  out_tbl <- out_tbl %>% dplyr::mutate(txt = gsub("\\)$", "", txt)) 
+  out_tbl %>%
     dplyr::mutate(
       txt = paste0(
         txt, .ggcorr_results_get_all_tbl_final_corr_pval_ci_txt(
@@ -580,7 +581,7 @@ ggcorr <- function(data,
 .ggcorr_results_get_all_tbl_final_corr_pval_ci_non <- function(out_tbl,
                                                                pval_signif,
                                                                pval_trunc) {
-   out_tbl |>
+   out_tbl %>%
      dplyr::mutate(
       txt = paste0(
         txt,
@@ -633,17 +634,17 @@ ggcorr <- function(data,
                          point_size,
                          point_alpha) {
   plot_tbl_raw <- .ggcorr_plot_tbl_get_raw(data, grp_vec)
-  .ggcorr_plot_init(plot_tbl_raw, point_size, point_alpha) |>
-    .ggcorr_plot_theme(thm, grid, legend_title, legend_position) |>
-    .ggcorr_plot_colour(plot_tbl_raw, grp_to_col, grp_vec) |>
-    .ggcorr_plot_limits(limits_expand, limits_equal, plot_tbl_raw) |>
-    .ggcorr_plot_label_axes(grp_vec, combn_mat) |>
-    .ggcorr_plot_abline(abline) |>
-    .ggcorr_plot_smooth(smooth, smooth_se, smooth_method) |>
-    .ggcorr_plot_label_points(label_id, label_id_size) |>
+  .ggcorr_plot_init(plot_tbl_raw, point_size, point_alpha) %>%
+    .ggcorr_plot_theme(thm, grid, legend_title, legend_position) %>%
+    .ggcorr_plot_colour(plot_tbl_raw, grp_to_col, grp_vec) %>%
+    .ggcorr_plot_limits(limits_expand, limits_equal, plot_tbl_raw) %>%
+    .ggcorr_plot_label_axes(grp_vec, combn_mat) %>%
+    .ggcorr_plot_abline(abline) %>%
+    .ggcorr_plot_smooth(smooth, smooth_se, smooth_method) %>%
+    .ggcorr_plot_label_points(label_id, label_id_size) %>%
     .ggcorr_plot_results(
       results_tbl, coord, skip, hjust, vjust, trans, font_size
-     ) |>
+     ) %>%
     .ggcorr_plot_trans(trans)
 }
 
@@ -651,17 +652,17 @@ ggcorr <- function(data,
   purrr::map_df(
     setdiff(grp_vec, grp_vec[1]),
     function(grp_alt) {
-      data |>
-        dplyr::filter(.grp == grp_vec[1]) |>
-        dplyr::select(.grp, .id, .y) |>
-        dplyr::rename(x = .y, grp_x = .grp) |>
+      data %>%
+        dplyr::filter(.grp == grp_vec[1]) %>%
+        dplyr::select(.grp, .id, .y) %>%
+        dplyr::rename(x = .y, grp_x = .grp) %>%
         dplyr::full_join(
-          data |>
-            dplyr::filter(.grp == grp_alt) |>
-            dplyr::select(.grp, .id, .y) |>
+          data %>%
+            dplyr::filter(.grp == grp_alt) %>%
+            dplyr::select(.grp, .id, .y) %>%
             dplyr::rename(y = .y, grp_y = .grp),
           by = ".id"
-        ) |>
+        ) %>%
         dplyr::select(.id, grp_x, grp_y, x, y)
     }
   )
@@ -682,7 +683,7 @@ ggcorr <- function(data,
                                grid,
                                legend_title,
                                legend_position) {
-  p <- .ggcorr_plot_init_theme(p, thm) |>
+  p <- .ggcorr_plot_init_theme(p, thm) %>%
     .ggcorr_plot_init_grid(grid)
   if (isFALSE(legend_title)) {
     p <- p + theme(legend.title = element_blank())

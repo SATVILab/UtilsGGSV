@@ -105,13 +105,13 @@ test_that("axis_limits works", {
     )
   )
   expect_identical(
-    p_adj$layers[[2]]$data[1, ] |>
+    p_adj$layers[[2]]$data[1, ] %>%
       as.numeric(),
     c(-1e4, -1e4)
   )
   expect_identical(
-    p_adj$layers[[2]]$data[2, ] |>
-      as.numeric() |>
+    p_adj$layers[[2]]$data[2, ] %>%
+      as.numeric() %>%
       round(),
     c(9222, 9222)
   )
@@ -124,13 +124,13 @@ test_that("axis_limits works", {
   )
 
   expect_identical(
-    p_adj$layers[[2]]$data[1, ] |>
+    p_adj$layers[[2]]$data[1, ] %>%
       as.numeric(),
     c(1, 1)
   )
   expect_identical(
-    p_adj$layers[[2]]$data[2, ] |>
-      as.numeric() |>
+    p_adj$layers[[2]]$data[2, ] %>%
+      as.numeric() %>%
       round(),
     c(1e4, 9222)
   )
@@ -143,13 +143,13 @@ test_that("axis_limits works", {
   )
 
   expect_identical(
-    p_adj$layers[[2]]$data[1, ] |>
+    p_adj$layers[[2]]$data[1, ] %>%
       as.numeric(),
     c(1, 1)
   )
   expect_identical(
-    p_adj$layers[[2]]$data[2, ] |>
-      as.numeric() |>
+    p_adj$layers[[2]]$data[2, ] %>%
+      as.numeric() %>%
       round(),
     c(1e4, 9222)
   )

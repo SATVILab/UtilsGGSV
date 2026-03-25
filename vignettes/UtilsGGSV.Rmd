@@ -23,26 +23,88 @@ UtilsGGSV provides utility functions for plotting in R using `ggplot2`. This vig
 ```{r setup}
 library(UtilsGGSV)
 library(ggplot2)
+library(magrittr)
 theme_set(cowplot::theme_cowplot())
 ```
 
 ## Scatter Plot with Clusters using `plot_cluster_scatter`
 
-The `plot_cluster_scatter` function creates an overlayed cluster scatter plot with point colouring and cluster centroid labels. It supports `dim_red = "none"`, `"pca"`, `"tsne"`, and `"umap"`.
+The `plot_cluster_scatter` function creates a biaxial scatter plot with
+observations coloured by cluster and median centroids overlaid. It supports
+four dimensionality reduction methods via the `dim_red` argument: `"none"`,
+`"pca"`, `"tsne"`, and `"umap"`.
 
-```{r plot-cluster-scatter}
+```{r plot-cluster-scatter-setup}
 set.seed(42)
 cluster_data <- data.frame(
-  cluster = rep(c("A", "B", "C"), each = 15),
-  x = rnorm(45),
-  y = rnorm(45, mean = rep(c(-1, 0, 1), each = 15))
+  cluster = rep(c("A", "B", "C"), each = 20),
+  var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+  var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0)),
+  var3 = c(rnorm(20, 1), rnorm(20, -1), rnorm(20, 0))
 )
+```
+
+### Raw variables (`dim_red = "none"`)
+
+When exactly two variables are available, or when you pass `dim_red = "none"`,
+the first two selected variables are used directly as axes:
+
+```{r plot-cluster-scatter-none}
 plot_cluster_scatter(
   cluster_data,
   cluster = "cluster",
   dim_red = "none",
-  vars = c("x", "y"),
-  point_col_var = "cluster"
+  vars = c("var1", "var2")
+)
+```
+
+### PCA (`dim_red = "pca"`)
+
+When more than two variables are available the default is `"pca"`, which
+projects all numeric variables onto the first two principal components:
+
+```{r plot-cluster-scatter-pca}
+plot_cluster_scatter(
+  cluster_data,
+  cluster = "cluster",
+  dim_red = "pca"
+)
+```
+
+### t-SNE (`dim_red = "tsne"`)
+
+t-SNE is available when the `Rtsne` package is installed:
+
+```{r plot-cluster-scatter-tsne, eval = requireNamespace("Rtsne", quietly = TRUE)}
+plot_cluster_scatter(
+  cluster_data,
+  cluster = "cluster",
+  dim_red = "tsne"
+)
+```
+
+### UMAP (`dim_red = "umap"`)
+
+UMAP is available when the `umap` package is installed:
+
+```{r plot-cluster-scatter-umap, eval = requireNamespace("umap", quietly = TRUE)}
+plot_cluster_scatter(
+  cluster_data,
+  cluster = "cluster",
+  dim_red = "umap"
+)
+```
+
+### Hiding the legend
+
+When centroid labels are sufficient, set `show_legend = FALSE`:
+
+```{r plot-cluster-scatter-nolegend}
+plot_cluster_scatter(
+  cluster_data,
+  cluster = "cluster",
+  dim_red = "pca",
+  show_legend = FALSE
 )
 ```
 
@@ -66,7 +128,7 @@ response_tbl <- data.frame(
 )
 
 ggcorr(
-  data = response_tbl |> dplyr::filter(group %in% c("a", "b")),
+  data = response_tbl %>% dplyr::filter(group %in% c("a", "b")),
   grp = "group",
   y = "response",
   id = "pid"
@@ -79,7 +141,7 @@ You can display multiple correlation coefficients simultaneously:
 
 ```{r ggcorr-multiple}
 ggcorr(
-  data = response_tbl |> dplyr::filter(group %in% c("a", "b")),
+  data = response_tbl %>% dplyr::filter(group %in% c("a", "b")),
   grp = "group",
   y = "response",
   id = "pid",
@@ -107,7 +169,7 @@ The concordance correlation coefficient is useful when assessing agreement betwe
 
 ```{r ggcorr-concordance}
 ggcorr(
-  data = response_tbl |> dplyr::filter(group %in% c("a", "b")),
+  data = response_tbl %>% dplyr::filter(group %in% c("a", "b")),
   grp = "group",
   y = "response",
   id = "pid",
@@ -123,7 +185,7 @@ Text placement, font size, and other visual elements can be customized:
  
 ```{r ggcorr-custom}
 ggcorr(
-  data = response_tbl |> dplyr::filter(group %in% c("a", "b")),
+  data = response_tbl %>% dplyr::filter(group %in% c("a", "b")),
   grp = "group",
   y = "response",
   id = "pid",
@@ -145,7 +207,7 @@ The text placement remains consistent even when axes are transformed:
 
 ```{r ggcorr-trans}
 ggcorr(
-  data = response_tbl |> dplyr::mutate(response = abs(response + 1)^4),
+  data = response_tbl %>% dplyr::mutate(response = abs(response + 1)^4),
   grp = "group",
   y = "response",
   id = "pid",
