@@ -11,6 +11,8 @@ plot_cluster_density(
   col_clusters = NULL,
   n_col = NULL,
   n_row = NULL,
+  density = "overall",
+  scale = "max_overall",
   scales = "free_y",
   expand_coord = NULL,
   exclude_min = "no",
@@ -43,6 +45,20 @@ faceted plot is returned instead of a list. Default is \code{NULL}.}
 \item{n_row}{integer or \code{NULL}. Number of rows passed to
 \code{ggplot2::facet_wrap}. If supplied (or if \code{n_col} is supplied) a single
 faceted plot is returned instead of a list. Default is \code{NULL}.}
+
+\item{density}{character. What density to display. One of \code{"overall"}
+(default: overall density curve plus cluster median lines), \code{"cluster"}
+(one density curve per cluster, coloured by cluster), or \code{"both"} (overall
+density curve plus per-cluster density curves). When \code{"cluster"} or
+\code{"both"}, the \code{scale} argument controls how cluster densities are scaled.}
+
+\item{scale}{character. How to scale per-cluster density curves. Only
+relevant when \code{density} is \code{"cluster"} or \code{"both"}. One of
+\code{"max_overall"} (default: each cluster density is rescaled so that its
+maximum equals the maximum of the overall density, keeping y-axis values
+comparable to the overall density), \code{"max_cluster"} (no rescaling;
+y-axis is determined by the tallest curve), or \code{"free"} (no rescaling;
+equivalent to \code{"max_cluster"}).}
 
 \item{scales}{character. The \code{scales} argument passed to
 \code{ggplot2::facet_wrap} when a faceted plot is requested. Default is
@@ -79,10 +95,16 @@ A named list of ggplot2 objects (one per variable) when neither
 \code{facet_wrap} panels when \code{n_col} or \code{n_row} is specified.
 }
 \description{
-For each variable, plots the overall density of values across all
-observations and overlays a vertical line for each cluster at that
-cluster's median value for the variable. Each cluster is given a
-distinct colour.
+For each variable, plots the density of values and optionally overlays
+per-cluster density curves or cluster median lines. The \code{density} argument
+controls what is shown:
+\itemize{
+\item \code{"overall"} (default): the overall density of all observations with a
+vertical line per cluster at that cluster's median value.
+\item \code{"cluster"}: one density curve per cluster, coloured by cluster.
+\item \code{"both"}: the overall density curve and one density curve per cluster,
+with the cluster curves scaled according to the \code{scale} argument.
+}
 
 By default the function returns a \strong{named list of ggplot2 objects}, one
 per variable. If \code{n_col} or \code{n_row} is supplied the plots are instead
@@ -95,8 +117,14 @@ data <- data.frame(
   var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
   var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
 )
-# Default: returns a list of plots
+# Default: overall density with cluster median lines
 plot_list <- plot_cluster_density(data, cluster = "cluster")
+
+# Per-cluster density curves
+plot_cluster_density(data, cluster = "cluster", density = "cluster")
+
+# Both overall and per-cluster densities (default scaling: max_overall)
+plot_cluster_density(data, cluster = "cluster", density = "both")
 
 # Faceted plot with 2 columns
 plot_cluster_density(data, cluster = "cluster", n_col = 2)

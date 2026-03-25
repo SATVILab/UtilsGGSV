@@ -2,10 +2,15 @@
 #' @title Plot density of variable values with per-cluster median lines
 #'
 #' @description
-#' For each variable, plots the overall density of values across all
-#' observations and overlays a vertical line for each cluster at that
-#' cluster's median value for the variable. Each cluster is given a
-#' distinct colour.
+#' For each variable, plots the density of values and optionally overlays
+#' per-cluster density curves or cluster median lines. The `density` argument
+#' controls what is shown:
+#'
+#' - `"overall"` (default): the overall density of all observations with a
+#'   vertical line per cluster at that cluster's median value.
+#' - `"cluster"`: one density curve per cluster, coloured by cluster.
+#' - `"both"`: the overall density curve and one density curve per cluster,
+#'   with the cluster curves scaled according to the `scale` argument.
 #'
 #' By default the function returns a **named list of ggplot2 objects**, one
 #' per variable. If `n_col` or `n_row` is supplied the plots are instead
@@ -27,6 +32,18 @@
 #' @param n_row integer or `NULL`. Number of rows passed to
 #'   `ggplot2::facet_wrap`. If supplied (or if `n_col` is supplied) a single
 #'   faceted plot is returned instead of a list. Default is `NULL`.
+#' @param density character. What density to display. One of `"overall"`
+#'   (default: overall density curve plus cluster median lines), `"cluster"`
+#'   (one density curve per cluster, coloured by cluster), or `"both"` (overall
+#'   density curve plus per-cluster density curves). When `"cluster"` or
+#'   `"both"`, the `scale` argument controls how cluster densities are scaled.
+#' @param scale character. How to scale per-cluster density curves. Only
+#'   relevant when `density` is `"cluster"` or `"both"`. One of
+#'   `"max_overall"` (default: each cluster density is rescaled so that its
+#'   maximum equals the maximum of the overall density, keeping y-axis values
+#'   comparable to the overall density), `"max_cluster"` (no rescaling;
+#'   y-axis is determined by the tallest curve), or `"free"` (no rescaling;
+#'   equivalent to `"max_cluster"`).
 #' @param scales character. The `scales` argument passed to
 #'   `ggplot2::facet_wrap` when a faceted plot is requested. Default is
 #'   `"free_y"` so that the x-axis is shared across panels.
@@ -63,8 +80,14 @@
 #'   var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
 #'   var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
 #' )
-#' # Default: returns a list of plots
+#' # Default: overall density with cluster median lines
 #' plot_list <- plot_cluster_density(data, cluster = "cluster")
+#'
+#' # Per-cluster density curves
+#' plot_cluster_density(data, cluster = "cluster", density = "cluster")
+#'
+#' # Both overall and per-cluster densities (default scaling: max_overall)
+#' plot_cluster_density(data, cluster = "cluster", density = "both")
 #'
 #' # Faceted plot with 2 columns
 #' plot_cluster_density(data, cluster = "cluster", n_col = 2)
@@ -74,6 +97,8 @@ plot_cluster_density <- function(data,
                                  col_clusters = NULL,
                                  n_col = NULL,
                                  n_row = NULL,
+                                 density = "overall",
+                                 scale = "max_overall",
                                  scales = "free_y",
                                  expand_coord = NULL,
                                  exclude_min = "no",
@@ -92,6 +117,8 @@ plot_cluster_density <- function(data,
                                  grid = cowplot::background_grid(
                                    major = "xy"
                                  )) {
+  density <- match.arg(density, c("overall", "cluster", "both"))
+  scale <- match.arg(scale, c("max_overall", "max_cluster", "free"))
   exclude_min <- match.arg(exclude_min, c("no", "overall", "variable"))
 
   if (is.null(vars)) {
@@ -131,28 +158,85 @@ plot_cluster_density <- function(data,
 
   cluster_vec <- unique(data[[cluster]])
 
+  # Helper: compute a density tibble from a vector of values.
+  .dens_tbl <- function(vals) {
+    if (length(vals) < 2) return(NULL)
+    d <- stats::density(vals)
+    tibble::tibble(x = d$x, y = d$y)
+  }
+
+  # Helper: compute per-cluster density tibbles, optionally scaled.
+  .cluster_dens_tbl <- function(all_vals, v, max_y_ref = NULL) {
+    purrr::map_df(cluster_vec, function(cl) {
+      cl_vals <- .filter_vals(all_vals[data[[cluster]] == cl], v)
+      d <- .dens_tbl(cl_vals)
+      if (is.null(d)) return(tibble::tibble())
+      if (!is.null(max_y_ref)) {
+        max_cl_y <- max(d$y)
+        if (max_cl_y > 0) d$y <- d$y * max_y_ref / max_cl_y
+      }
+      d$cluster <- cl
+      d
+    })
+  }
+
   if (!use_facet) {
     plot_list <- stats::setNames(
       lapply(vars, function(v) {
         all_vals <- data[[v]]
         dens_vals <- .filter_vals(all_vals, v)
-        dens_tbl <- tibble::tibble(value = dens_vals)
 
-        med_tbl <- purrr::map_df(cluster_vec, function(cl) {
-          cl_vals <- .filter_vals(all_vals[data[[cluster]] == cl], v)
-          tibble::tibble(
-            cluster = cl,
-            median = stats::median(cl_vals, na.rm = TRUE)
-          )
-        })
+        if (density == "overall") {
+          dens_tbl <- tibble::tibble(value = dens_vals)
 
-        p <- ggplot2::ggplot(dens_tbl, ggplot2::aes(x = .data$value)) +
-          ggplot2::geom_density() +
-          ggplot2::geom_vline(
-            data = med_tbl,
-            ggplot2::aes(xintercept = .data$median, colour = .data$cluster)
-          ) +
-          ggplot2::labs(x = v, y = "Density", colour = "Cluster")
+          med_tbl <- purrr::map_df(cluster_vec, function(cl) {
+            cl_vals <- .filter_vals(all_vals[data[[cluster]] == cl], v)
+            tibble::tibble(
+              cluster = cl,
+              median = stats::median(cl_vals, na.rm = TRUE)
+            )
+          })
+
+          p <- ggplot2::ggplot(dens_tbl, ggplot2::aes(x = .data$value)) +
+            ggplot2::geom_density() +
+            ggplot2::geom_vline(
+              data = med_tbl,
+              ggplot2::aes(xintercept = .data$median, colour = .data$cluster)
+            ) +
+            ggplot2::labs(x = v, y = "Density", colour = "Cluster")
+        } else {
+          overall_d <- .dens_tbl(dens_vals)
+          max_y_ref <- if (scale == "max_overall" && !is.null(overall_d)) {
+            max(overall_d$y)
+          } else {
+            NULL
+          }
+          cl_dens <- .cluster_dens_tbl(all_vals, v, max_y_ref)
+
+          if (density == "cluster") {
+            p <- ggplot2::ggplot(
+              cl_dens,
+              ggplot2::aes(
+                x = .data$x, y = .data$y, colour = .data$cluster
+              )
+            ) +
+              ggplot2::geom_line() +
+              ggplot2::labs(x = v, y = "Density", colour = "Cluster")
+          } else {
+            p <- ggplot2::ggplot() +
+              ggplot2::geom_line(
+                data = overall_d,
+                ggplot2::aes(x = .data$x, y = .data$y)
+              ) +
+              ggplot2::geom_line(
+                data = cl_dens,
+                ggplot2::aes(
+                  x = .data$x, y = .data$y, colour = .data$cluster
+                )
+              ) +
+              ggplot2::labs(x = v, y = "Density", colour = "Cluster")
+          }
+        }
 
         if (!is.null(expand_coord)) {
           ec <- if (is.list(expand_coord)) expand_coord[[v]] else expand_coord
@@ -172,34 +256,94 @@ plot_cluster_density <- function(data,
     return(plot_list)
   }
 
-  long_tbl <- purrr::map_df(vars, function(v) {
-    tibble::tibble(variable = v, value = .filter_vals(data[[v]], v))
-  })
-
-  median_tbl <- purrr::map_df(vars, function(v) {
-    purrr::map_df(cluster_vec, function(cl) {
-      vals <- .filter_vals(data[[v]][data[[cluster]] == cl], v)
-      tibble::tibble(
-        variable = v,
-        cluster = cl,
-        median = stats::median(vals, na.rm = TRUE)
-      )
+  if (density == "overall") {
+    long_tbl <- purrr::map_df(vars, function(v) {
+      tibble::tibble(variable = v, value = .filter_vals(data[[v]], v))
     })
-  })
 
-  p <- ggplot2::ggplot(long_tbl, ggplot2::aes(x = .data$value)) +
-    ggplot2::geom_density() +
-    ggplot2::geom_vline(
-      data = median_tbl,
-      ggplot2::aes(xintercept = .data$median, colour = .data$cluster)
-    ) +
-    ggplot2::facet_wrap(
-      ~ .data$variable,
-      scales = scales,
-      ncol = n_col,
-      nrow = n_row
-    ) +
-    ggplot2::labs(x = "Value", y = "Density", colour = "Cluster")
+    median_tbl <- purrr::map_df(vars, function(v) {
+      purrr::map_df(cluster_vec, function(cl) {
+        vals <- .filter_vals(data[[v]][data[[cluster]] == cl], v)
+        tibble::tibble(
+          variable = v,
+          cluster = cl,
+          median = stats::median(vals, na.rm = TRUE)
+        )
+      })
+    })
+
+    p <- ggplot2::ggplot(long_tbl, ggplot2::aes(x = .data$value)) +
+      ggplot2::geom_density() +
+      ggplot2::geom_vline(
+        data = median_tbl,
+        ggplot2::aes(xintercept = .data$median, colour = .data$cluster)
+      ) +
+      ggplot2::facet_wrap(
+        ~ .data$variable,
+        scales = scales,
+        ncol = n_col,
+        nrow = n_row
+      ) +
+      ggplot2::labs(x = "Value", y = "Density", colour = "Cluster")
+  } else {
+    overall_dens_tbl <- purrr::map_df(vars, function(v) {
+      d <- .dens_tbl(.filter_vals(data[[v]], v))
+      if (is.null(d)) return(tibble::tibble())
+      d$variable <- v
+      d
+    })
+
+    cluster_dens_tbl <- purrr::map_df(vars, function(v) {
+      all_vals <- data[[v]]
+      dens_vals <- .filter_vals(all_vals, v)
+      max_y_ref <- if (scale == "max_overall") {
+        od <- .dens_tbl(dens_vals)
+        if (!is.null(od)) max(od$y) else NULL
+      } else {
+        NULL
+      }
+      d <- .cluster_dens_tbl(all_vals, v, max_y_ref)
+      if (nrow(d) == 0) return(tibble::tibble())
+      d$variable <- v
+      d
+    })
+
+    if (density == "cluster") {
+      p <- ggplot2::ggplot(
+        cluster_dens_tbl,
+        ggplot2::aes(
+          x = .data$x, y = .data$y, colour = .data$cluster
+        )
+      ) +
+        ggplot2::geom_line() +
+        ggplot2::facet_wrap(
+          ~ .data$variable,
+          scales = scales,
+          ncol = n_col,
+          nrow = n_row
+        ) +
+        ggplot2::labs(x = "Value", y = "Density", colour = "Cluster")
+    } else {
+      p <- ggplot2::ggplot() +
+        ggplot2::geom_line(
+          data = overall_dens_tbl,
+          ggplot2::aes(x = .data$x, y = .data$y)
+        ) +
+        ggplot2::geom_line(
+          data = cluster_dens_tbl,
+          ggplot2::aes(
+            x = .data$x, y = .data$y, colour = .data$cluster
+          )
+        ) +
+        ggplot2::facet_wrap(
+          ~ .data$variable,
+          scales = scales,
+          ncol = n_col,
+          nrow = n_row
+        ) +
+        ggplot2::labs(x = "Value", y = "Density", colour = "Cluster")
+    }
+  }
 
   if (!is.null(expand_coord) && is.numeric(expand_coord)) {
     p <- p + ggplot2::expand_limits(x = expand_coord)

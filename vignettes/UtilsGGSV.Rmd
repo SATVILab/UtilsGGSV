@@ -27,87 +27,6 @@ library(magrittr)
 theme_set(cowplot::theme_cowplot())
 ```
 
-## Scatter Plot with Clusters using `plot_cluster_scatter`
-
-The `plot_cluster_scatter` function creates a biaxial scatter plot with
-observations coloured by cluster and median centroids overlaid. It supports
-four dimensionality reduction methods via the `dim_red` argument: `"none"`,
-`"pca"`, `"tsne"`, and `"umap"`.
-
-```{r plot-cluster-scatter-setup}
-set.seed(42)
-cluster_data <- data.frame(
-  cluster = rep(c("A", "B", "C"), each = 20),
-  var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
-  var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0)),
-  var3 = c(rnorm(20, 1), rnorm(20, -1), rnorm(20, 0))
-)
-```
-
-### Raw variables (`dim_red = "none"`)
-
-When exactly two variables are available, or when you pass `dim_red = "none"`,
-the first two selected variables are used directly as axes:
-
-```{r plot-cluster-scatter-none}
-plot_cluster_scatter(
-  cluster_data,
-  cluster = "cluster",
-  dim_red = "none",
-  vars = c("var1", "var2")
-)
-```
-
-### PCA (`dim_red = "pca"`)
-
-When more than two variables are available the default is `"pca"`, which
-projects all numeric variables onto the first two principal components:
-
-```{r plot-cluster-scatter-pca}
-plot_cluster_scatter(
-  cluster_data,
-  cluster = "cluster",
-  dim_red = "pca"
-)
-```
-
-### t-SNE (`dim_red = "tsne"`)
-
-t-SNE is available when the `Rtsne` package is installed:
-
-```{r plot-cluster-scatter-tsne, eval = requireNamespace("Rtsne", quietly = TRUE)}
-plot_cluster_scatter(
-  cluster_data,
-  cluster = "cluster",
-  dim_red = "tsne"
-)
-```
-
-### UMAP (`dim_red = "umap"`)
-
-UMAP is available when the `umap` package is installed:
-
-```{r plot-cluster-scatter-umap, eval = requireNamespace("umap", quietly = TRUE)}
-plot_cluster_scatter(
-  cluster_data,
-  cluster = "cluster",
-  dim_red = "umap"
-)
-```
-
-### Hiding the legend
-
-When centroid labels are sufficient, set `show_legend = FALSE`:
-
-```{r plot-cluster-scatter-nolegend}
-plot_cluster_scatter(
-  cluster_data,
-  cluster = "cluster",
-  dim_red = "pca",
-  show_legend = FALSE
-)
-```
-
 ## Correlation Plots with `ggcorr`
  
 The `ggcorr` function creates scatterplots with correlation coefficients overlaid. This is the primary function of the package and is useful for visualizing relationships between groups of measurements.
@@ -304,32 +223,159 @@ add_text_column(
 
 ## Cluster-Specific Plots
 
+The `plot_cluster_*` family of functions helps visualise the characteristics of
+clusters identified by an unsupervised learning method. The examples below use
+the `palmerpenguins` dataset: we first apply k-means clustering to
+bill and flipper measurements, then explore the clusters using each function.
+
+```{r cluster-setup, eval = requireNamespace("palmerpenguins", quietly = TRUE)}
+set.seed(42)
+penguins <- palmerpenguins::penguins
+penguins <- penguins[complete.cases(penguins[
+  c("bill_length_mm", "bill_depth_mm", "flipper_length_mm", "body_mass_g")
+]), ]
+vars_penguin <- c(
+  "bill_length_mm", "bill_depth_mm", "flipper_length_mm", "body_mass_g"
+)
+km <- kmeans(scale(penguins[vars_penguin]), centers = 3)
+penguins$cluster <- paste0("K", km$cluster)
+```
+
 ### Heat Maps with `plot_cluster_heatmap`
 
-The `plot_cluster_heatmap` function creates a heat map where each tile shows the percentile of the median value of a variable for a cluster. This percentile is compared against the empirical cumulative distribution function (ECDF) of that variable across all observations not in the cluster. Clusters and variables are ordered along the axes via hierarchical clustering.
+The `plot_cluster_heatmap` function creates a heat map where each tile shows
+the percentile of the median value of a variable for a cluster. This percentile
+is compared against the empirical cumulative distribution function (ECDF) of
+that variable across all observations not in the cluster. Clusters and
+variables are ordered along the axes via hierarchical clustering.
 
-```{r plot-cluster-heatmap}
-set.seed(1)
-cluster_data <- data.frame(
-  cluster = rep(paste0("C", 1:3), each = 20),
-  var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
-  var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
-)
-plot_cluster_heatmap(cluster_data, cluster = "cluster")
+```{r plot-cluster-heatmap, eval = requireNamespace("palmerpenguins", quietly = TRUE)}
+plot_cluster_heatmap(penguins, cluster = "cluster", vars = vars_penguin)
 ```
 
 ### Density Plots with `plot_cluster_density`
 
-The `plot_cluster_density` function plots, for each variable, the overall density of values across all observations and overlays a vertical line for each cluster at that cluster's median value. Each cluster is given a distinct colour, making it easy to see how each cluster relates to the overall distribution.
+The `plot_cluster_density` function visualises, for each variable, how each
+cluster's observations are distributed relative to the overall population. The
+`density` argument controls what is shown:
 
-```{r plot-cluster-density}
-set.seed(1)
-cluster_data <- data.frame(
-  cluster = rep(paste0("C", 1:3), each = 20),
-  var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
-  var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
+- `"overall"` (default): the overall density with per-cluster median lines.
+- `"cluster"`: one density curve per cluster.
+- `"both"`: overall density plus per-cluster density curves.
+
+#### Overall density with cluster median lines (default)
+
+```{r plot-cluster-density-overall, eval = requireNamespace("palmerpenguins", quietly = TRUE)}
+plot_cluster_density(
+  penguins,
+  cluster = "cluster",
+  vars = vars_penguin,
+  n_col = 2
 )
-plot_cluster_density(cluster_data, cluster = "cluster")
+```
+
+#### Per-cluster density curves
+
+```{r plot-cluster-density-cluster, eval = requireNamespace("palmerpenguins", quietly = TRUE)}
+plot_cluster_density(
+  penguins,
+  cluster = "cluster",
+  vars = vars_penguin,
+  density = "cluster",
+  n_col = 2
+)
+```
+
+#### Both overall and per-cluster densities
+
+When `density = "both"`, the `scale` argument controls how cluster curves are
+scaled relative to the overall density:
+
+- `"max_overall"` (default): each cluster density is rescaled so that its
+  maximum equals the maximum of the overall density. Y-axis values reflect the
+  overall density.
+- `"max_cluster"`: no rescaling; the y-axis is determined by the tallest curve.
+- `"free"`: no rescaling (equivalent to `"max_cluster"`).
+
+```{r plot-cluster-density-both, eval = requireNamespace("palmerpenguins", quietly = TRUE)}
+# scale = "max_overall" keeps the y-axis anchored to the overall density
+plot_cluster_density(
+  penguins,
+  cluster = "cluster",
+  vars = vars_penguin,
+  density = "both",
+  scale = "max_overall",
+  n_col = 2
+)
+```
+
+```{r plot-cluster-density-both-free, eval = requireNamespace("palmerpenguins", quietly = TRUE)}
+# scale = "max_cluster": natural scale for all curves
+plot_cluster_density(
+  penguins,
+  cluster = "cluster",
+  vars = vars_penguin,
+  density = "both",
+  scale = "max_cluster",
+  n_col = 2
+)
+```
+
+### Scatter Plot with `plot_cluster_scatter`
+
+The `plot_cluster_scatter` function creates a biaxial scatter plot with
+observations coloured by cluster and median centroids overlaid. It supports
+four dimensionality reduction methods via the `dim_red` argument: `"none"`,
+`"pca"`, `"tsne"`, and `"umap"`.
+
+#### PCA projection (default for more than two variables)
+
+```{r plot-cluster-scatter-pca, eval = requireNamespace("palmerpenguins", quietly = TRUE)}
+plot_cluster_scatter(
+  penguins,
+  cluster = "cluster",
+  vars = vars_penguin,
+  dim_red = "pca"
+)
+```
+
+#### Raw variables (`dim_red = "none"`)
+
+When exactly two variables are needed directly as axes:
+
+```{r plot-cluster-scatter-none, eval = requireNamespace("palmerpenguins", quietly = TRUE)}
+plot_cluster_scatter(
+  penguins,
+  cluster = "cluster",
+  vars = c("bill_length_mm", "flipper_length_mm"),
+  dim_red = "none"
+)
+```
+
+#### t-SNE
+
+t-SNE is available when the `Rtsne` package is installed:
+
+```{r plot-cluster-scatter-tsne, eval = requireNamespace("palmerpenguins", quietly = TRUE) && requireNamespace("Rtsne", quietly = TRUE)}
+plot_cluster_scatter(
+  penguins,
+  cluster = "cluster",
+  vars = vars_penguin,
+  dim_red = "tsne"
+)
+```
+
+#### UMAP
+
+UMAP is available when the `umap` package is installed:
+
+```{r plot-cluster-scatter-umap, eval = requireNamespace("palmerpenguins", quietly = TRUE) && requireNamespace("umap", quietly = TRUE)}
+plot_cluster_scatter(
+  penguins,
+  cluster = "cluster",
+  vars = vars_penguin,
+  dim_red = "umap"
+)
 ```
 
 ### Minimum-Spanning Tree with `plot_cluster_mst`
@@ -343,21 +389,13 @@ used by `plot_cluster_heatmap`. By default a named list of plots is returned;
 supplying `n_col` or `n_row` returns a combined `cowplot::plot_grid` figure
 with variable names as labels.
 
-```{r plot-cluster-mst}
-set.seed(1)
-cluster_data <- data.frame(
-  cluster = rep(paste0("C", 1:3), each = 20),
-  var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
-  var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
+```{r plot-cluster-mst, eval = requireNamespace("palmerpenguins", quietly = TRUE)}
+plot_cluster_mst(
+  penguins,
+  cluster = "cluster",
+  vars = vars_penguin,
+  n_col = 2
 )
-plot_list <- plot_cluster_mst(cluster_data, cluster = "cluster")
-plot_list[["var1"]]
-```
-
-Combine into a labelled grid:
-
-```{r plot-cluster-mst-grid}
-plot_cluster_mst(cluster_data, cluster = "cluster", n_col = 2)
 ```
 
 ## Transformations with `get_trans`
@@ -369,3 +407,4 @@ get_trans("log10")
 get_trans("asinh")
 get_trans("root_cube")
 ```
+
