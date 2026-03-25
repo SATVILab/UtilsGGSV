@@ -23,6 +23,7 @@ UtilsGGSV provides utility functions for plotting in R using `ggplot2`. This vig
 ```{r setup}
 library(UtilsGGSV)
 library(ggplot2)
+library(magrittr)
 theme_set(cowplot::theme_cowplot())
 ```
 
@@ -127,7 +128,7 @@ response_tbl <- data.frame(
 )
 
 ggcorr(
-  data = response_tbl |> dplyr::filter(group %in% c("a", "b")),
+  data = response_tbl %>% dplyr::filter(group %in% c("a", "b")),
   grp = "group",
   y = "response",
   id = "pid"
@@ -140,7 +141,7 @@ You can display multiple correlation coefficients simultaneously:
 
 ```{r ggcorr-multiple}
 ggcorr(
-  data = response_tbl |> dplyr::filter(group %in% c("a", "b")),
+  data = response_tbl %>% dplyr::filter(group %in% c("a", "b")),
   grp = "group",
   y = "response",
   id = "pid",
@@ -168,7 +169,7 @@ The concordance correlation coefficient is useful when assessing agreement betwe
 
 ```{r ggcorr-concordance}
 ggcorr(
-  data = response_tbl |> dplyr::filter(group %in% c("a", "b")),
+  data = response_tbl %>% dplyr::filter(group %in% c("a", "b")),
   grp = "group",
   y = "response",
   id = "pid",
@@ -184,7 +185,7 @@ Text placement, font size, and other visual elements can be customized:
  
 ```{r ggcorr-custom}
 ggcorr(
-  data = response_tbl |> dplyr::filter(group %in% c("a", "b")),
+  data = response_tbl %>% dplyr::filter(group %in% c("a", "b")),
   grp = "group",
   y = "response",
   id = "pid",
@@ -206,7 +207,7 @@ The text placement remains consistent even when axes are transformed:
 
 ```{r ggcorr-trans}
 ggcorr(
-  data = response_tbl |> dplyr::mutate(response = abs(response + 1)^4),
+  data = response_tbl %>% dplyr::mutate(response = abs(response + 1)^4),
   grp = "group",
   y = "response",
   id = "pid",

@@ -247,7 +247,7 @@ plot_cluster_heatmap <- function(data,
                                        values_col,
                                        values_size,
                                        scale_method) {
-  plot_tbl <- plot_tbl |>
+  plot_tbl <- plot_tbl %>%
     dplyr::mutate(
       cluster = factor(.data$cluster, levels = order_list$cluster),
       variable = factor(.data$variable, levels = order_list$variable)
@@ -303,7 +303,7 @@ plot_cluster_heatmap <- function(data,
     if (is.null(values_format)) {
       values_format <- function(x) formatC(x, digits = 3, format = "g")
     }
-    plot_tbl <- plot_tbl |>
+    plot_tbl <- plot_tbl %>%
       dplyr::mutate(label = values_format(.data$med))
     p <- p + ggplot2::geom_text(
       data = plot_tbl,

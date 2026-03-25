@@ -25,7 +25,7 @@
 }
 
 .utilsggsv_renv_detect <- function() {
-  .utilsggsv_renv_lockfile_path_get() |> file.exists()
+  .utilsggsv_renv_lockfile_path_get() %>% file.exists()
 }
 
 .utilsggsv_renv_lockfile_path_get <- function() {

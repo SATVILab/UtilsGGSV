@@ -59,7 +59,7 @@ test_that("ggcorr works", {
 
   # only two groups
   p_test <- ggcorr(
-    data = response_tbl |>
+    data = response_tbl %>%
       dplyr::filter(group != "c"),
     grp = "group",
     y = "response",
@@ -73,7 +73,7 @@ test_that("ggcorr works", {
 
   # labelling ids
   p_test <- ggcorr(
-    data = response_tbl |>
+    data = response_tbl %>%
       dplyr::filter(group != "c"),
     grp = "group",
     y = "response",
@@ -88,7 +88,7 @@ test_that("ggcorr works", {
 
   # test adding the abline
   p_test <- ggcorr(
-    data = response_tbl |>
+    data = response_tbl %>%
       dplyr::filter(group != "c"),
     grp = "group",
     y = "response",
@@ -102,7 +102,7 @@ test_that("ggcorr works", {
   )
 
   p_test <- ggcorr(
-    data = response_tbl |>
+    data = response_tbl %>%
       dplyr::filter(group != "c"),
     grp = "group",
     y = "response",
@@ -117,7 +117,7 @@ test_that("ggcorr works", {
 
   # loess smooth
   p_test <- ggcorr(
-    data = response_tbl |>
+    data = response_tbl %>%
       dplyr::filter(group != "c"),
     grp = "group",
     y = "response",
@@ -131,7 +131,7 @@ test_that("ggcorr works", {
   )
 
   p_test <- ggcorr(
-    data = response_tbl |>
+    data = response_tbl %>%
       dplyr::filter(group != "c"),
     grp = "group",
     y = "response",

@@ -109,7 +109,7 @@ axis_limits <- function(p,
         stop("limits_expand must have names of 'x' and/or 'y' (if named)")
       }
     }
-    class_input <- purrr::map_lgl(limits_expand, is.numeric) |> all()
+    class_input <- purrr::map_lgl(limits_expand, is.numeric) %>% all()
     if (!class_input) {
       stop("input to limits_expand must be numeric (if limits_expand not NULL)")
     }
@@ -171,7 +171,7 @@ axis_limits <- function(p,
   } else {
     # limits_equal may or may not be true
     if (limits_equal) {
-      limits_expand_all <- limits_expand |>
+      limits_expand_all <- limits_expand %>%
         unlist()
       lims <- c(
         min(range, limits_expand_all),
@@ -182,8 +182,8 @@ axis_limits <- function(p,
       }
       if (length(limits_expand) == 1) {
         nm <- setdiff(c("x", "y"), names(limits_expand))
-        limits_expand <- limits_expand |>
-          append(list(range) |> stats::setNames(nm))
+        limits_expand <- limits_expand %>%
+          append(list(range) %>% stats::setNames(nm))
       }
     }
   }
