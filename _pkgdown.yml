@@ -51,6 +51,8 @@ reference:
   - plot_cluster_heatmap
   - plot_cluster_density
   - plot_cluster_mst
+  - plot_cluster_scatter
+  - plot_median_cluster_centroid
 
 - title: Cluster Analysis
   desc: Functions for analysing and merging clusters
