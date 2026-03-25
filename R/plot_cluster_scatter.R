@@ -25,20 +25,23 @@
 #' @param y_lab character or `NULL`. Label for y axis; default uses reduction variable names.
 #' @param show_legend logical. Whether to show the legend. Default is `TRUE`.
 #'   Set to `FALSE` to hide the legend, as centroid labels may suffice.
+#' @param grid ggplot2 layer or `NULL`. Background grid added to the plot.
+#'   Default is `cowplot::background_grid(major = "xy")`. Set to `NULL` to
+#'   suppress the grid.
+#' @importFrom stats aggregate setNames
 #' @export
 #'
 #' @examples
-# set.seed(1)
-# data <- data.frame(
-#   cluster = rep(paste0("C", 1:3), each = 20),
-#   var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
-#   var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0)),
-#   var3 = c(rnorm(20, 1), rnorm(20, -1), rnorm(20, 0))
-# )
-# plot_cluster_scatter(data, cluster = "cluster")
-# plot_cluster_scatter(data, cluster = "cluster", dim_red = "none", vars = c("var1", "var2"))
-# plot_cluster_scatter(data, cluster = "cluster", dim_red = "tsne")
-# plot_cluster_scatter(data, cluster = "cluster", show_legend = FALSE) + ggplot2::theme(legend.position = "none")
+#' set.seed(1)
+#' data <- data.frame(
+#'   cluster = rep(paste0("C", 1:3), each = 20),
+#'   var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+#'   var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0)),
+#'   var3 = c(rnorm(20, 1), rnorm(20, -1), rnorm(20, 0))
+#' )
+#' plot_cluster_scatter(data, cluster = "cluster")
+#' plot_cluster_scatter(data, cluster = "cluster", dim_red = "none", vars = c("var1", "var2"))
+#' plot_cluster_scatter(data, cluster = "cluster", show_legend = FALSE)
 plot_cluster_scatter <- function(.data,
                                  cluster,
                                  dim_red = NULL,
@@ -302,31 +305,3 @@ plot_cluster_scatter <- function(.data,
   p
 }
 
-#' @keywords internal
-#' @noRd
-.plot_median_cluster_pca_data <- function(data, cluster, vars) {  # Perform PCA on the specified variables
-  pca_mat <- data[, vars, drop = FALSE]
-  
-  # Remove rows with missing values
-  complete_idx <- stats::complete.cases(pca_mat)
-  pca_mat_clean <- pca_mat[complete_idx, ]
-  
-  if (nrow(pca_mat_clean) == 0) {
-    stop("No complete cases after removing missing values.")
-  }
-  
-  # Run PCA
-  pca_result <- stats::prcomp(pca_mat_clean, scale. = TRUE)
-  
-  # Extract first two PCs
-  pc_scores <- pca_result$x[, 1:2, drop = FALSE]
-  
-  # Create result dataframe
-  result <- tibble::tibble(
-    PC1 = pc_scores[, 1],
-    PC2 = pc_scores[, 2],
-    .cluster = data[[cluster]][complete_idx]
-  )
-  
-  result
-}
