@@ -20,37 +20,6 @@ library(ggplot2)
 theme_set(cowplot::theme_cowplot())
 ```
 
-### Scatter Plot With Clusters with `plot_cluster_scatter`
-
-``` r
-set.seed(123)
-example_data <- data.frame(
-  cluster = rep(c("A", "B", "C"), each = 20),
-  var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
-  var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0)),
-  var3 = c(rnorm(20, 1), rnorm(20, -1), rnorm(20, 0))
-)
-
-# Default: PCA projection (> 2 numeric variables)
-plot_cluster_scatter(example_data, cluster = "cluster")
-#> dim_red automatically set to 'pca' because more than two numeric variables are available.
-```
-
-![](reference/figures/README-unnamed-chunk-3-1.png)
-
-Raw variables can also be used directly:
-
-``` r
-plot_cluster_scatter(
-  example_data,
-  cluster = "cluster",
-  dim_red = "none",
-  vars = c("var1", "var2")
-)
-```
-
-![](reference/figures/README-unnamed-chunk-4-1.png)
-
 ### Correlation Plots with `ggcorr`
 
 The function `ggcorr` plots correlation coefficients:
@@ -76,7 +45,7 @@ ggcorr(
 )
 ```
 
-![](reference/figures/README-unnamed-chunk-5-1.png)
+![](reference/figures/README-unnamed-chunk-3-1.png)
 
 We can display multiple correlation coefficients:
 
@@ -90,7 +59,7 @@ ggcorr(
 )
 ```
 
-![](reference/figures/README-unnamed-chunk-6-1.png)
+![](reference/figures/README-unnamed-chunk-4-1.png)
 
 We can compare more than two groups:
 
@@ -104,7 +73,7 @@ ggcorr(
 )
 ```
 
-![](reference/figures/README-unnamed-chunk-7-1.png)
+![](reference/figures/README-unnamed-chunk-5-1.png)
 
 We can compare more than two groups and multiple correlation
 coefficients:
@@ -119,7 +88,7 @@ ggcorr(
 )
 ```
 
-![](reference/figures/README-unnamed-chunk-8-1.png)
+![](reference/figures/README-unnamed-chunk-6-1.png)
 
 Specific functionality to make appropriate plots for the concordance
 correlation coefficient is available:
@@ -136,7 +105,7 @@ ggcorr(
 )
 ```
 
-![](reference/figures/README-unnamed-chunk-9-1.png)
+![](reference/figures/README-unnamed-chunk-7-1.png)
 
 Text in table can be moved around and resized:
 
@@ -158,7 +127,7 @@ ggcorr(
 )
 ```
 
-![](reference/figures/README-unnamed-chunk-10-1.png)
+![](reference/figures/README-unnamed-chunk-8-1.png)
 
 Finally, the text placement is kept consistent when the axes are
 visually transformed:
@@ -177,7 +146,7 @@ ggcorr(
 )
 ```
 
-![](reference/figures/README-unnamed-chunk-11-1.png)
+![](reference/figures/README-unnamed-chunk-9-1.png)
 
 ### Axis Limits with `axis_limits`
 
@@ -290,6 +259,10 @@ add_text_column(
 
 ### Cluster-Specific Plots
 
+The `plot_cluster_*` family of functions helps visualise the
+characteristics of clusters identified by an unsupervised learning
+method.
+
 #### Heat Maps with `plot_cluster_heatmap`
 
 The function `plot_cluster_heatmap` creates a heat map where each tile
@@ -312,11 +285,15 @@ plot_cluster_heatmap(cluster_data, cluster = "cluster")
 
 #### Density Plots with `plot_cluster_density`
 
-The function `plot_cluster_density` plots, for each variable, the
-overall density of values across all observations and overlays a
-vertical line for each cluster at that cluster’s median value. Each
-cluster is given a distinct colour, making it easy to see how each
-cluster relates to the overall distribution.
+The function `plot_cluster_density` visualises, for each variable, how
+each cluster’s observations are distributed relative to the overall
+population. The `density` argument controls what is shown: `"overall"`
+(default, overall density plus cluster median lines), `"cluster"` (one
+density curve per cluster), or `"both"` (overall density plus
+per-cluster density curves). When showing per-cluster densities, the
+`scale` argument controls scaling: by default (`"max_overall"`) each
+cluster density is rescaled so its maximum equals the overall density
+maximum.
 
 ``` r
 set.seed(1)
@@ -325,6 +302,7 @@ cluster_data <- data.frame(
   var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
   var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
 )
+# Default: overall density with cluster median lines
 plot_cluster_density(cluster_data, cluster = "cluster")
 #> $var1
 ```
@@ -337,6 +315,56 @@ plot_cluster_density(cluster_data, cluster = "cluster")
 ```
 
 ![](reference/figures/README-plot_cluster_density-2.png)
+
+``` r
+# Both overall and per-cluster densities (scaled to overall maximum)
+plot_cluster_density(cluster_data, cluster = "cluster", density = "both")
+#> $var1
+```
+
+![](reference/figures/README-plot_cluster_density_both-1.png)
+
+``` R
+#> 
+#> $var2
+```
+
+![](reference/figures/README-plot_cluster_density_both-2.png)
+
+#### Scatter Plot with `plot_cluster_scatter`
+
+The function `plot_cluster_scatter` creates a biaxial scatter plot with
+observations coloured by cluster and median centroids overlaid. When
+more than two variables are supplied it defaults to a PCA projection.
+
+``` r
+set.seed(123)
+example_data <- data.frame(
+  cluster = rep(c("A", "B", "C"), each = 20),
+  var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+  var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0)),
+  var3 = c(rnorm(20, 1), rnorm(20, -1), rnorm(20, 0))
+)
+
+# Default: PCA projection (> 2 numeric variables)
+plot_cluster_scatter(example_data, cluster = "cluster")
+#> dim_red automatically set to 'pca' because more than two numeric variables are available.
+```
+
+![](reference/figures/README-plot_cluster_scatter-1.png)
+
+Raw variables can also be used directly:
+
+``` r
+plot_cluster_scatter(
+  example_data,
+  cluster = "cluster",
+  dim_red = "none",
+  vars = c("var1", "var2")
+)
+```
+
+![](reference/figures/README-plot_cluster_scatter_none-1.png)
 
 #### Minimum-Spanning Tree with `plot_cluster_mst`
 

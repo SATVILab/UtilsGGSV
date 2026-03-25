@@ -1,9 +1,16 @@
 # Plot density of variable values with per-cluster median lines
 
-For each variable, plots the overall density of values across all
-observations and overlays a vertical line for each cluster at that
-cluster's median value for the variable. Each cluster is given a
-distinct colour.
+For each variable, plots the density of values and optionally overlays
+per-cluster density curves or cluster median lines. The `density`
+argument controls what is shown:
+
+- `"overall"` (default): the overall density of all observations with a
+  vertical line per cluster at that cluster's median value.
+
+- `"cluster"`: one density curve per cluster, coloured by cluster.
+
+- `"both"`: the overall density curve and one density curve per cluster,
+  with the cluster curves scaled according to the `scale` argument.
 
 By default the function returns a **named list of ggplot2 objects**, one
 per variable. If `n_col` or `n_row` is supplied the plots are instead
@@ -19,6 +26,8 @@ plot_cluster_density(
   col_clusters = NULL,
   n_col = NULL,
   n_row = NULL,
+  density = "overall",
+  scale = "max_overall",
   scales = "free_y",
   expand_coord = NULL,
   exclude_min = "no",
@@ -67,6 +76,25 @@ plot_cluster_density(
   [`ggplot2::facet_wrap`](https://ggplot2.tidyverse.org/reference/facet_wrap.html).
   If supplied (or if `n_col` is supplied) a single faceted plot is
   returned instead of a list. Default is `NULL`.
+
+- density:
+
+  character. What density to display. One of `"overall"` (default:
+  overall density curve plus cluster median lines), `"cluster"` (one
+  density curve per cluster, coloured by cluster), or `"both"` (overall
+  density curve plus per-cluster density curves). When `"cluster"` or
+  `"both"`, the `scale` argument controls how cluster densities are
+  scaled.
+
+- scale:
+
+  character. How to scale per-cluster density curves. Only relevant when
+  `density` is `"cluster"` or `"both"`. One of `"max_overall"` (default:
+  each cluster density is rescaled so that its maximum equals the
+  maximum of the overall density, keeping y-axis values comparable to
+  the overall density), `"max_cluster"` (no rescaling; y-axis is
+  determined by the tallest curve), or `"free"` (no rescaling;
+  equivalent to `"max_cluster"`).
 
 - scales:
 
@@ -126,8 +154,26 @@ data <- data.frame(
   var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
   var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
 )
-# Default: returns a list of plots
+# Default: overall density with cluster median lines
 plot_list <- plot_cluster_density(data, cluster = "cluster")
+
+# Per-cluster density curves
+plot_cluster_density(data, cluster = "cluster", density = "cluster")
+#> $var1
+
+#> 
+#> $var2
+
+#> 
+
+# Both overall and per-cluster densities (default scaling: max_overall)
+plot_cluster_density(data, cluster = "cluster", density = "both")
+#> $var1
+
+#> 
+#> $var2
+
+#> 
 
 # Faceted plot with 2 columns
 plot_cluster_density(data, cluster = "cluster", n_col = 2)

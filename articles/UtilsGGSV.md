@@ -12,98 +12,6 @@ library(magrittr)
 theme_set(cowplot::theme_cowplot())
 ```
 
-## Scatter Plot with Clusters using `plot_cluster_scatter`
-
-The `plot_cluster_scatter` function creates a biaxial scatter plot with
-observations coloured by cluster and median centroids overlaid. It
-supports four dimensionality reduction methods via the `dim_red`
-argument: `"none"`, `"pca"`, `"tsne"`, and `"umap"`.
-
-``` r
-set.seed(42)
-cluster_data <- data.frame(
-  cluster = rep(c("A", "B", "C"), each = 20),
-  var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
-  var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0)),
-  var3 = c(rnorm(20, 1), rnorm(20, -1), rnorm(20, 0))
-)
-```
-
-### Raw variables (`dim_red = "none"`)
-
-When exactly two variables are available, or when you pass
-`dim_red = "none"`, the first two selected variables are used directly
-as axes:
-
-``` r
-plot_cluster_scatter(
-  cluster_data,
-  cluster = "cluster",
-  dim_red = "none",
-  vars = c("var1", "var2")
-)
-```
-
-![](UtilsGGSV_files/figure-html/plot-cluster-scatter-none-1.png)
-
-### PCA (`dim_red = "pca"`)
-
-When more than two variables are available the default is `"pca"`, which
-projects all numeric variables onto the first two principal components:
-
-``` r
-plot_cluster_scatter(
-  cluster_data,
-  cluster = "cluster",
-  dim_red = "pca"
-)
-```
-
-![](UtilsGGSV_files/figure-html/plot-cluster-scatter-pca-1.png)
-
-### t-SNE (`dim_red = "tsne"`)
-
-t-SNE is available when the `Rtsne` package is installed:
-
-``` r
-plot_cluster_scatter(
-  cluster_data,
-  cluster = "cluster",
-  dim_red = "tsne"
-)
-```
-
-![](UtilsGGSV_files/figure-html/plot-cluster-scatter-tsne-1.png)
-
-### UMAP (`dim_red = "umap"`)
-
-UMAP is available when the `umap` package is installed:
-
-``` r
-plot_cluster_scatter(
-  cluster_data,
-  cluster = "cluster",
-  dim_red = "umap"
-)
-```
-
-![](UtilsGGSV_files/figure-html/plot-cluster-scatter-umap-1.png)
-
-### Hiding the legend
-
-When centroid labels are sufficient, set `show_legend = FALSE`:
-
-``` r
-plot_cluster_scatter(
-  cluster_data,
-  cluster = "cluster",
-  dim_red = "pca",
-  show_legend = FALSE
-)
-```
-
-![](UtilsGGSV_files/figure-html/plot-cluster-scatter-nolegend-1.png)
-
 ## Correlation Plots with `ggcorr`
 
 The `ggcorr` function creates scatterplots with correlation coefficients
@@ -322,6 +230,25 @@ add_text_column(
 
 ## Cluster-Specific Plots
 
+The `plot_cluster_*` family of functions helps visualise the
+characteristics of clusters identified by an unsupervised learning
+method. The examples below use the `palmerpenguins` dataset: we first
+apply k-means clustering to bill and flipper measurements, then explore
+the clusters using each function.
+
+``` r
+set.seed(42)
+penguins <- palmerpenguins::penguins
+penguins <- penguins[complete.cases(penguins[
+  c("bill_length_mm", "bill_depth_mm", "flipper_length_mm", "body_mass_g")
+]), ]
+vars_penguin <- c(
+  "bill_length_mm", "bill_depth_mm", "flipper_length_mm", "body_mass_g"
+)
+km <- kmeans(scale(penguins[vars_penguin]), centers = 3)
+penguins$cluster <- paste0("K", km$cluster)
+```
+
 ### Heat Maps with `plot_cluster_heatmap`
 
 The `plot_cluster_heatmap` function creates a heat map where each tile
@@ -332,42 +259,153 @@ not in the cluster. Clusters and variables are ordered along the axes
 via hierarchical clustering.
 
 ``` r
-set.seed(1)
-cluster_data <- data.frame(
-  cluster = rep(paste0("C", 1:3), each = 20),
-  var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
-  var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
-)
-plot_cluster_heatmap(cluster_data, cluster = "cluster")
+plot_cluster_heatmap(penguins, cluster = "cluster", vars = vars_penguin)
 ```
 
 ![](UtilsGGSV_files/figure-html/plot-cluster-heatmap-1.png)
 
 ### Density Plots with `plot_cluster_density`
 
-The `plot_cluster_density` function plots, for each variable, the
-overall density of values across all observations and overlays a
-vertical line for each cluster at that cluster’s median value. Each
-cluster is given a distinct colour, making it easy to see how each
-cluster relates to the overall distribution.
+The `plot_cluster_density` function visualises, for each variable, how
+each cluster’s observations are distributed relative to the overall
+population. The `density` argument controls what is shown:
+
+- `"overall"` (default): the overall density with per-cluster median
+  lines.
+- `"cluster"`: one density curve per cluster.
+- `"both"`: overall density plus per-cluster density curves.
+
+#### Overall density with cluster median lines (default)
 
 ``` r
-set.seed(1)
-cluster_data <- data.frame(
-  cluster = rep(paste0("C", 1:3), each = 20),
-  var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
-  var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
+plot_cluster_density(
+  penguins,
+  cluster = "cluster",
+  vars = vars_penguin,
+  n_col = 2
 )
-plot_cluster_density(cluster_data, cluster = "cluster")
-#> $var1
 ```
 
-![](UtilsGGSV_files/figure-html/plot-cluster-density-1.png)
+![](UtilsGGSV_files/figure-html/plot-cluster-density-overall-1.png)
 
-    #> 
-    #> $var2
+#### Per-cluster density curves
 
-![](UtilsGGSV_files/figure-html/plot-cluster-density-2.png)
+``` r
+plot_cluster_density(
+  penguins,
+  cluster = "cluster",
+  vars = vars_penguin,
+  density = "cluster",
+  n_col = 2
+)
+```
+
+![](UtilsGGSV_files/figure-html/plot-cluster-density-cluster-1.png)
+
+#### Both overall and per-cluster densities
+
+When `density = "both"`, the `scale` argument controls how cluster
+curves are scaled relative to the overall density:
+
+- `"max_overall"` (default): each cluster density is rescaled so that
+  its maximum equals the maximum of the overall density. Y-axis values
+  reflect the overall density.
+- `"max_cluster"`: no rescaling; the y-axis is determined by the tallest
+  curve.
+- `"free"`: no rescaling (equivalent to `"max_cluster"`).
+
+``` r
+# scale = "max_overall" keeps the y-axis anchored to the overall density
+plot_cluster_density(
+  penguins,
+  cluster = "cluster",
+  vars = vars_penguin,
+  density = "both",
+  scale = "max_overall",
+  n_col = 2
+)
+```
+
+![](UtilsGGSV_files/figure-html/plot-cluster-density-both-1.png)
+
+``` r
+# scale = "max_cluster": natural scale for all curves
+plot_cluster_density(
+  penguins,
+  cluster = "cluster",
+  vars = vars_penguin,
+  density = "both",
+  scale = "max_cluster",
+  n_col = 2
+)
+```
+
+![](UtilsGGSV_files/figure-html/plot-cluster-density-both-free-1.png)
+
+### Scatter Plot with `plot_cluster_scatter`
+
+The `plot_cluster_scatter` function creates a biaxial scatter plot with
+observations coloured by cluster and median centroids overlaid. It
+supports four dimensionality reduction methods via the `dim_red`
+argument: `"none"`, `"pca"`, `"tsne"`, and `"umap"`.
+
+#### PCA projection (default for more than two variables)
+
+``` r
+plot_cluster_scatter(
+  penguins,
+  cluster = "cluster",
+  vars = vars_penguin,
+  dim_red = "pca"
+)
+```
+
+![](UtilsGGSV_files/figure-html/plot-cluster-scatter-pca-1.png)
+
+#### Raw variables (`dim_red = "none"`)
+
+When exactly two variables are needed directly as axes:
+
+``` r
+plot_cluster_scatter(
+  penguins,
+  cluster = "cluster",
+  vars = c("bill_length_mm", "flipper_length_mm"),
+  dim_red = "none"
+)
+```
+
+![](UtilsGGSV_files/figure-html/plot-cluster-scatter-none-1.png)
+
+#### t-SNE
+
+t-SNE is available when the `Rtsne` package is installed:
+
+``` r
+plot_cluster_scatter(
+  penguins,
+  cluster = "cluster",
+  vars = vars_penguin,
+  dim_red = "tsne"
+)
+```
+
+![](UtilsGGSV_files/figure-html/plot-cluster-scatter-tsne-1.png)
+
+#### UMAP
+
+UMAP is available when the `umap` package is installed:
+
+``` r
+plot_cluster_scatter(
+  penguins,
+  cluster = "cluster",
+  vars = vars_penguin,
+  dim_red = "umap"
+)
+```
+
+![](UtilsGGSV_files/figure-html/plot-cluster-scatter-umap-1.png)
 
 ### Minimum-Spanning Tree with `plot_cluster_mst`
 
@@ -383,25 +421,15 @@ combined
 figure with variable names as labels.
 
 ``` r
-set.seed(1)
-cluster_data <- data.frame(
-  cluster = rep(paste0("C", 1:3), each = 20),
-  var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
-  var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
+plot_cluster_mst(
+  penguins,
+  cluster = "cluster",
+  vars = vars_penguin,
+  n_col = 2
 )
-plot_list <- plot_cluster_mst(cluster_data, cluster = "cluster")
-plot_list[["var1"]]
 ```
 
 ![](UtilsGGSV_files/figure-html/plot-cluster-mst-1.png)
-
-Combine into a labelled grid:
-
-``` r
-plot_cluster_mst(cluster_data, cluster = "cluster", n_col = 2)
-```
-
-![](UtilsGGSV_files/figure-html/plot-cluster-mst-grid-1.png)
 
 ## Transformations with `get_trans`
 
