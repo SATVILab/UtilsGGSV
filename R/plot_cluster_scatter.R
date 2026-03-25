@@ -25,6 +25,14 @@
 #' @param y_lab character or `NULL`. Label for y axis; default uses reduction variable names.
 #' @param show_legend logical. Whether to show the legend. Default is `TRUE`.
 #'   Set to `FALSE` to hide the legend, as centroid labels may suffice.
+#' @param dim_red_args named list. Additional arguments passed to the
+#'   dimensionality reduction function, overriding any defaults set by
+#'   `plot_cluster_scatter`. For `dim_red = "pca"` these are passed to
+#'   [stats::prcomp()] (default: `scale. = TRUE`); for `dim_red = "tsne"` to
+#'   [Rtsne::Rtsne()] (defaults: `dims = 2`, `perplexity` auto-computed,
+#'   `check_duplicates = FALSE`, `pca = FALSE`); for `dim_red = "umap"` to
+#'   [umap::umap()]. The data argument is always set internally and cannot be
+#'   overridden. Ignored when `dim_red = "none"`. Default is `list()`.
 #' @param grid ggplot2 layer or `NULL`. Background grid added to the plot.
 #'   Default is `cowplot::background_grid(major = "xy")`. Set to `NULL` to
 #'   suppress the grid.
@@ -42,10 +50,14 @@
 #' plot_cluster_scatter(data, cluster = "cluster")
 #' plot_cluster_scatter(data, cluster = "cluster", dim_red = "none", vars = c("var1", "var2"))
 #' plot_cluster_scatter(data, cluster = "cluster", show_legend = FALSE)
+#' # Pass extra arguments to the dim-red function, e.g. disable scaling in PCA:
+#' plot_cluster_scatter(data, cluster = "cluster", dim_red = "pca",
+#'                      dim_red_args = list(scale. = FALSE))
 plot_cluster_scatter <- function(.data,
                                  cluster,
                                  dim_red = NULL,
                                  vars = NULL,
+                                 dim_red_args = list(),
                                  point_col_var = NULL,
                                  point_col = NULL,
                                  point_size = 2,
@@ -142,7 +154,9 @@ plot_cluster_scatter <- function(.data,
     x_values <- coords[[1]]
     y_values <- coords[[2]]
   } else if (dim_red == "pca") {
-    pca_result <- stats::prcomp(data_clean[, input_vars, drop = FALSE], scale. = TRUE)
+    pca_call_args <- modifyList(list(scale. = TRUE), dim_red_args)
+    pca_call_args[["x"]] <- data_clean[, input_vars, drop = FALSE]
+    pca_result <- do.call(stats::prcomp, pca_call_args)
     if (ncol(pca_result$x) < 2) {
       stop("PCA did not return at least two components.")
     }
@@ -162,13 +176,12 @@ plot_cluster_scatter <- function(.data,
     if (perplexity < 1) {
       stop("Not enough samples for t-SNE. Need at least 3 observations.")
     }
-    tsne_res <- Rtsne::Rtsne(
-      data_clean[, input_vars, drop = FALSE],
-      dims = 2,
-      perplexity = perplexity,
-      check_duplicates = FALSE,
-      pca = FALSE
+    tsne_call_args <- modifyList(
+      list(dims = 2, perplexity = perplexity, check_duplicates = FALSE, pca = FALSE),
+      dim_red_args
     )
+    tsne_call_args[["X"]] <- data_clean[, input_vars, drop = FALSE]
+    tsne_res <- do.call(Rtsne::Rtsne, tsne_call_args)
     x_values <- tsne_res$Y[, 1]
     y_values <- tsne_res$Y[, 2]
     x_var <- "tSNE1"
@@ -180,7 +193,9 @@ plot_cluster_scatter <- function(.data,
       }
       stop("Package 'umap' is required for dim_red = 'umap'.")
     }
-    umap_res <- umap::umap(data_clean[, input_vars, drop = FALSE])
+    umap_call_args <- modifyList(list(), dim_red_args)
+    umap_call_args[["d"]] <- data_clean[, input_vars, drop = FALSE]
+    umap_res <- do.call(umap::umap, umap_call_args)
     x_values <- umap_res$layout[, 1]
     y_values <- umap_res$layout[, 2]
     x_var <- "UMAP1"

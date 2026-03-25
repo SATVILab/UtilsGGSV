@@ -257,3 +257,64 @@ test_that("plot_cluster_scatter errors with insufficient variables for none", {
     "requires at least two variables"
   )
 })
+
+test_that("plot_cluster_scatter passes dim_red_args to prcomp (pca)", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0)),
+    var3 = c(rnorm(20, 1), rnorm(20, -1), rnorm(20, 0))
+  )
+
+  result <- plot_cluster_scatter(
+    data,
+    cluster = "cluster",
+    dim_red = "pca",
+    dim_red_args = list(scale. = FALSE)
+  )
+
+  expect_s3_class(result, "ggplot")
+})
+
+test_that("plot_cluster_scatter passes dim_red_args to Rtsne (tsne)", {
+  skip_if_not_installed("Rtsne")
+
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0)),
+    var3 = c(rnorm(20, 1), rnorm(20, -1), rnorm(20, 0))
+  )
+
+  result <- plot_cluster_scatter(
+    data,
+    cluster = "cluster",
+    dim_red = "tsne",
+    dim_red_args = list(perplexity = 5)
+  )
+
+  expect_s3_class(result, "ggplot")
+})
+
+test_that("plot_cluster_scatter passes dim_red_args to umap", {
+  skip_if_not_installed("umap")
+
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0)),
+    var3 = c(rnorm(20, 1), rnorm(20, -1), rnorm(20, 0))
+  )
+
+  result <- plot_cluster_scatter(
+    data,
+    cluster = "cluster",
+    dim_red = "umap",
+    dim_red_args = list(config = umap::umap.defaults)
+  )
+
+  expect_s3_class(result, "ggplot")
+})

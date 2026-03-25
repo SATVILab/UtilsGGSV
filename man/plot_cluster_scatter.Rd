@@ -9,6 +9,7 @@ plot_cluster_scatter(
   cluster,
   dim_red = NULL,
   vars = NULL,
+  dim_red_args = list(),
   point_col_var = NULL,
   point_col = NULL,
   point_size = 2,
@@ -35,6 +36,15 @@ plot_cluster_scatter(
 \item{dim_red}{character or \code{NULL}. Dimensionality reduction method: one of \code{"none"}, \code{"pca"}, \code{"tsne"}, \code{"umap"}. If \code{NULL}, auto-selects \code{"none"} when exactly 2 numeric vars are available, otherwise \code{"pca"}.}
 
 \item{vars}{character vector or \code{NULL}. Names of numeric columns in \code{.data} to use for the plot or reduction. If \code{NULL}, uses all numeric columns except \code{cluster} and \code{point_col_var}.}
+
+\item{dim_red_args}{named list. Additional arguments passed to the
+dimensionality reduction function, overriding any defaults set by
+\code{plot_cluster_scatter}. For \code{dim_red = "pca"} these are passed to
+\code{\link[stats:prcomp]{stats::prcomp()}} (default: \code{scale. = TRUE}); for \code{dim_red = "tsne"} to
+\code{\link[Rtsne:Rtsne]{Rtsne::Rtsne()}} (defaults: \code{dims = 2}, \code{perplexity} auto-computed,
+\code{check_duplicates = FALSE}, \code{pca = FALSE}); for \code{dim_red = "umap"} to
+\code{\link[umap:umap]{umap::umap()}}. The data argument is always set internally and cannot be
+overridden. Ignored when \code{dim_red = "none"}. Default is \code{list()}.}
 
 \item{point_col_var}{character or \code{NULL}. Column to use for point colour mapping. Default is same as \code{cluster}.}
 
@@ -84,4 +94,7 @@ data <- data.frame(
 plot_cluster_scatter(data, cluster = "cluster")
 plot_cluster_scatter(data, cluster = "cluster", dim_red = "none", vars = c("var1", "var2"))
 plot_cluster_scatter(data, cluster = "cluster", show_legend = FALSE)
+# Pass extra arguments to the dim-red function, e.g. disable scaling in PCA:
+plot_cluster_scatter(data, cluster = "cluster", dim_red = "pca",
+                     dim_red_args = list(scale. = FALSE))
 }
