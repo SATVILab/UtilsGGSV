@@ -13,6 +13,7 @@ plot_cluster_scatter(
   cluster,
   dim_red = NULL,
   vars = NULL,
+  dim_red_args = list(),
   point_col_var = NULL,
   point_col = NULL,
   point_size = 2,
@@ -55,6 +56,21 @@ plot_cluster_scatter(
   character vector or `NULL`. Names of numeric columns in `.data` to use
   for the plot or reduction. If `NULL`, uses all numeric columns except
   `cluster` and `point_col_var`.
+
+- dim_red_args:
+
+  named list. Additional arguments passed to the dimensionality
+  reduction function, overriding any defaults set by
+  `plot_cluster_scatter`. For `dim_red = "pca"` these are passed to
+  [`stats::prcomp()`](https://rdrr.io/r/stats/prcomp.html) (default:
+  `scale. = TRUE`); for `dim_red = "tsne"` to
+  [`Rtsne::Rtsne()`](https://rdrr.io/pkg/Rtsne/man/Rtsne.html)
+  (defaults: `dims = 2`, `perplexity` auto-computed,
+  `check_duplicates = FALSE`, `pca = FALSE`); for `dim_red = "umap"` to
+  [`umap::umap()`](https://rdrr.io/pkg/umap/man/umap.html). The data
+  argument is always set internally and cannot be overridden. Ignored
+  when `dim_red = "none"`. Default is
+  [`list()`](https://rdrr.io/r/base/list.html).
 
 - point_col_var:
 
@@ -144,4 +160,8 @@ plot_cluster_scatter(data, cluster = "cluster", dim_red = "none", vars = c("var1
 
 plot_cluster_scatter(data, cluster = "cluster", show_legend = FALSE)
 #> dim_red automatically set to 'pca' because more than two numeric variables are available.
+
+# Pass extra arguments to the dim-red function, e.g. disable scaling in PCA:
+plot_cluster_scatter(data, cluster = "cluster", dim_red = "pca",
+                     dim_red_args = list(scale. = FALSE))
 ```
