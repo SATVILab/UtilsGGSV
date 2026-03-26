@@ -16,6 +16,8 @@ plot_cluster_density(
   scales = "free_y",
   expand_coord = NULL,
   exclude_min = "no",
+  rug = NULL,
+  density_overall_weight = NULL,
   font_size = 14,
   thm = cowplot::theme_cowplot(font_size = font_size) + ggplot2::theme(plot.background =
     ggplot2::element_rect(fill = "white", colour = NA), panel.background =
@@ -79,6 +81,20 @@ value equals the global minimum across all variables), or \code{"variable"}
 (for each variable, exclude observations whose value equals that
 variable's minimum).}
 
+\item{rug}{character or \code{NULL}. Controls the rug added below the density.
+\code{NULL} (default): per-cluster rug when \code{density} is \code{"cluster"} or
+\code{"both"}, overall rug when \code{density} is \code{"overall"}. \code{"cluster"}:
+per-cluster rug, coloured by cluster. \code{"overall"}: overall rug with no
+cluster colouring.}
+
+\item{density_overall_weight}{character or \code{NULL}. Controls weighting of the
+overall density when \code{density} is \code{"overall"} or \code{"both"}. \code{NULL}
+(default): the overall density is estimated from all observations pooled
+together. \code{"even"}: the overall density is computed as an equal-weight
+average of per-cluster kernel densities (using the Sheather-Jones
+bandwidth for each cluster), preventing larger clusters from dominating
+the density estimate. Ignored when \code{density} is \code{"cluster"}.}
+
 \item{font_size}{numeric. Font size passed to \code{cowplot::theme_cowplot}.
 Default is \code{14}.}
 
@@ -106,6 +122,15 @@ vertical line per cluster at that cluster's median value.
 with the cluster curves scaled according to the \code{scale} argument.
 }
 
+A rug is added by default. The \code{rug} argument controls which data the rug
+represents:
+\itemize{
+\item \code{NULL} (default): per-cluster rug when \code{density} is \code{"cluster"} or
+\code{"both"}, overall rug when \code{density} is \code{"overall"}.
+\item \code{"cluster"}: per-cluster rug, coloured by cluster.
+\item \code{"overall"}: overall rug (no cluster colouring).
+}
+
 By default the function returns a \strong{named list of ggplot2 objects}, one
 per variable. If \code{n_col} or \code{n_row} is supplied the plots are instead
 combined into a \strong{single faceted ggplot2 object} via \code{facet_wrap}.
@@ -126,6 +151,12 @@ plot_cluster_density(data, cluster = "cluster", density = "cluster")
 # Both overall and per-cluster densities (default scaling: max_overall)
 plot_cluster_density(data, cluster = "cluster", density = "both")
 
+# Even-weighted overall density
+plot_cluster_density(
+  data, cluster = "cluster", density_overall_weight = "even"
+)
+
 # Faceted plot with 2 columns
 plot_cluster_density(data, cluster = "cluster", n_col = 2)
 }
+
