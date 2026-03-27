@@ -1,7 +1,7 @@
 Package: UtilsGGSV
 Type: Package
 Title: Utility functions for ggplot2
-Version: 0.7.3
+Version: 0.7.4
 Author: Miguel Rodo
 Maintainer: Miguel Rodo <rdxmig002@myuct.ac.za>
 Description: Provides utility functions for working with `ggplot2` objects.
@@ -34,6 +34,7 @@ Imports:
     dplyr,
     tibble,
     igraph,
-    ggrepel
+    ggrepel,
+    ks
 Roxygen: list(markdown = TRUE)
 VignetteBuilder: knitr

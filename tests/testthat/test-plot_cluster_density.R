@@ -28,7 +28,9 @@ test_that("plot_cluster_density list plots have density and vline layers", {
     var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
     var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
   )
-  result <- plot_cluster_density(data, cluster = "cluster")
+  result <- plot_cluster_density(
+    data, cluster = "cluster", density = "overall"
+  )
   for (p in result) {
     expect_true(any(sapply(p$layers, function(l) inherits(l$geom, "GeomDensity"))))
     expect_true(any(sapply(p$layers, function(l) inherits(l$geom, "GeomVline"))))
@@ -64,7 +66,9 @@ test_that("plot_cluster_density facet plot has density and vline layers", {
     var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
     var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
   )
-  p <- plot_cluster_density(data, cluster = "cluster", n_col = 1)
+  p <- plot_cluster_density(
+    data, cluster = "cluster", density = "overall", n_col = 1
+  )
   expect_true(any(sapply(p$layers, function(l) inherits(l$geom, "GeomDensity"))))
   expect_true(any(sapply(p$layers, function(l) inherits(l$geom, "GeomVline"))))
 })
@@ -91,7 +95,8 @@ test_that("plot_cluster_density respects vars argument (facet mode)", {
     var3 = rnorm(60)
   )
   p <- plot_cluster_density(
-    data, cluster = "cluster", vars = c("var1", "var2"), n_col = 1
+    data, cluster = "cluster", vars = c("var1", "var2"),
+    density = "overall", n_col = 1
   )
   expect_equal(length(unique(p$data$variable)), 2L)
   expect_true(all(unique(p$data$variable) %in% c("var1", "var2")))
@@ -138,7 +143,9 @@ test_that("plot_cluster_density facet vline data has one row per cluster per var
     var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
     var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
   )
-  p <- plot_cluster_density(data, cluster = "cluster", n_col = 1)
+  p <- plot_cluster_density(
+    data, cluster = "cluster", density = "overall", n_col = 1
+  )
   vline_layer <- p$layers[
     sapply(p$layers, function(l) inherits(l$geom, "GeomVline"))
   ][[1]]
@@ -709,5 +716,127 @@ test_that("plot_cluster_density density_overall_weight invalid value errors", {
       data, cluster = "cluster", density_overall_weight = "half"
     ),
     "should be"
+  )
+})
+
+# bandwidth tests
+
+test_that("plot_cluster_density bandwidth = 'hpi_1' (default) returns ggplot list", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2))
+  )
+  result <- plot_cluster_density(
+    data, cluster = "cluster", density = "cluster"
+  )
+  expect_type(result, "list")
+  for (p in result) expect_s3_class(p, "ggplot")
+})
+
+test_that("plot_cluster_density bandwidth = 'hpi_0' returns ggplot list", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2))
+  )
+  result <- plot_cluster_density(
+    data, cluster = "cluster", density = "cluster", bandwidth = "hpi_0"
+  )
+  expect_type(result, "list")
+  for (p in result) expect_s3_class(p, "ggplot")
+})
+
+test_that("plot_cluster_density bandwidth = 'SJ' returns ggplot list", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2))
+  )
+  result <- plot_cluster_density(
+    data, cluster = "cluster", density = "cluster", bandwidth = "SJ"
+  )
+  expect_type(result, "list")
+  for (p in result) expect_s3_class(p, "ggplot")
+})
+
+test_that("plot_cluster_density bandwidth as numeric returns ggplot list", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2))
+  )
+  result <- plot_cluster_density(
+    data, cluster = "cluster", density = "cluster", bandwidth = 0.5
+  )
+  expect_type(result, "list")
+  for (p in result) expect_s3_class(p, "ggplot")
+})
+
+test_that("plot_cluster_density bandwidth invalid value errors", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = rnorm(60)
+  )
+  expect_error(
+    plot_cluster_density(
+      data, cluster = "cluster", bandwidth = "nrd0"
+    ),
+    "should be one of"
+  )
+})
+
+test_that("plot_cluster_density bandwidth hpi_1 applied in density_overall_weight=even", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2))
+  )
+  result <- plot_cluster_density(
+    data, cluster = "cluster", density = "overall",
+    density_overall_weight = "even", bandwidth = "hpi_1"
+  )
+  expect_type(result, "list")
+  for (p in result) expect_s3_class(p, "ggplot")
+})
+
+test_that("plot_cluster_density default density is 'both'", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2))
+  )
+  result <- plot_cluster_density(data, cluster = "cluster")
+  p <- result[["var1"]]
+  n_lines <- sum(sapply(p$layers, function(l) inherits(l$geom, "GeomLine")))
+  # 1 overall line + 1 cluster line layer (3 clusters combined in one layer)
+  expect_equal(n_lines, 2L)
+  expect_false(
+    any(sapply(p$layers, function(l) inherits(l$geom, "GeomDensity")))
+  )
+  expect_false(
+    any(sapply(p$layers, function(l) inherits(l$geom, "GeomVline")))
+  )
+  # The cluster density layer data should contain all 3 clusters
+  cluster_line <- p$layers[
+    sapply(p$layers, function(l) inherits(l$geom, "GeomLine"))
+  ][[2]]
+  expect_equal(length(unique(cluster_line$data$cluster)), 3L)
+})
+
+test_that("plot_cluster_density bandwidth non-positive errors", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = rnorm(60)
+  )
+  expect_error(
+    plot_cluster_density(data, cluster = "cluster", bandwidth = 0),
+    "positive"
+  )
+  expect_error(
+    plot_cluster_density(data, cluster = "cluster", bandwidth = -1),
+    "positive"
   )
 })
