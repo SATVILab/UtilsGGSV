@@ -7,12 +7,24 @@
 #' The plot can use either raw variables (specified by the user) or dimensionality
 #' reduction components as axes.
 #'
-#' @param data data.frame. Rows are observations. Must contain a column identifying cluster membership and numeric variables.
-#' @param cluster character. Name of the column in `data` that identifies cluster membership.
+#' @param .data data.frame. Rows are observations. Must contain a column identifying cluster membership and numeric variables.
+#' @param cluster character. Name of the column in `.data` that identifies cluster membership.
 #' @param dim_red character or `NULL`. Dimensionality reduction method: one of `"none"`, `"pca"`, `"tsne"`, `"umap"`. If `NULL`, auto-selects `"none"` when exactly 2 numeric vars are available, otherwise `"pca"`.
-#' @param vars character vector or `NULL`. Names of numeric columns in `data` to use for the plot or reduction. If `NULL`, uses all numeric columns except `cluster` and `point_col_var`.
+#' @param vars character vector or `NULL`. Names of numeric columns in `.data` to use for the plot or reduction. If `NULL`, uses all numeric columns except `cluster` and `point_col_var`.
 #' @param point_col_var character or `NULL`. Column to use for point colour mapping. Default is same as `cluster`.
-#' @param point_col named vector or NULL. Custom colours for discrete `point_col_var` (named by level) or colour bounds for continuous `point_col_var` (length 3 low/mid/high).
+#' @param point_col named vector or NULL. Custom colours for discrete `point_col_var` (named by level).
+#'   Ignored for continuous `point_col_var` (use `col` instead).
+#' @param col character vector. Colours used for the continuous `point_col_var` colour scale, ordered
+#'   from low to high values. Default is `c("#2166AC", "#F7F7F7", "#B2182B")` (blue, white, red).
+#'   Any number of colours (>= 2) is accepted. Ignored when `point_col_var` is discrete.
+#' @param col_positions numeric vector or `"auto"`. Positions (in \[0, 1\]) at which each colour in
+#'   `col` is placed on the colour scale. Must be the same length as `col`, sorted ascending, with
+#'   first value `0` and last value `1`. When `"auto"` (default) and `col` has exactly three colours,
+#'   the middle colour is stretched over `white_range`. In all other `"auto"` cases the colours are
+#'   evenly spaced from 0 to 1. Ignored when `point_col_var` is discrete.
+#' @param white_range numeric vector of length 2. The range of positions (on a 0-1 scale) over which
+#'   the middle colour is stretched. Only used when `col` has exactly three colours and
+#'   `col_positions = "auto"`. Default is `c(0.4, 0.6)`. Ignored when `point_col_var` is discrete.
 #' @param point_size numeric. Size of observation points. Default is `2`.
 #' @param point_alpha numeric. Alpha transparency for observation points and legend guide. Default is `0.65`.
 #' @param centroid_size numeric. Size of centroid points. Default is `3`.
@@ -41,25 +53,28 @@
 #'
 #' @examples
 #' set.seed(1)
-#' data <- data.frame(
+#' .data <- data.frame(
 #'   cluster = rep(paste0("C", 1:3), each = 20),
 #'   var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
 #'   var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0)),
 #'   var3 = c(rnorm(20, 1), rnorm(20, -1), rnorm(20, 0))
 #' )
-#' plot_cluster_scatter(data, cluster = "cluster")
-#' plot_cluster_scatter(data, cluster = "cluster", dim_red = "none", vars = c("var1", "var2"))
-#' plot_cluster_scatter(data, cluster = "cluster", show_legend = FALSE)
+#' plot_cluster_scatter(.data, cluster = "cluster")
+#' plot_cluster_scatter(.data, cluster = "cluster", dim_red = "none", vars = c("var1", "var2"))
+#' plot_cluster_scatter(.data, cluster = "cluster", show_legend = FALSE)
 #' # Pass extra arguments to the dim-red function, e.g. disable scaling in PCA:
-#' plot_cluster_scatter(data, cluster = "cluster", dim_red = "pca",
+#' plot_cluster_scatter(.data, cluster = "cluster", dim_red = "pca",
 #'                      dim_red_args = list(scale. = FALSE))
-plot_cluster_scatter <- function(data,
+plot_cluster_scatter <- function(.data,
                                  cluster,
                                  dim_red = NULL,
                                  vars = NULL,
                                  dim_red_args = list(),
                                  point_col_var = NULL,
                                  point_col = NULL,
+                                 col = c("#2166AC", "#F7F7F7", "#B2182B"),
+                                 col_positions = "auto",
+                                 white_range = c(0.4, 0.6),
                                  point_size = 2,
                                  point_alpha = 0.65,
                                  centroid_size = 3,
@@ -84,7 +99,7 @@ plot_cluster_scatter <- function(data,
                                  grid = cowplot::background_grid(
                                    major = "xy"
                                  )) {
-  .plot_cluster_validate(data, cluster, vars)
+  .plot_cluster_validate(.data, cluster, vars)
 
   if (is.null(point_col_var)) {
     point_col_var <- cluster
@@ -94,9 +109,9 @@ plot_cluster_scatter <- function(data,
       is.na(point_col_var)) {
     stop("`point_col_var` must be a single non-NA character string.", call. = FALSE)
   }
-  if (!(point_col_var %in% colnames(data))) {
+  if (!(point_col_var %in% colnames(.data))) {
     stop(
-      paste0("`point_col_var` column \"", point_col_var, "\" not found in `data`."),
+      paste0("`point_col_var` column \"", point_col_var, "\" not found in `.data`."),
       call. = FALSE
     )
   }
@@ -123,8 +138,8 @@ plot_cluster_scatter <- function(data,
   }
 
   input_vars <- if (is.null(vars)) {
-    candidates <- setdiff(colnames(data), unique(c(cluster, point_col_var)))
-    candidates[sapply(data[, candidates, drop = FALSE], is.numeric)]
+    candidates <- setdiff(colnames(.data), unique(c(cluster, point_col_var)))
+    candidates[sapply(.data[, candidates, drop = FALSE], is.numeric)]
   } else {
     vars
   }
@@ -153,12 +168,12 @@ plot_cluster_scatter <- function(data,
     stop("dim_red=\"none\" requires at least two variables in vars or numeric variables in `data`.")
   }
 
-  complete_idx <- stats::complete.cases(data[, input_vars, drop = FALSE])
+  complete_idx <- stats::complete.cases(.data[, input_vars, drop = FALSE])
   if (sum(complete_idx) == 0) {
     stop("No complete cases after removing missing values for selected vars.")
   }
 
-  data_clean <- data[complete_idx, , drop = FALSE]
+  data_clean <- .data[complete_idx, , drop = FALSE]
 
   if (dim_red == "none") {
     x_var <- input_vars[1]

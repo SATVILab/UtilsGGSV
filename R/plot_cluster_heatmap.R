@@ -10,7 +10,7 @@
 #' cluster. Clusters and variables are ordered along the axes via hierarchical
 #' clustering.
 #'
-#' @param data data.frame. Rows are observations. Must contain a column
+#' @param .data data.frame. Rows are observations. Must contain a column
 #'   identifying cluster membership and columns for variable values.
 #' @param cluster character. Name of the column in `data` that identifies
 #'   cluster membership.
@@ -76,14 +76,14 @@
 #'
 #' @examples
 #' set.seed(1)
-#' data <- data.frame(
+#' .data <- data.frame(
 #'   cluster = rep(paste0("C", 1:3), each = 20),
 #'   var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
 #'   var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
 #' )
-#' plot_cluster_heatmap(data, cluster = "cluster")
-#' plot_cluster_heatmap(data, cluster = "cluster", show_values = TRUE)
-plot_cluster_heatmap <- function(data,
+#' plot_cluster_heatmap(.data, cluster = "cluster")
+#' plot_cluster_heatmap(.data, cluster = "cluster", show_values = TRUE)
+plot_cluster_heatmap <- function(.data,
                                  cluster,
                                  vars = NULL,
                                  scale_method = "ecdf",
@@ -109,10 +109,10 @@ plot_cluster_heatmap <- function(data,
                                  values_format = NULL,
                                  values_col = "black",
                                  values_size = 3) {
-  .plot_cluster_validate(data, cluster, vars)
+  .plot_cluster_validate(.data, cluster, vars)
 
   if (is.null(vars)) {
-    vars <- setdiff(colnames(data), cluster)
+    vars <- setdiff(colnames(.data), cluster)
   }
 
   scale_method <- match.arg(
@@ -156,9 +156,9 @@ plot_cluster_heatmap <- function(data,
     stop("`show_values` must be TRUE or FALSE.", call. = FALSE)
   }
 
-  cluster_vec <- unique(data[[cluster]])
+  cluster_vec <- unique(.data[[cluster]])
 
-  plot_tbl <- .plot_cluster_heatmap_calc(data, cluster, vars, cluster_vec, scale_method)
+  plot_tbl <- .plot_cluster_heatmap_calc(.data, cluster, vars, cluster_vec, scale_method)
   order_list <- .plot_cluster_heatmap_order(plot_tbl)
 
   .plot_cluster_heatmap_plot(
@@ -177,13 +177,13 @@ plot_cluster_heatmap <- function(data,
   )
 }
 
-.plot_cluster_heatmap_calc <- function(data, cluster, vars, cluster_vec, scale_method) {
+.plot_cluster_heatmap_calc <- function(.data, cluster, vars, cluster_vec, scale_method) {
   if (scale_method == "ecdf") {
     return(purrr::map_df(cluster_vec, function(clust) {
-      obs_in <- data[[cluster]] == clust
-      data_out <- data[!obs_in, ]
+      obs_in <- .data[[cluster]] == clust
+      data_out <- .data[!obs_in, ]
       purrr::map_df(vars, function(var) {
-        med <- stats::median(data[[var]][obs_in])
+        med <- stats::median(.data[[var]][obs_in])
         ecdf_fn <- stats::ecdf(data_out[[var]])
         tibble::tibble(
           cluster = clust,
@@ -196,12 +196,12 @@ plot_cluster_heatmap <- function(data,
   }
 
   med_tbl <- purrr::map_df(cluster_vec, function(clust) {
-    obs_in <- data[[cluster]] == clust
+    obs_in <- .data[[cluster]] == clust
     purrr::map_df(vars, function(var) {
       tibble::tibble(
         cluster = clust,
         variable = var,
-        med = stats::median(data[[var]][obs_in])
+        med = stats::median(.data[[var]][obs_in])
       )
     })
   })
@@ -209,7 +209,7 @@ plot_cluster_heatmap <- function(data,
   if (scale_method == "zscore") {
     perc_vec <- numeric(nrow(med_tbl))
     for (var in vars) {
-      all_vals <- data[[var]]
+      all_vals <- .data[[var]]
       mu <- mean(all_vals, na.rm = TRUE)
       sigma <- stats::sd(all_vals, na.rm = TRUE)
       idx <- med_tbl$variable == var
@@ -220,7 +220,7 @@ plot_cluster_heatmap <- function(data,
   } else if (scale_method == "raw") {
     med_tbl$perc <- med_tbl$med
   } else if (scale_method == "minmax") {
-    all_vals <- unlist(lapply(vars, function(v) data[[v]]))
+    all_vals <- unlist(lapply(vars, function(v) .data[[v]]))
     global_min <- min(all_vals, na.rm = TRUE)
     global_max <- max(all_vals, na.rm = TRUE)
     med_tbl$perc <- if (global_max == global_min) 0.5 else
@@ -228,7 +228,7 @@ plot_cluster_heatmap <- function(data,
   } else if (scale_method == "minmax_var") {
     perc_vec <- numeric(nrow(med_tbl))
     for (var in vars) {
-      all_vals <- data[[var]]
+      all_vals <- .data[[var]]
       var_min <- min(all_vals, na.rm = TRUE)
       var_max <- max(all_vals, na.rm = TRUE)
       idx <- med_tbl$variable == var
