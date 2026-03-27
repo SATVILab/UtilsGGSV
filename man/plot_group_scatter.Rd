@@ -119,6 +119,8 @@ suppress the grid.}
 
 \item{cluster}{character. Name of the column in \code{.data} that identifies
 group membership. Alias for the \code{group} parameter.}
+
+\item{...}{Additional arguments passed to \code{\link[=plot_group_scatter]{plot_group_scatter()}}.}
 }
 \description{
 Creates a biaxial scatter plot with observations colored by group assignment.

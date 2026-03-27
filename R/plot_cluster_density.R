@@ -647,6 +647,7 @@ plot_group_density <- function(.data,
 #' @rdname plot_group_density
 #' @param cluster character. Name of the column in `.data` that identifies
 #'   group membership. Alias for the `group` parameter.
+#' @param ... Additional arguments passed to [plot_group_density()].
 #' @export
 plot_cluster_density <- function(.data, cluster, ...) {
   plot_group_density(.data, group = cluster, ...)

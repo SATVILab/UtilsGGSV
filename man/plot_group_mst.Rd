@@ -129,6 +129,8 @@ background. Set to \code{NULL} to apply no theme adjustment.}
 
 \item{cluster}{character. Name of the column in \code{.data} that identifies
 group membership. Alias for the \code{group} parameter.}
+
+\item{...}{Additional arguments passed to \code{\link[=plot_group_mst]{plot_group_mst()}}.}
 }
 \value{
 A named list of ggplot2 objects (one per variable) when neither

@@ -424,6 +424,7 @@ plot_group_heatmap <- function(.data,
 #' @rdname plot_group_heatmap
 #' @param cluster character. Name of the column in `.data` that identifies
 #'   group membership. Alias for the `group` parameter.
+#' @param ... Additional arguments passed to [plot_group_heatmap()].
 #' @export
 plot_cluster_heatmap <- function(.data, cluster, ...) {
   plot_group_heatmap(.data, group = cluster, ...)
