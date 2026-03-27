@@ -123,6 +123,8 @@ overlaid text labels. Default is \code{3}.}
 
 \item{cluster}{character. Name of the column in \code{.data} that identifies
 group membership. Alias for the \code{group} parameter.}
+
+\item{...}{Additional arguments passed to \code{\link[=plot_group_heatmap]{plot_group_heatmap()}}.}
 }
 \value{
 A ggplot object.

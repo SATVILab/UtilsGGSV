@@ -464,6 +464,7 @@ plot_group_mst <- function(.data,
 #' @rdname plot_group_mst
 #' @param cluster character. Name of the column in `.data` that identifies
 #'   group membership. Alias for the `group` parameter.
+#' @param ... Additional arguments passed to [plot_group_mst()].
 #' @export
 plot_cluster_mst <- function(.data, cluster, ...) {
   plot_group_mst(.data, group = cluster, ...)

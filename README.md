@@ -10,8 +10,35 @@
 coverage](https://codecov.io/gh/SATVILab/UtilsGGSV/graph/badge.svg)](https://codecov.io/gh/SATVILab/UtilsGGSV)
 <!-- badges: end -->
 
-The goal of UtilsGGSV is to provide utility functions for plotting in R
-using `ggplot2`.
+UtilsGGSV provides `ggplot2`-based utilities that solve two common pain
+points in exploratory data analysis:
+
+1.  **Cluster / group characterisation** — the `plot_group_*` family
+    creates publication-ready plots that help you understand what makes
+    each cluster (or any labelled group) distinctive:
+    - `plot_group_heatmap()` — ECDF-percentile heat map showing each
+      group’s relative position for every variable.
+    - `plot_group_density()` — per-variable density plots with per-group
+      overlays (density curves and/or median lines).
+    - `plot_group_scatter()` — biaxial scatter with optional PCA / t-SNE
+      / UMAP projection and cluster centroids.
+    - `plot_group_mst()` — minimum-spanning-tree layout coloured by the
+      same ECDF scale as the heat map.
+2.  **Correlation visualisation** — `ggcorr()` creates paired scatter
+    plots with Spearman, Pearson, Kendall, or concordance correlation
+    coefficients overlaid as a formatted table, with support for log /
+    asinh / any `scales` transformation.
+
+Additional helpers round out the toolkit:
+
+- `axis_limits()` — force equal axis limits or expand axis coordinates
+  without manually computing values.
+- `add_text_column()` — place a column of text annotations at a
+  consistent relative position regardless of the underlying axis
+  transformation.
+- `get_trans()` — retrieve any `scales` transformation by name,
+  including higher-root and `asinh` transformations not available in
+  base `scales`.
 
 ## Installation
 

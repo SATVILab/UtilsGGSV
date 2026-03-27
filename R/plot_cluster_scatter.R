@@ -64,6 +64,7 @@
 #'   Default is `cowplot::background_grid(major = "xy")`. Set to `NULL` to
 #'   suppress the grid.
 #' @importFrom stats aggregate setNames
+#' @importFrom utils modifyList
 #' @export
 #'
 #' @examples
@@ -417,6 +418,7 @@ plot_group_scatter <- function(.data,
 #' @rdname plot_group_scatter
 #' @param cluster character. Name of the column in `.data` that identifies
 #'   group membership. Alias for the `group` parameter.
+#' @param ... Additional arguments passed to [plot_group_scatter()].
 #' @export
 plot_cluster_scatter <- function(.data, cluster, ...) {
   plot_group_scatter(.data, group = cluster, ...)
