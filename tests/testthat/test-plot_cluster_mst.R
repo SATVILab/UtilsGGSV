@@ -141,7 +141,7 @@ test_that("plot_cluster_mst col_clusters applies colour scale", {
   }
 })
 
-test_that("plot_cluster_mst custom heatmap colours apply to fill scale", {
+test_that("plot_cluster_mst custom colours apply to fill scale", {
   set.seed(1)
   data <- data.frame(
     cluster = rep(paste0("C", 1:3), each = 20),
@@ -150,7 +150,7 @@ test_that("plot_cluster_mst custom heatmap colours apply to fill scale", {
   )
   result <- plot_cluster_mst(
     data, cluster = "cluster",
-    col_high = "#FF0000", col_mid = "#FFFFFF", col_low = "#0000FF"
+    col = c("#0000FF", "#FFFFFF", "#FF0000")
   )
   for (p in result) {
     fill_scale <- p$scales$get_scales("fill")

@@ -566,7 +566,7 @@ test_that("plot_cluster_density rug invalid value errors", {
 
 # cluster coercion tests
 
-test_that("plot_cluster_density errors when cluster column is integer (numeric)", {
+test_that("plot_cluster_density errors when cluster column is integer", {
   set.seed(1)
   data <- data.frame(
     cluster = rep(1:3, each = 20),

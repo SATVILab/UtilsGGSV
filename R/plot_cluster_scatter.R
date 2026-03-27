@@ -7,10 +7,10 @@
 #' The plot can use either raw variables (specified by the user) or dimensionality
 #' reduction components as axes.
 #'
-#' @param .data data.frame. Rows are observations. Must contain a column identifying cluster membership and numeric variables.
-#' @param cluster character. Name of the column in `.data` that identifies cluster membership.
+#' @param data data.frame. Rows are observations. Must contain a column identifying cluster membership and numeric variables.
+#' @param cluster character. Name of the column in `data` that identifies cluster membership.
 #' @param dim_red character or `NULL`. Dimensionality reduction method: one of `"none"`, `"pca"`, `"tsne"`, `"umap"`. If `NULL`, auto-selects `"none"` when exactly 2 numeric vars are available, otherwise `"pca"`.
-#' @param vars character vector or `NULL`. Names of numeric columns in `.data` to use for the plot or reduction. If `NULL`, uses all numeric columns except `cluster` and `point_col_var`.
+#' @param vars character vector or `NULL`. Names of numeric columns in `data` to use for the plot or reduction. If `NULL`, uses all numeric columns except `cluster` and `point_col_var`.
 #' @param point_col_var character or `NULL`. Column to use for point colour mapping. Default is same as `cluster`.
 #' @param point_col named vector or NULL. Custom colours for discrete `point_col_var` (named by level) or colour bounds for continuous `point_col_var` (length 3 low/mid/high).
 #' @param point_size numeric. Size of observation points. Default is `2`.
@@ -53,7 +53,7 @@
 #' # Pass extra arguments to the dim-red function, e.g. disable scaling in PCA:
 #' plot_cluster_scatter(data, cluster = "cluster", dim_red = "pca",
 #'                      dim_red_args = list(scale. = FALSE))
-plot_cluster_scatter <- function(.data,
+plot_cluster_scatter <- function(data,
                                  cluster,
                                  dim_red = NULL,
                                  vars = NULL,
@@ -84,7 +84,7 @@ plot_cluster_scatter <- function(.data,
                                  grid = cowplot::background_grid(
                                    major = "xy"
                                  )) {
-  .plot_cluster_validate(.data, cluster, vars)
+  .plot_cluster_validate(data, cluster, vars)
 
   if (is.null(point_col_var)) {
     point_col_var <- cluster
@@ -94,7 +94,7 @@ plot_cluster_scatter <- function(.data,
       is.na(point_col_var)) {
     stop("`point_col_var` must be a single non-NA character string.", call. = FALSE)
   }
-  if (!(point_col_var %in% colnames(.data))) {
+  if (!(point_col_var %in% colnames(data))) {
     stop(
       paste0("`point_col_var` column \"", point_col_var, "\" not found in `data`."),
       call. = FALSE
@@ -122,18 +122,9 @@ plot_cluster_scatter <- function(.data,
     stop("`dim_red_args` must be a list.", call. = FALSE)
   }
 
-  if (!is.null(vars)) {
-    if (!all(vars %in% colnames(.data))) {
-      stop("All vars must exist in .data")
-    }
-    if (!all(sapply(.data[, vars, drop = FALSE], is.numeric))) {
-      stop("All vars must be numeric")
-    }
-  }
-
   input_vars <- if (is.null(vars)) {
-    candidates <- setdiff(colnames(.data), unique(c(cluster, point_col_var)))
-    candidates[sapply(.data[, candidates, drop = FALSE], is.numeric)]
+    candidates <- setdiff(colnames(data), unique(c(cluster, point_col_var)))
+    candidates[sapply(data[, candidates, drop = FALSE], is.numeric)]
   } else {
     vars
   }
@@ -155,19 +146,19 @@ plot_cluster_scatter <- function(.data,
   dim_red <- match.arg(dim_red, c("none", "pca", "tsne", "umap"))
 
   if (dim_red != "none" && length(input_vars) < 2) {
-    stop("dim_red=\"", dim_red, "\" requires at least two variables in vars or numeric variables in .data.")
+    stop("dim_red=\"", dim_red, "\" requires at least two variables in vars or numeric variables in `data`.")
   }
 
   if (dim_red == "none" && length(input_vars) < 2) {
-    stop("dim_red=\"none\" requires at least two variables in vars or numeric variables in .data.")
+    stop("dim_red=\"none\" requires at least two variables in vars or numeric variables in `data`.")
   }
 
-  complete_idx <- stats::complete.cases(.data[, input_vars, drop = FALSE])
+  complete_idx <- stats::complete.cases(data[, input_vars, drop = FALSE])
   if (sum(complete_idx) == 0) {
     stop("No complete cases after removing missing values for selected vars.")
   }
 
-  data_clean <- .data[complete_idx, , drop = FALSE]
+  data_clean <- data[complete_idx, , drop = FALSE]
 
   if (dim_red == "none") {
     x_var <- input_vars[1]
