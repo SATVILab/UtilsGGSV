@@ -12,9 +12,9 @@
 #'
 #' @param .data data.frame. Rows are observations. Must contain a column
 #'   identifying cluster membership and columns for variable values.
-#' @param cluster character. Name of the column in `data` that identifies
+#' @param cluster character. Name of the column in `.data` that identifies
 #'   cluster membership.
-#' @param vars character vector or `NULL`. Names of columns in `data` to
+#' @param vars character vector or `NULL`. Names of columns in `.data` to
 #'   use as variables. If `NULL`, all columns except `cluster` are used.
 #'   Default is `NULL`.
 #' @param scale_method character. Method used to scale variable values for

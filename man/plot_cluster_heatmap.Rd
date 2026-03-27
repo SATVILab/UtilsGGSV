@@ -29,10 +29,10 @@ plot_cluster_heatmap(
 \item{.data}{data.frame. Rows are observations. Must contain a column
 identifying cluster membership and columns for variable values.}
 
-\item{cluster}{character. Name of the column in \code{data} that identifies
+\item{cluster}{character. Name of the column in \code{.data} that identifies
 cluster membership.}
 
-\item{vars}{character vector or \code{NULL}. Names of columns in \code{data} to
+\item{vars}{character vector or \code{NULL}. Names of columns in \code{.data} to
 use as variables. If \code{NULL}, all columns except \code{cluster} are used.
 Default is \code{NULL}.}
 

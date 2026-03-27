@@ -213,7 +213,6 @@ plot_cluster_scatter <- function(.data,
         "Removing ", n_dropped, " observation(s) with missing values in ",
         if (dim_red == "none") "the axis variables." else "the selected variables."
       )
-      complete_idx <- complete_idx  # already computed
     }
   }
 
