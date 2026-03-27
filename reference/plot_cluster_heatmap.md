@@ -12,13 +12,15 @@ ordered along the axes via hierarchical clustering.
 
 ``` r
 plot_cluster_heatmap(
-  data,
+  .data,
   cluster,
   vars = NULL,
   scale_method = "ecdf",
+  palette = "bipolar",
   col = c("#2166AC", "#F7F7F7", "#B2182B"),
   col_positions = "auto",
   white_range = c(0.4, 0.6),
+  na_rm = TRUE,
   font_size = 14,
   thm = cowplot::theme_cowplot(font_size = font_size) + ggplot2::theme(plot.background =
     ggplot2::element_rect(fill = "white", colour = NA), panel.background =
@@ -33,19 +35,19 @@ plot_cluster_heatmap(
 
 ## Arguments
 
-- data:
+- .data:
 
   data.frame. Rows are observations. Must contain a column identifying
   cluster membership and columns for variable values.
 
 - cluster:
 
-  character. Name of the column in `data` that identifies cluster
+  character. Name of the column in `.data` that identifies cluster
   membership.
 
 - vars:
 
-  character vector or `NULL`. Names of columns in `data` to use as
+  character vector or `NULL`. Names of columns in `.data` to use as
   variables. If `NULL`, all columns except `cluster` are used. Default
   is `NULL`.
 
@@ -77,11 +79,22 @@ plot_cluster_heatmap(
     variable separately. Fill values are in \[0, 1\] and the legend uses
     percent labels.
 
+- palette:
+
+  character or `NULL`. Named colour palette for the continuous fill
+  scale. When not `NULL`, overrides `col` and `col_positions`. Available
+  palettes: `"bipolar"` (default, blue-white-red), `"alarm"`
+  (green-white-red, good-to-bad), `"accessible"` (blue-white-orange,
+  colour-blind-safe diverging), `"heat"` (light-yellow to dark-red,
+  sequential), `"sky"` (white to navy, sequential). Set to `NULL` to use
+  `col` and `col_positions` directly.
+
 - col:
 
   character vector. Colours used to fill tiles, ordered from low to high
   values. Default is `c("#2166AC", "#F7F7F7", "#B2182B")` (blue, white,
-  red). Any number of colours (\>= 2) is accepted.
+  red). Any number of colours (\>= 2) is accepted. Ignored when
+  `palette` is not `NULL`.
 
 - col_positions:
 
@@ -91,14 +104,25 @@ plot_cluster_heatmap(
   last value `1`. When `"auto"` (default) and `col` has exactly three
   colours and `scale_method = "ecdf"`, the middle colour is stretched
   over `white_range` (the current default behaviour). In all other
-  `"auto"` cases the colours are evenly spaced from 0 to 1.
+  `"auto"` cases the colours are evenly spaced from 0 to 1. Ignored when
+  `palette` is not `NULL`.
 
 - white_range:
 
   numeric vector of length 2. The range of positions (on a 0-1 scale)
   over which the middle colour is stretched. Only used when `col` has
   exactly three colours, `scale_method = "ecdf"`, and
-  `col_positions = "auto"`. Default is `c(0.4, 0.6)`.
+  `col_positions = "auto"`. Also applied to diverging `palette` presets
+  (those with `col_positions = "auto"`). Default is `c(0.4, 0.6)`.
+
+- na_rm:
+
+  logical. Whether to remove `NA` values before computing per-cluster
+  statistics. When `TRUE` (default), `NA` values are removed and a
+  message is issued showing how many were removed per variable. When
+  `FALSE`, `NA` values are passed through: tile fill values will be `NA`
+  (rendered as grey by default) where a variable has no non-missing
+  observations in a cluster.
 
 - font_size:
 
@@ -147,12 +171,14 @@ A ggplot object.
 
 ``` r
 set.seed(1)
-data <- data.frame(
+.data <- data.frame(
   cluster = rep(paste0("C", 1:3), each = 20),
   var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
   var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
 )
-plot_cluster_heatmap(data, cluster = "cluster")
+plot_cluster_heatmap(.data, cluster = "cluster")
 
-plot_cluster_heatmap(data, cluster = "cluster", show_values = TRUE)
+plot_cluster_heatmap(.data, cluster = "cluster", show_values = TRUE)
+
+plot_cluster_heatmap(.data, cluster = "cluster", palette = "alarm")
 ```

@@ -49,7 +49,7 @@ a single figure using cowplot::plot_grid, with variable names as labels."></head
 
     <a class="navbar-brand me-2" href="../index.html">UtilsGGSV</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -104,17 +104,18 @@ a single figure using <code><a href="https://wilkelab.org/cowplot/reference/plot
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">plot_cluster_mst</span><span class="op">(</span></span>
-<span>  <span class="va">data</span>,</span>
+<span>  <span class="va">.data</span>,</span>
 <span>  <span class="va">cluster</span>,</span>
 <span>  vars <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  layout_algorithm <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"kamada-kawai"</span>, <span class="st">"mds"</span><span class="op">)</span>,</span>
 <span>  coord_equal <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  suppress_axes <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  col_clusters <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  col_high <span class="op">=</span> <span class="st">"#B2182B"</span>,</span>
-<span>  col_mid <span class="op">=</span> <span class="st">"#F7F7F7"</span>,</span>
-<span>  col_low <span class="op">=</span> <span class="st">"#2166AC"</span>,</span>
+<span>  palette <span class="op">=</span> <span class="st">"bipolar"</span>,</span>
+<span>  col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"#2166AC"</span>, <span class="st">"#F7F7F7"</span>, <span class="st">"#B2182B"</span><span class="op">)</span>,</span>
+<span>  col_positions <span class="op">=</span> <span class="st">"auto"</span>,</span>
 <span>  white_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.4</span>, <span class="fl">0.6</span><span class="op">)</span>,</span>
+<span>  na_rm <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  n_col <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  n_row <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  label_x <span class="op">=</span> <span class="fl">0</span>,</span>
@@ -133,18 +134,18 @@ a single figure using <code><a href="https://wilkelab.org/cowplot/reference/plot
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
 
 
-<dl><dt id="arg-data">data<a class="anchor" aria-label="anchor" href="#arg-data"></a></dt>
+<dl><dt id="arg--data">.data<a class="anchor" aria-label="anchor" href="#arg--data"></a></dt>
 <dd><p>data.frame. Rows are observations. Must contain a column
 identifying cluster membership and columns for variable values.</p></dd>
 
 
 <dt id="arg-cluster">cluster<a class="anchor" aria-label="anchor" href="#arg-cluster"></a></dt>
-<dd><p>character. Name of the column in <code>data</code> that identifies
+<dd><p>character. Name of the column in <code>.data</code> that identifies
 cluster membership.</p></dd>
 
 
 <dt id="arg-vars">vars<a class="anchor" aria-label="anchor" href="#arg-vars"></a></dt>
-<dd><p>character vector or <code>NULL</code>. Names of columns in <code>data</code> to
+<dd><p>character vector or <code>NULL</code>. Names of columns in <code>.data</code> to
 use as variables. If <code>NULL</code>, all columns except <code>cluster</code> are used.
 Default is <code>NULL</code>.</p></dd>
 
@@ -173,27 +174,51 @@ from <code>coord_equal</code> — axes are suppressed when equal scaling is acti
 <dt id="arg-col-clusters">col_clusters<a class="anchor" aria-label="anchor" href="#arg-col-clusters"></a></dt>
 <dd><p>named character vector or <code>NULL</code>. Per-cluster colours
 applied to node borders and text labels. Names should match cluster
-labels. When <code>NULL</code> (default), the default ggplot2 colour scale is used.</p></dd>
+labels. When <code>NULL</code> (default), a colour-blind-friendly palette
+(<code>"Paired"</code>) is used.</p></dd>
 
 
-<dt id="arg-col-high">col_high<a class="anchor" aria-label="anchor" href="#arg-col-high"></a></dt>
-<dd><p>character. Colour for high values (100th percentile).
-Default is <code>"#B2182B"</code>.</p></dd>
+<dt id="arg-palette">palette<a class="anchor" aria-label="anchor" href="#arg-palette"></a></dt>
+<dd><p>character or <code>NULL</code>. Named colour palette for the continuous
+node fill scale. When not <code>NULL</code>, overrides <code>col</code> and <code>col_positions</code>.
+Available palettes: <code>"bipolar"</code> (default, blue-white-red), <code>"alarm"</code>
+(green-white-red, good-to-bad), <code>"accessible"</code> (blue-white-orange,
+colour-blind-safe diverging), <code>"heat"</code> (light-yellow to dark-red,
+sequential), <code>"sky"</code> (white to navy, sequential). Set to <code>NULL</code> to use
+<code>col</code> and <code>col_positions</code> directly.</p></dd>
 
 
-<dt id="arg-col-mid">col_mid<a class="anchor" aria-label="anchor" href="#arg-col-mid"></a></dt>
-<dd><p>character. Colour for the middle of the value range.
-Default is <code>"#F7F7F7"</code>.</p></dd>
+<dt id="arg-col">col<a class="anchor" aria-label="anchor" href="#arg-col"></a></dt>
+<dd><p>character vector. Colours used to fill nodes, ordered from low
+to high values. Default is <code>c("#2166AC", "#F7F7F7", "#B2182B")</code> (blue,
+white, red). Any number of colours (&gt;= 2) is accepted. Ignored when
+<code>palette</code> is not <code>NULL</code>.</p></dd>
 
 
-<dt id="arg-col-low">col_low<a class="anchor" aria-label="anchor" href="#arg-col-low"></a></dt>
-<dd><p>character. Colour for low values (0th percentile).
-Default is <code>"#2166AC"</code>.</p></dd>
+<dt id="arg-col-positions">col_positions<a class="anchor" aria-label="anchor" href="#arg-col-positions"></a></dt>
+<dd><p>numeric vector or <code>"auto"</code>. Positions (in [0, 1]) at
+which each colour in <code>col</code> is placed on the fill scale. Must be the same
+length as <code>col</code>, sorted in ascending order, with the first value <code>0</code> and
+the last value <code>1</code>. When <code>"auto"</code> (default) and <code>col</code> has exactly three
+colours, the middle colour is stretched over <code>white_range</code>. In all other
+<code>"auto"</code> cases the colours are evenly spaced from 0 to 1. Ignored when
+<code>palette</code> is not <code>NULL</code>.</p></dd>
 
 
 <dt id="arg-white-range">white_range<a class="anchor" aria-label="anchor" href="#arg-white-range"></a></dt>
-<dd><p>numeric vector of length 2. The range of percentile
-values (on a 0-1 scale) that map to <code>col_mid</code>. Default is <code>c(0.4, 0.6)</code>.</p></dd>
+<dd><p>numeric vector of length 2. The range of positions (on a
+0-1 scale) over which the middle colour is stretched. Only used when <code>col</code>
+has exactly three colours and <code>col_positions = "auto"</code>. Also applied to
+diverging <code>palette</code> presets. Default is <code>c(0.4, 0.6)</code>.</p></dd>
+
+
+<dt id="arg-na-rm">na_rm<a class="anchor" aria-label="anchor" href="#arg-na-rm"></a></dt>
+<dd><p>logical. Whether to remove <code>NA</code> values before computing
+per-cluster medians and ECDF percentiles. When <code>TRUE</code> (default), <code>NA</code>
+values are removed and a message is issued showing how many were removed
+per variable. When <code>FALSE</code>, <code>NA</code> values are passed through: node fill
+values will be <code>NA</code> (rendered as grey by default) where a variable has no
+non-missing observations in a cluster.</p></dd>
 
 
 <dt id="arg-n-col">n_col<a class="anchor" aria-label="anchor" href="#arg-n-col"></a></dt>
@@ -254,16 +279,16 @@ background. Set to <code>NULL</code> to apply no theme adjustment.</p></dd>
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span><span class="va">.data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>  cluster <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"C"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">)</span>, each <span class="op">=</span> <span class="fl">20</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>  var1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fl">2</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fl">0</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">20</span>, <span class="op">-</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>  var2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">20</span>, <span class="op">-</span><span class="fl">1</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fl">1</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fl">0</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="co"># Default: Kamada-Kawai layout, returns a named list of plots</span></span></span>
-<span class="r-in"><span><span class="va">plot_list</span> <span class="op">&lt;-</span> <span class="fu">plot_cluster_mst</span><span class="op">(</span><span class="va">data</span>, cluster <span class="op">=</span> <span class="st">"cluster"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">plot_list</span> <span class="op">&lt;-</span> <span class="fu">plot_cluster_mst</span><span class="op">(</span><span class="va">.data</span>, cluster <span class="op">=</span> <span class="st">"cluster"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># MDS layout</span></span></span>
-<span class="r-in"><span><span class="fu">plot_cluster_mst</span><span class="op">(</span><span class="va">data</span>, cluster <span class="op">=</span> <span class="st">"cluster"</span>, layout_algorithm <span class="op">=</span> <span class="st">"mds"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">plot_cluster_mst</span><span class="op">(</span><span class="va">.data</span>, cluster <span class="op">=</span> <span class="st">"cluster"</span>, layout_algorithm <span class="op">=</span> <span class="st">"mds"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $var1</span>
 <span class="r-plt img"><img src="plot_cluster_mst-1.png" alt="" width="700" height="433"></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -272,7 +297,7 @@ background. Set to <code>NULL</code> to apply no theme adjustment.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Combined grid with 2 columns</span></span></span>
-<span class="r-in"><span><span class="fu">plot_cluster_mst</span><span class="op">(</span><span class="va">data</span>, cluster <span class="op">=</span> <span class="st">"cluster"</span>, n_col <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">plot_cluster_mst</span><span class="op">(</span><span class="va">.data</span>, cluster <span class="op">=</span> <span class="st">"cluster"</span>, n_col <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="plot_cluster_mst-3.png" alt="" width="700" height="433"></span>
 </code></pre></div>
     </div>

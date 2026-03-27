@@ -35,17 +35,18 @@ with variable names as labels.
 
 ``` r
 plot_cluster_mst(
-  data,
+  .data,
   cluster,
   vars = NULL,
   layout_algorithm = c("kamada-kawai", "mds"),
   coord_equal = TRUE,
   suppress_axes = NULL,
   col_clusters = NULL,
-  col_high = "#B2182B",
-  col_mid = "#F7F7F7",
-  col_low = "#2166AC",
+  palette = "bipolar",
+  col = c("#2166AC", "#F7F7F7", "#B2182B"),
+  col_positions = "auto",
   white_range = c(0.4, 0.6),
+  na_rm = TRUE,
   n_col = NULL,
   n_row = NULL,
   label_x = 0,
@@ -62,19 +63,19 @@ plot_cluster_mst(
 
 ## Arguments
 
-- data:
+- .data:
 
   data.frame. Rows are observations. Must contain a column identifying
   cluster membership and columns for variable values.
 
 - cluster:
 
-  character. Name of the column in `data` that identifies cluster
+  character. Name of the column in `.data` that identifies cluster
   membership.
 
 - vars:
 
-  character vector or `NULL`. Names of columns in `data` to use as
+  character vector or `NULL`. Names of columns in `.data` to use as
   variables. If `NULL`, all columns except `cluster` are used. Default
   is `NULL`.
 
@@ -105,27 +106,51 @@ plot_cluster_mst(
 
   named character vector or `NULL`. Per-cluster colours applied to node
   borders and text labels. Names should match cluster labels. When
-  `NULL` (default), the default ggplot2 colour scale is used.
+  `NULL` (default), a colour-blind-friendly palette (`"Paired"`) is
+  used.
 
-- col_high:
+- palette:
 
-  character. Colour for high values (100th percentile). Default is
-  `"#B2182B"`.
+  character or `NULL`. Named colour palette for the continuous node fill
+  scale. When not `NULL`, overrides `col` and `col_positions`. Available
+  palettes: `"bipolar"` (default, blue-white-red), `"alarm"`
+  (green-white-red, good-to-bad), `"accessible"` (blue-white-orange,
+  colour-blind-safe diverging), `"heat"` (light-yellow to dark-red,
+  sequential), `"sky"` (white to navy, sequential). Set to `NULL` to use
+  `col` and `col_positions` directly.
 
-- col_mid:
+- col:
 
-  character. Colour for the middle of the value range. Default is
-  `"#F7F7F7"`.
+  character vector. Colours used to fill nodes, ordered from low to high
+  values. Default is `c("#2166AC", "#F7F7F7", "#B2182B")` (blue, white,
+  red). Any number of colours (\>= 2) is accepted. Ignored when
+  `palette` is not `NULL`.
 
-- col_low:
+- col_positions:
 
-  character. Colour for low values (0th percentile). Default is
-  `"#2166AC"`.
+  numeric vector or `"auto"`. Positions (in \[0, 1\]) at which each
+  colour in `col` is placed on the fill scale. Must be the same length
+  as `col`, sorted in ascending order, with the first value `0` and the
+  last value `1`. When `"auto"` (default) and `col` has exactly three
+  colours, the middle colour is stretched over `white_range`. In all
+  other `"auto"` cases the colours are evenly spaced from 0 to 1.
+  Ignored when `palette` is not `NULL`.
 
 - white_range:
 
-  numeric vector of length 2. The range of percentile values (on a 0-1
-  scale) that map to `col_mid`. Default is `c(0.4, 0.6)`.
+  numeric vector of length 2. The range of positions (on a 0-1 scale)
+  over which the middle colour is stretched. Only used when `col` has
+  exactly three colours and `col_positions = "auto"`. Also applied to
+  diverging `palette` presets. Default is `c(0.4, 0.6)`.
+
+- na_rm:
+
+  logical. Whether to remove `NA` values before computing per-cluster
+  medians and ECDF percentiles. When `TRUE` (default), `NA` values are
+  removed and a message is issued showing how many were removed per
+  variable. When `FALSE`, `NA` values are passed through: node fill
+  values will be `NA` (rendered as grey by default) where a variable has
+  no non-missing observations in a cluster.
 
 - n_col:
 
@@ -197,16 +222,16 @@ figure when `n_col` or `n_row` is specified.
 
 ``` r
 set.seed(1)
-data <- data.frame(
+.data <- data.frame(
   cluster = rep(paste0("C", 1:3), each = 20),
   var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
   var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
 )
 # Default: Kamada-Kawai layout, returns a named list of plots
-plot_list <- plot_cluster_mst(data, cluster = "cluster")
+plot_list <- plot_cluster_mst(.data, cluster = "cluster")
 
 # MDS layout
-plot_cluster_mst(data, cluster = "cluster", layout_algorithm = "mds")
+plot_cluster_mst(.data, cluster = "cluster", layout_algorithm = "mds")
 #> $var1
 
 #> 
@@ -215,5 +240,5 @@ plot_cluster_mst(data, cluster = "cluster", layout_algorithm = "mds")
 #> 
 
 # Combined grid with 2 columns
-plot_cluster_mst(data, cluster = "cluster", n_col = 2)
+plot_cluster_mst(.data, cluster = "cluster", n_col = 2)
 ```

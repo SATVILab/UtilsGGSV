@@ -8,7 +8,7 @@ ggplot2 objects or a single faceted plot.
 
 ``` r
 plot_cluster_density(
-  data,
+  .data,
   cluster,
   vars = NULL,
   col_clusters = NULL,
@@ -22,6 +22,7 @@ plot_cluster_density(
   rug = NULL,
   density_overall_weight = NULL,
   bandwidth = "hpi_1",
+  na_rm = TRUE,
   font_size = 14,
   thm = cowplot::theme_cowplot(font_size = font_size) + ggplot2::theme(plot.background =
     ggplot2::element_rect(fill = "white", colour = NA), panel.background =
@@ -32,19 +33,19 @@ plot_cluster_density(
 
 ## Arguments
 
-- data:
+- .data:
 
   data.frame. Rows are observations. Must contain a column identifying
   cluster membership and columns for variable values.
 
 - cluster:
 
-  character. Name of the column in `data` that identifies cluster
+  character. Name of the column in `.data` that identifies cluster
   membership.
 
 - vars:
 
-  character vector or `NULL`. Names of columns in `data` to use as
+  character vector or `NULL`. Names of columns in `.data` to use as
   variables. If `NULL`, all columns except `cluster` are used. Default
   is `NULL`.
 
@@ -135,6 +136,15 @@ plot_cluster_density(
   density estimation. One of `"hpi_1"` (default), `"hpi_0"`, `"SJ"`, or
   a positive number. See **Details**.
 
+- na_rm:
+
+  logical. Whether to remove `NA` values from each variable before
+  computing densities and medians. When `TRUE` (default), `NA` values
+  are removed and a message is issued showing how many were removed per
+  variable. When `FALSE`, `NA` values are passed directly to
+  [`stats::density()`](https://rdrr.io/r/stats/density.html), which will
+  strip them with its own warning.
+
 - font_size:
 
   numeric. Font size passed to
@@ -216,16 +226,16 @@ combined into a **single faceted ggplot2 object** via `facet_wrap`.
 
 ``` r
 set.seed(1)
-data <- data.frame(
+.data <- data.frame(
   cluster = rep(paste0("C", 1:3), each = 20),
   var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
   var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
 )
 # Default: overall + per-cluster density curves
-plot_list <- plot_cluster_density(data, cluster = "cluster")
+plot_list <- plot_cluster_density(.data, cluster = "cluster")
 
 # Overall density with cluster median lines only
-plot_cluster_density(data, cluster = "cluster", density = "overall")
+plot_cluster_density(.data, cluster = "cluster", density = "overall")
 #> $var1
 
 #> 
@@ -234,7 +244,7 @@ plot_cluster_density(data, cluster = "cluster", density = "overall")
 #> 
 
 # Per-cluster density curves only
-plot_cluster_density(data, cluster = "cluster", density = "cluster")
+plot_cluster_density(.data, cluster = "cluster", density = "cluster")
 #> $var1
 
 #> 
@@ -244,7 +254,7 @@ plot_cluster_density(data, cluster = "cluster", density = "cluster")
 
 # Even-weighted overall density
 plot_cluster_density(
-  data, cluster = "cluster", density_overall_weight = "even"
+  .data, cluster = "cluster", density_overall_weight = "even"
 )
 #> $var1
 
@@ -254,5 +264,5 @@ plot_cluster_density(
 #> 
 
 # Faceted plot with 2 columns
-plot_cluster_density(data, cluster = "cluster", n_col = 2)
+plot_cluster_density(.data, cluster = "cluster", n_col = 2)
 ```

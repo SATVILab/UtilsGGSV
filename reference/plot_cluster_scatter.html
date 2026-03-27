@@ -13,7 +13,7 @@ reduction components as axes."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">UtilsGGSV</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -60,6 +60,11 @@ reduction components as axes.</p>
 <span>  dim_red_args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  point_col_var <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  point_col <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  palette <span class="op">=</span> <span class="st">"bipolar"</span>,</span>
+<span>  col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"#2166AC"</span>, <span class="st">"#F7F7F7"</span>, <span class="st">"#B2182B"</span><span class="op">)</span>,</span>
+<span>  col_positions <span class="op">=</span> <span class="st">"auto"</span>,</span>
+<span>  white_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.4</span>, <span class="fl">0.6</span><span class="op">)</span>,</span>
+<span>  na_rm <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  point_size <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>  point_alpha <span class="op">=</span> <span class="fl">0.65</span>,</span>
 <span>  centroid_size <span class="op">=</span> <span class="fl">3</span>,</span>
@@ -113,7 +118,49 @@ overridden. Ignored when <code>dim_red = "none"</code>. Default is <code><a href
 
 
 <dt id="arg-point-col">point_col<a class="anchor" aria-label="anchor" href="#arg-point-col"></a></dt>
-<dd><p>named vector or NULL. Custom colours for discrete <code>point_col_var</code> (named by level) or colour bounds for continuous <code>point_col_var</code> (length 3 low/mid/high).</p></dd>
+<dd><p>named vector or <code>NULL</code>. Custom colours for discrete <code>point_col_var</code> (named by
+level). Ignored for continuous <code>point_col_var</code> (use <code>col</code> instead).</p></dd>
+
+
+<dt id="arg-palette">palette<a class="anchor" aria-label="anchor" href="#arg-palette"></a></dt>
+<dd><p>character or <code>NULL</code>. Named colour palette for the continuous <code>point_col_var</code> colour
+scale. When not <code>NULL</code>, overrides <code>col</code> and <code>col_positions</code>. Available palettes:
+<code>"bipolar"</code> (default, blue-white-red), <code>"alarm"</code> (green-white-red, good-to-bad),
+<code>"accessible"</code> (blue-white-orange, colour-blind-safe diverging), <code>"heat"</code> (light-yellow to
+dark-red, sequential), <code>"sky"</code> (white to navy, sequential). Set to <code>NULL</code> to use <code>col</code> and
+<code>col_positions</code> directly. Ignored when <code>point_col_var</code> is discrete.</p></dd>
+
+
+<dt id="arg-col">col<a class="anchor" aria-label="anchor" href="#arg-col"></a></dt>
+<dd><p>character vector. Colours used for the continuous <code>point_col_var</code> colour scale, ordered
+from low to high values. Default is <code>c("#2166AC", "#F7F7F7", "#B2182B")</code> (blue, white, red).
+Any number of colours (&gt;= 2) is accepted. Ignored when <code>point_col_var</code> is discrete or when
+<code>palette</code> is not <code>NULL</code>.</p></dd>
+
+
+<dt id="arg-col-positions">col_positions<a class="anchor" aria-label="anchor" href="#arg-col-positions"></a></dt>
+<dd><p>numeric vector or <code>"auto"</code>. Positions (in [0, 1]) at which each colour in
+<code>col</code> is placed on the colour scale. Must be the same length as <code>col</code>, sorted ascending, with
+first value <code>0</code> and last value <code>1</code>. When <code>"auto"</code> (default) and <code>col</code> has exactly three colours,
+the middle colour is stretched over <code>white_range</code>. In all other <code>"auto"</code> cases the colours are
+evenly spaced from 0 to 1. Ignored when <code>point_col_var</code> is discrete or when <code>palette</code> is not
+<code>NULL</code>.</p></dd>
+
+
+<dt id="arg-white-range">white_range<a class="anchor" aria-label="anchor" href="#arg-white-range"></a></dt>
+<dd><p>numeric vector of length 2. The range of positions (on a 0-1 scale) over which
+the middle colour is stretched. Only used when <code>col</code> has exactly three colours and
+<code>col_positions = "auto"</code>. Also applied to diverging <code>palette</code> presets. Default is <code>c(0.4, 0.6)</code>.
+Ignored when <code>point_col_var</code> is discrete.</p></dd>
+
+
+<dt id="arg-na-rm">na_rm<a class="anchor" aria-label="anchor" href="#arg-na-rm"></a></dt>
+<dd><p>logical. Whether to remove observations with missing values in the variables used
+for the plot axes (and dimensionality reduction, when applicable). When <code>TRUE</code> (default),
+missing observations are removed and a message is issued showing how many. When <code>FALSE</code> and
+<code>dim_red</code> is not <code>"none"</code>, an error is raised if any missing values are found (dimensionality
+reduction algorithms cannot handle them). When <code>FALSE</code> and <code>dim_red = "none"</code>, observations
+with missing axis values are silently dropped by ggplot2.</p></dd>
 
 
 <dt id="arg-point-size">point_size<a class="anchor" aria-label="anchor" href="#arg-point-size"></a></dt>
@@ -171,22 +218,22 @@ suppress the grid.</p></dd>
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span><span class="va">.data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>  cluster <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"C"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">)</span>, each <span class="op">=</span> <span class="fl">20</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>  var1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fl">2</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fl">0</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">20</span>, <span class="op">-</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>  var2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">20</span>, <span class="op">-</span><span class="fl">1</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fl">1</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fl">0</span><span class="op">)</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>  var3 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fl">1</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">20</span>, <span class="op">-</span><span class="fl">1</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fl">0</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu">plot_cluster_scatter</span><span class="op">(</span><span class="va">data</span>, cluster <span class="op">=</span> <span class="st">"cluster"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">plot_cluster_scatter</span><span class="op">(</span><span class="va">.data</span>, cluster <span class="op">=</span> <span class="st">"cluster"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> dim_red automatically set to 'pca' because more than two numeric variables are available.</span>
 <span class="r-plt img"><img src="plot_cluster_scatter-1.png" alt="" width="700" height="433"></span>
-<span class="r-in"><span><span class="fu">plot_cluster_scatter</span><span class="op">(</span><span class="va">data</span>, cluster <span class="op">=</span> <span class="st">"cluster"</span>, dim_red <span class="op">=</span> <span class="st">"none"</span>, vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"var1"</span>, <span class="st">"var2"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">plot_cluster_scatter</span><span class="op">(</span><span class="va">.data</span>, cluster <span class="op">=</span> <span class="st">"cluster"</span>, dim_red <span class="op">=</span> <span class="st">"none"</span>, vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"var1"</span>, <span class="st">"var2"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="plot_cluster_scatter-2.png" alt="" width="700" height="433"></span>
-<span class="r-in"><span><span class="fu">plot_cluster_scatter</span><span class="op">(</span><span class="va">data</span>, cluster <span class="op">=</span> <span class="st">"cluster"</span>, show_legend <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">plot_cluster_scatter</span><span class="op">(</span><span class="va">.data</span>, cluster <span class="op">=</span> <span class="st">"cluster"</span>, show_legend <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> dim_red automatically set to 'pca' because more than two numeric variables are available.</span>
 <span class="r-plt img"><img src="plot_cluster_scatter-3.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="co"># Pass extra arguments to the dim-red function, e.g. disable scaling in PCA:</span></span></span>
-<span class="r-in"><span><span class="fu">plot_cluster_scatter</span><span class="op">(</span><span class="va">data</span>, cluster <span class="op">=</span> <span class="st">"cluster"</span>, dim_red <span class="op">=</span> <span class="st">"pca"</span>,</span></span>
+<span class="r-in"><span><span class="fu">plot_cluster_scatter</span><span class="op">(</span><span class="va">.data</span>, cluster <span class="op">=</span> <span class="st">"cluster"</span>, dim_red <span class="op">=</span> <span class="st">"pca"</span>,</span></span>
 <span class="r-in"><span>                     dim_red_args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>scale. <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="plot_cluster_scatter-4.png" alt="" width="700" height="433"></span>
 </code></pre></div>

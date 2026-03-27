@@ -16,6 +16,11 @@ plot_cluster_scatter(
   dim_red_args = list(),
   point_col_var = NULL,
   point_col = NULL,
+  palette = "bipolar",
+  col = c("#2166AC", "#F7F7F7", "#B2182B"),
+  col_positions = "auto",
+  white_range = c(0.4, 0.6),
+  na_rm = TRUE,
   point_size = 2,
   point_alpha = 0.65,
   centroid_size = 3,
@@ -79,9 +84,57 @@ plot_cluster_scatter(
 
 - point_col:
 
-  named vector or NULL. Custom colours for discrete `point_col_var`
-  (named by level) or colour bounds for continuous `point_col_var`
-  (length 3 low/mid/high).
+  named vector or `NULL`. Custom colours for discrete `point_col_var`
+  (named by level). Ignored for continuous `point_col_var` (use `col`
+  instead).
+
+- palette:
+
+  character or `NULL`. Named colour palette for the continuous
+  `point_col_var` colour scale. When not `NULL`, overrides `col` and
+  `col_positions`. Available palettes: `"bipolar"` (default,
+  blue-white-red), `"alarm"` (green-white-red, good-to-bad),
+  `"accessible"` (blue-white-orange, colour-blind-safe diverging),
+  `"heat"` (light-yellow to dark-red, sequential), `"sky"` (white to
+  navy, sequential). Set to `NULL` to use `col` and `col_positions`
+  directly. Ignored when `point_col_var` is discrete.
+
+- col:
+
+  character vector. Colours used for the continuous `point_col_var`
+  colour scale, ordered from low to high values. Default is
+  `c("#2166AC", "#F7F7F7", "#B2182B")` (blue, white, red). Any number of
+  colours (\>= 2) is accepted. Ignored when `point_col_var` is discrete
+  or when `palette` is not `NULL`.
+
+- col_positions:
+
+  numeric vector or `"auto"`. Positions (in \[0, 1\]) at which each
+  colour in `col` is placed on the colour scale. Must be the same length
+  as `col`, sorted ascending, with first value `0` and last value `1`.
+  When `"auto"` (default) and `col` has exactly three colours, the
+  middle colour is stretched over `white_range`. In all other `"auto"`
+  cases the colours are evenly spaced from 0 to 1. Ignored when
+  `point_col_var` is discrete or when `palette` is not `NULL`.
+
+- white_range:
+
+  numeric vector of length 2. The range of positions (on a 0-1 scale)
+  over which the middle colour is stretched. Only used when `col` has
+  exactly three colours and `col_positions = "auto"`. Also applied to
+  diverging `palette` presets. Default is `c(0.4, 0.6)`. Ignored when
+  `point_col_var` is discrete.
+
+- na_rm:
+
+  logical. Whether to remove observations with missing values in the
+  variables used for the plot axes (and dimensionality reduction, when
+  applicable). When `TRUE` (default), missing observations are removed
+  and a message is issued showing how many. When `FALSE` and `dim_red`
+  is not `"none"`, an error is raised if any missing values are found
+  (dimensionality reduction algorithms cannot handle them). When `FALSE`
+  and `dim_red = "none"`, observations with missing axis values are
+  silently dropped by ggplot2.
 
 - point_size:
 
@@ -147,21 +200,21 @@ plot_cluster_scatter(
 
 ``` r
 set.seed(1)
-data <- data.frame(
+.data <- data.frame(
   cluster = rep(paste0("C", 1:3), each = 20),
   var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
   var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0)),
   var3 = c(rnorm(20, 1), rnorm(20, -1), rnorm(20, 0))
 )
-plot_cluster_scatter(data, cluster = "cluster")
+plot_cluster_scatter(.data, cluster = "cluster")
 #> dim_red automatically set to 'pca' because more than two numeric variables are available.
 
-plot_cluster_scatter(data, cluster = "cluster", dim_red = "none", vars = c("var1", "var2"))
+plot_cluster_scatter(.data, cluster = "cluster", dim_red = "none", vars = c("var1", "var2"))
 
-plot_cluster_scatter(data, cluster = "cluster", show_legend = FALSE)
+plot_cluster_scatter(.data, cluster = "cluster", show_legend = FALSE)
 #> dim_red automatically set to 'pca' because more than two numeric variables are available.
 
 # Pass extra arguments to the dim-red function, e.g. disable scaling in PCA:
-plot_cluster_scatter(data, cluster = "cluster", dim_red = "pca",
+plot_cluster_scatter(.data, cluster = "cluster", dim_red = "pca",
                      dim_red_args = list(scale. = FALSE))
 ```
