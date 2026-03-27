@@ -1,20 +1,8 @@
-# Plot density of variable values with per-cluster median lines
+# Plot density of variable values with per-cluster overlays
 
-For each variable, plots the density of values and optionally overlays
-per-cluster density curves or cluster median lines. The `density`
-argument controls what is shown:
-
-- `"overall"` (default): the overall density of all observations with a
-  vertical line per cluster at that cluster's median value.
-
-- `"cluster"`: one density curve per cluster, coloured by cluster.
-
-- `"both"`: the overall density curve and one density curve per cluster,
-  with the cluster curves scaled according to the `scale` argument.
-
-By default the function returns a **named list of ggplot2 objects**, one
-per variable. If `n_col` or `n_row` is supplied the plots are instead
-combined into a **single faceted ggplot2 object** via `facet_wrap`.
+For each variable, plots kernel density estimates with per-cluster
+overlays (density curves and/or median lines). Returns a named list of
+ggplot2 objects or a single faceted plot.
 
 ## Usage
 
@@ -26,11 +14,14 @@ plot_cluster_density(
   col_clusters = NULL,
   n_col = NULL,
   n_row = NULL,
-  density = "overall",
+  density = "both",
   scale = "max_overall",
   scales = "free_y",
   expand_coord = NULL,
   exclude_min = "no",
+  rug = NULL,
+  density_overall_weight = NULL,
+  bandwidth = "hpi_1",
   font_size = 14,
   thm = cowplot::theme_cowplot(font_size = font_size) + ggplot2::theme(plot.background =
     ggplot2::element_rect(fill = "white", colour = NA), panel.background =
@@ -79,12 +70,10 @@ plot_cluster_density(
 
 - density:
 
-  character. What density to display. One of `"overall"` (default:
-  overall density curve plus cluster median lines), `"cluster"` (one
-  density curve per cluster, coloured by cluster), or `"both"` (overall
-  density curve plus per-cluster density curves). When `"cluster"` or
-  `"both"`, the `scale` argument controls how cluster densities are
-  scaled.
+  character. What density to display. One of `"both"` (default: overall
+  density curve plus per-cluster density curves), `"overall"` (overall
+  density curve plus cluster median lines), or `"cluster"` (one density
+  curve per cluster, coloured by cluster). See **Details**.
 
 - scale:
 
@@ -122,6 +111,30 @@ plot_cluster_density(
   each variable, exclude observations whose value equals that variable's
   minimum).
 
+- rug:
+
+  character or `NULL`. Controls the rug added below the density. `NULL`
+  (default): per-cluster rug when `density` is `"cluster"` or `"both"`,
+  overall rug when `density` is `"overall"`. `"cluster"`: per-cluster
+  rug, coloured by cluster. `"overall"`: overall rug with no cluster
+  colouring. See **Details**.
+
+- density_overall_weight:
+
+  character or `NULL`. Controls weighting of the overall density when
+  `density` is `"overall"` or `"both"`. `NULL` (default): the overall
+  density is estimated from all observations pooled together. `"even"`:
+  the overall density is computed as an equal-weight average of
+  per-cluster kernel densities, preventing larger clusters from
+  dominating the density estimate. Ignored when `density` is
+  `"cluster"`.
+
+- bandwidth:
+
+  character or positive numeric. Bandwidth used for per-cluster kernel
+  density estimation. One of `"hpi_1"` (default), `"hpi_0"`, `"SJ"`, or
+  a positive number. See **Details**.
+
 - font_size:
 
   numeric. Font size passed to
@@ -145,6 +158,60 @@ A named list of ggplot2 objects (one per variable) when neither `n_col`
 nor `n_row` is specified. A single ggplot2 object with `facet_wrap`
 panels when `n_col` or `n_row` is specified.
 
+## Details
+
+### Density modes
+
+The `density` argument controls what is shown:
+
+- `"both"` (default): the overall density curve plus one density curve
+  per cluster, coloured by cluster. Cluster curves are scaled according
+  to the `scale` argument.
+
+- `"overall"`: the overall density of all observations with a vertical
+  line per cluster at that cluster's median value.
+
+- `"cluster"`: one density curve per cluster, coloured by cluster.
+
+### Rug
+
+A rug is added by default. The `rug` argument controls which data it
+shows:
+
+- `NULL` (default): per-cluster rug when `density` is `"cluster"` or
+  `"both"`, overall rug when `density` is `"overall"`.
+
+- `"cluster"`: per-cluster rug, coloured by cluster.
+
+- `"overall"`: overall rug (no cluster colouring).
+
+### Bandwidth
+
+The `bandwidth` argument controls per-cluster bandwidth selection (used
+for per-cluster density curves and for the even-weighted overall
+density):
+
+- `"hpi_1"` (default): `ks::hpi(x, deriv.order = 1)` — plug-in bandwidth
+  based on the first derivative, less sensitive to cluster size than SJ.
+
+- `"hpi_0"`: `ks::hpi(x, deriv.order = 0)` — plug-in bandwidth based on
+  the density itself.
+
+- `"SJ"`: Sheather-Jones bandwidth via
+  [`stats::bw.SJ()`](https://rdrr.io/r/stats/bandwidth.html).
+
+- A positive numeric value: use that value as the bandwidth directly.
+
+If bandwidth estimation fails, a warning is issued and the default
+([`stats::bw.nrd0`](https://rdrr.io/r/stats/bandwidth.html)) bandwidth
+is used as a fallback.
+
+### Layout
+
+By default the function returns a **named list of ggplot2 objects**, one
+per variable. If `n_col` or `n_row` is supplied the plots are instead
+combined into a **single faceted ggplot2 object** via `facet_wrap`.
+
 ## Examples
 
 ``` r
@@ -154,10 +221,19 @@ data <- data.frame(
   var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
   var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
 )
-# Default: overall density with cluster median lines
+# Default: overall + per-cluster density curves
 plot_list <- plot_cluster_density(data, cluster = "cluster")
 
-# Per-cluster density curves
+# Overall density with cluster median lines only
+plot_cluster_density(data, cluster = "cluster", density = "overall")
+#> $var1
+
+#> 
+#> $var2
+
+#> 
+
+# Per-cluster density curves only
 plot_cluster_density(data, cluster = "cluster", density = "cluster")
 #> $var1
 
@@ -166,8 +242,10 @@ plot_cluster_density(data, cluster = "cluster", density = "cluster")
 
 #> 
 
-# Both overall and per-cluster densities (default scaling: max_overall)
-plot_cluster_density(data, cluster = "cluster", density = "both")
+# Even-weighted overall density
+plot_cluster_density(
+  data, cluster = "cluster", density_overall_weight = "even"
+)
 #> $var1
 
 #> 

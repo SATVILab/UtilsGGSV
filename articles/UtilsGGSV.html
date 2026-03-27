@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">UtilsGGSV</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -325,16 +325,16 @@ the overall population. The <code>density</code> argument controls what
 is shown:</p>
 <ul>
 <li>
-<code>"overall"</code> (default): the overall density with
-per-cluster median lines.</li>
+<code>"both"</code> (default): overall density plus per-cluster
+density curves.</li>
+<li>
+<code>"overall"</code>: the overall density with per-cluster median
+lines.</li>
 <li>
 <code>"cluster"</code>: one density curve per cluster.</li>
-<li>
-<code>"both"</code>: overall density plus per-cluster density
-curves.</li>
 </ul>
 <div class="section level4">
-<h4 id="overall-density-with-cluster-median-lines-default">Overall density with cluster median lines (default)<a class="anchor" aria-label="anchor" href="#overall-density-with-cluster-median-lines-default"></a>
+<h4 id="overall-and-per-cluster-density-curves-default">Overall and per-cluster density curves (default)<a class="anchor" aria-label="anchor" href="#overall-and-per-cluster-density-curves-default"></a>
 </h4>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_cluster_density.html">plot_cluster_density</a></span><span class="op">(</span></span>
@@ -343,12 +343,25 @@ curves.</li>
 <span>  vars <span class="op">=</span> <span class="va">vars_penguin</span>,</span>
 <span>  n_col <span class="op">=</span> <span class="fl">2</span></span>
 <span><span class="op">)</span></span></code></pre></div>
+<p><img src="UtilsGGSV_files/figure-html/plot-cluster-density-default-1.png" class="r-plt" alt="" width="672"></p>
+</div>
+<div class="section level4">
+<h4 id="overall-density-with-cluster-median-lines">Overall density with cluster median lines<a class="anchor" aria-label="anchor" href="#overall-density-with-cluster-median-lines"></a>
+</h4>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_cluster_density.html">plot_cluster_density</a></span><span class="op">(</span></span>
+<span>  <span class="va">penguins</span>,</span>
+<span>  cluster <span class="op">=</span> <span class="st">"cluster"</span>,</span>
+<span>  vars <span class="op">=</span> <span class="va">vars_penguin</span>,</span>
+<span>  density <span class="op">=</span> <span class="st">"overall"</span>,</span>
+<span>  n_col <span class="op">=</span> <span class="fl">2</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 <p><img src="UtilsGGSV_files/figure-html/plot-cluster-density-overall-1.png" class="r-plt" alt="" width="672"></p>
 </div>
 <div class="section level4">
-<h4 id="per-cluster-density-curves">Per-cluster density curves<a class="anchor" aria-label="anchor" href="#per-cluster-density-curves"></a>
+<h4 id="per-cluster-density-curves-only">Per-cluster density curves only<a class="anchor" aria-label="anchor" href="#per-cluster-density-curves-only"></a>
 </h4>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_cluster_density.html">plot_cluster_density</a></span><span class="op">(</span></span>
 <span>  <span class="va">penguins</span>,</span>
 <span>  cluster <span class="op">=</span> <span class="st">"cluster"</span>,</span>
@@ -359,11 +372,11 @@ curves.</li>
 <p><img src="UtilsGGSV_files/figure-html/plot-cluster-density-cluster-1.png" class="r-plt" alt="" width="672"></p>
 </div>
 <div class="section level4">
-<h4 id="both-overall-and-per-cluster-densities">Both overall and per-cluster densities<a class="anchor" aria-label="anchor" href="#both-overall-and-per-cluster-densities"></a>
+<h4 id="scaling-cluster-density-curves">Scaling cluster density curves<a class="anchor" aria-label="anchor" href="#scaling-cluster-density-curves"></a>
 </h4>
-<p>When <code>density = "both"</code>, the <code>scale</code> argument
-controls how cluster curves are scaled relative to the overall
-density:</p>
+<p>When <code>density</code> is <code>"both"</code> or
+<code>"cluster"</code>, the <code>scale</code> argument controls how
+cluster curves are scaled relative to the overall density:</p>
 <ul>
 <li>
 <code>"max_overall"</code> (default): each cluster density is
@@ -376,17 +389,6 @@ by the tallest curve.</li>
 <code>"free"</code>: no rescaling (equivalent to
 <code>"max_cluster"</code>).</li>
 </ul>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># scale = "max_overall" keeps the y-axis anchored to the overall density</span></span>
-<span><span class="fu"><a href="../reference/plot_cluster_density.html">plot_cluster_density</a></span><span class="op">(</span></span>
-<span>  <span class="va">penguins</span>,</span>
-<span>  cluster <span class="op">=</span> <span class="st">"cluster"</span>,</span>
-<span>  vars <span class="op">=</span> <span class="va">vars_penguin</span>,</span>
-<span>  density <span class="op">=</span> <span class="st">"both"</span>,</span>
-<span>  scale <span class="op">=</span> <span class="st">"max_overall"</span>,</span>
-<span>  n_col <span class="op">=</span> <span class="fl">2</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-<p><img src="UtilsGGSV_files/figure-html/plot-cluster-density-both-1.png" class="r-plt" alt="" width="672"></p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># scale = "max_cluster": natural scale for all curves</span></span>
 <span><span class="fu"><a href="../reference/plot_cluster_density.html">plot_cluster_density</a></span><span class="op">(</span></span>

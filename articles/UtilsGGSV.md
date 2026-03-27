@@ -270,12 +270,11 @@ The `plot_cluster_density` function visualises, for each variable, how
 each cluster’s observations are distributed relative to the overall
 population. The `density` argument controls what is shown:
 
-- `"overall"` (default): the overall density with per-cluster median
-  lines.
+- `"both"` (default): overall density plus per-cluster density curves.
+- `"overall"`: the overall density with per-cluster median lines.
 - `"cluster"`: one density curve per cluster.
-- `"both"`: overall density plus per-cluster density curves.
 
-#### Overall density with cluster median lines (default)
+#### Overall and per-cluster density curves (default)
 
 ``` r
 plot_cluster_density(
@@ -286,9 +285,23 @@ plot_cluster_density(
 )
 ```
 
+![](UtilsGGSV_files/figure-html/plot-cluster-density-default-1.png)
+
+#### Overall density with cluster median lines
+
+``` r
+plot_cluster_density(
+  penguins,
+  cluster = "cluster",
+  vars = vars_penguin,
+  density = "overall",
+  n_col = 2
+)
+```
+
 ![](UtilsGGSV_files/figure-html/plot-cluster-density-overall-1.png)
 
-#### Per-cluster density curves
+#### Per-cluster density curves only
 
 ``` r
 plot_cluster_density(
@@ -302,10 +315,10 @@ plot_cluster_density(
 
 ![](UtilsGGSV_files/figure-html/plot-cluster-density-cluster-1.png)
 
-#### Both overall and per-cluster densities
+#### Scaling cluster density curves
 
-When `density = "both"`, the `scale` argument controls how cluster
-curves are scaled relative to the overall density:
+When `density` is `"both"` or `"cluster"`, the `scale` argument controls
+how cluster curves are scaled relative to the overall density:
 
 - `"max_overall"` (default): each cluster density is rescaled so that
   its maximum equals the maximum of the overall density. Y-axis values
@@ -313,20 +326,6 @@ curves are scaled relative to the overall density:
 - `"max_cluster"`: no rescaling; the y-axis is determined by the tallest
   curve.
 - `"free"`: no rescaling (equivalent to `"max_cluster"`).
-
-``` r
-# scale = "max_overall" keeps the y-axis anchored to the overall density
-plot_cluster_density(
-  penguins,
-  cluster = "cluster",
-  vars = vars_penguin,
-  density = "both",
-  scale = "max_overall",
-  n_col = 2
-)
-```
-
-![](UtilsGGSV_files/figure-html/plot-cluster-density-both-1.png)
 
 ``` r
 # scale = "max_cluster": natural scale for all curves

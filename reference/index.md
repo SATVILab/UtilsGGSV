@@ -44,7 +44,7 @@ Functions for visualising cluster characteristics
 - [`plot_cluster_heatmap()`](https://satvilab.github.io/UtilsGGSV/reference/plot_cluster_heatmap.md)
   : Plot heat map of scaled variable values per cluster
 - [`plot_cluster_density()`](https://satvilab.github.io/UtilsGGSV/reference/plot_cluster_density.md)
-  : Plot density of variable values with per-cluster median lines
+  : Plot density of variable values with per-cluster overlays
 - [`plot_cluster_mst()`](https://satvilab.github.io/UtilsGGSV/reference/plot_cluster_mst.md)
   : Plot minimum-spanning tree of clusters with per-variable node
   colouring
