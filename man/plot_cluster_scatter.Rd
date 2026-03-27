@@ -12,6 +12,11 @@ plot_cluster_scatter(
   dim_red_args = list(),
   point_col_var = NULL,
   point_col = NULL,
+  palette = "bipolar",
+  col = c("#2166AC", "#F7F7F7", "#B2182B"),
+  col_positions = "auto",
+  white_range = c(0.4, 0.6),
+  na_rm = TRUE,
   point_size = 2,
   point_alpha = 0.65,
   centroid_size = 3,
@@ -48,7 +53,39 @@ overridden. Ignored when \code{dim_red = "none"}. Default is \code{list()}.}
 
 \item{point_col_var}{character or \code{NULL}. Column to use for point colour mapping. Default is same as \code{cluster}.}
 
-\item{point_col}{named vector or NULL. Custom colours for discrete \code{point_col_var} (named by level) or colour bounds for continuous \code{point_col_var} (length 3 low/mid/high).}
+\item{point_col}{named vector or \code{NULL}. Custom colours for discrete \code{point_col_var} (named by
+level). Ignored for continuous \code{point_col_var} (use \code{col} instead).}
+
+\item{palette}{character or \code{NULL}. Named colour palette for the continuous \code{point_col_var} colour
+scale. When not \code{NULL}, overrides \code{col} and \code{col_positions}. Available palettes:
+\code{"bipolar"} (default, blue-white-red), \code{"alarm"} (green-white-red, good-to-bad),
+\code{"accessible"} (blue-white-orange, colour-blind-safe diverging), \code{"heat"} (light-yellow to
+dark-red, sequential), \code{"sky"} (white to navy, sequential). Set to \code{NULL} to use \code{col} and
+\code{col_positions} directly. Ignored when \code{point_col_var} is discrete.}
+
+\item{col}{character vector. Colours used for the continuous \code{point_col_var} colour scale, ordered
+from low to high values. Default is \code{c("#2166AC", "#F7F7F7", "#B2182B")} (blue, white, red).
+Any number of colours (>= 2) is accepted. Ignored when \code{point_col_var} is discrete or when
+\code{palette} is not \code{NULL}.}
+
+\item{col_positions}{numeric vector or \code{"auto"}. Positions (in [0, 1]) at which each colour in
+\code{col} is placed on the colour scale. Must be the same length as \code{col}, sorted ascending, with
+first value \code{0} and last value \code{1}. When \code{"auto"} (default) and \code{col} has exactly three colours,
+the middle colour is stretched over \code{white_range}. In all other \code{"auto"} cases the colours are
+evenly spaced from 0 to 1. Ignored when \code{point_col_var} is discrete or when \code{palette} is not
+\code{NULL}.}
+
+\item{white_range}{numeric vector of length 2. The range of positions (on a 0-1 scale) over which
+the middle colour is stretched. Only used when \code{col} has exactly three colours and
+\code{col_positions = "auto"}. Also applied to diverging \code{palette} presets. Default is \code{c(0.4, 0.6)}.
+Ignored when \code{point_col_var} is discrete.}
+
+\item{na_rm}{logical. Whether to remove observations with missing values in the variables used
+for the plot axes (and dimensionality reduction, when applicable). When \code{TRUE} (default),
+missing observations are removed and a message is issued showing how many. When \code{FALSE} and
+\code{dim_red} is not \code{"none"}, an error is raised if any missing values are found (dimensionality
+reduction algorithms cannot handle them). When \code{FALSE} and \code{dim_red = "none"}, observations
+with missing axis values are silently dropped by ggplot2.}
 
 \item{point_size}{numeric. Size of observation points. Default is \code{2}.}
 
@@ -85,16 +122,16 @@ reduction components as axes.
 }
 \examples{
 set.seed(1)
-data <- data.frame(
+.data <- data.frame(
   cluster = rep(paste0("C", 1:3), each = 20),
   var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
   var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0)),
   var3 = c(rnorm(20, 1), rnorm(20, -1), rnorm(20, 0))
 )
-plot_cluster_scatter(data, cluster = "cluster")
-plot_cluster_scatter(data, cluster = "cluster", dim_red = "none", vars = c("var1", "var2"))
-plot_cluster_scatter(data, cluster = "cluster", show_legend = FALSE)
+plot_cluster_scatter(.data, cluster = "cluster")
+plot_cluster_scatter(.data, cluster = "cluster", dim_red = "none", vars = c("var1", "var2"))
+plot_cluster_scatter(.data, cluster = "cluster", show_legend = FALSE)
 # Pass extra arguments to the dim-red function, e.g. disable scaling in PCA:
-plot_cluster_scatter(data, cluster = "cluster", dim_red = "pca",
+plot_cluster_scatter(.data, cluster = "cluster", dim_red = "pca",
                      dim_red_args = list(scale. = FALSE))
 }

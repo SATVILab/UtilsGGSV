@@ -108,6 +108,7 @@ test_that("plot_cluster_heatmap custom colours are applied to the scale", {
   p <- plot_cluster_heatmap(
     data,
     cluster = "cluster",
+    palette = NULL,
     col = c("#0000FF", "#FFFFFF", "#FF0000")
   )
   expect_s3_class(p, "ggplot")
@@ -363,7 +364,7 @@ test_that("plot_cluster_heatmap five colours with auto positions evenly spaces c
 test_that("plot_cluster_heatmap errors when data is not a data.frame", {
   expect_error(
     plot_cluster_heatmap(list(cluster = 1:3, var1 = 1:3), cluster = "cluster"),
-    "`data` must be a data.frame"
+    "`\\.data` must be a data.frame"
   )
 })
 
@@ -385,7 +386,7 @@ test_that("plot_cluster_heatmap errors when cluster column is missing", {
   )
   expect_error(
     plot_cluster_heatmap(data, cluster = "cluster"),
-    "not found in `data`"
+    "not found in `\\.data`"
   )
 })
 
@@ -418,7 +419,7 @@ test_that("plot_cluster_heatmap errors when a vars column is missing", {
   )
   expect_error(
     plot_cluster_heatmap(data, cluster = "cluster", vars = c("var1", "var_missing")),
-    "not found in `data`"
+    "not found in `\\.data`"
   )
 })
 
@@ -440,7 +441,7 @@ test_that("plot_cluster_heatmap errors when col is not a character vector", {
     var1 = rnorm(10)
   )
   expect_error(
-    plot_cluster_heatmap(data, cluster = "cluster", col = 1:3),
+    plot_cluster_heatmap(data, cluster = "cluster", palette = NULL, col = 1:3),
     "`col` must be a character vector"
   )
 })
@@ -451,7 +452,7 @@ test_that("plot_cluster_heatmap errors when col has fewer than 2 elements", {
     var1 = rnorm(10)
   )
   expect_error(
-    plot_cluster_heatmap(data, cluster = "cluster", col = "#FF0000"),
+    plot_cluster_heatmap(data, cluster = "cluster", palette = NULL, col = "#FF0000"),
     "`col` must be a character vector of length >= 2"
   )
 })
@@ -464,6 +465,7 @@ test_that("plot_cluster_heatmap errors when col_positions does not start at 0 an
   expect_error(
     plot_cluster_heatmap(
       data, cluster = "cluster",
+      palette = NULL,
       col = c("#2166AC", "#F7F7F7", "#B2182B"),
       col_positions = c(0.1, 0.5, 0.9)
     ),
@@ -479,6 +481,7 @@ test_that("plot_cluster_heatmap errors when col_positions wrong length", {
   expect_error(
     plot_cluster_heatmap(
       data, cluster = "cluster",
+      palette = NULL,
       col = c("#2166AC", "#F7F7F7", "#B2182B"),
       col_positions = c(0, 1)
     ),

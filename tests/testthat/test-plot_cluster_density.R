@@ -845,7 +845,7 @@ test_that("plot_cluster_density bandwidth non-positive errors", {
 test_that("plot_cluster_density errors when data is not a data.frame", {
   expect_error(
     plot_cluster_density(list(cluster = c("A", "B"), var1 = 1:2), cluster = "cluster"),
-    "`data` must be a data.frame"
+    "`\\.data` must be a data.frame"
   )
 })
 
@@ -867,7 +867,7 @@ test_that("plot_cluster_density errors when cluster column is missing", {
   )
   expect_error(
     plot_cluster_density(data, cluster = "cluster"),
-    "not found in `data`"
+    "not found in `\\.data`"
   )
 })
 
@@ -900,7 +900,7 @@ test_that("plot_cluster_density errors when a vars column is missing", {
   )
   expect_error(
     plot_cluster_density(data, cluster = "cluster", vars = c("var1", "var_missing")),
-    "not found in `data`"
+    "not found in `\\.data`"
   )
 })
 

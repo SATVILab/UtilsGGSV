@@ -5,7 +5,7 @@
 \title{Plot density of variable values with per-cluster overlays}
 \usage{
 plot_cluster_density(
-  data,
+  .data,
   cluster,
   vars = NULL,
   col_clusters = NULL,
@@ -19,6 +19,7 @@ plot_cluster_density(
   rug = NULL,
   density_overall_weight = NULL,
   bandwidth = "hpi_1",
+  na_rm = TRUE,
   font_size = 14,
   thm = cowplot::theme_cowplot(font_size = font_size) + ggplot2::theme(plot.background =
     ggplot2::element_rect(fill = "white", colour = NA), panel.background =
@@ -27,13 +28,13 @@ plot_cluster_density(
 )
 }
 \arguments{
-\item{data}{data.frame. Rows are observations. Must contain a column
+\item{.data}{data.frame. Rows are observations. Must contain a column
 identifying cluster membership and columns for variable values.}
 
-\item{cluster}{character. Name of the column in \code{data} that identifies
+\item{cluster}{character. Name of the column in \code{.data} that identifies
 cluster membership.}
 
-\item{vars}{character vector or \code{NULL}. Names of columns in \code{data} to
+\item{vars}{character vector or \code{NULL}. Names of columns in \code{.data} to
 use as variables. If \code{NULL}, all columns except \code{cluster} are used.
 Default is \code{NULL}.}
 
@@ -97,6 +98,12 @@ dominating the density estimate. Ignored when \code{density} is \code{"cluster"}
 \item{bandwidth}{character or positive numeric. Bandwidth used for
 per-cluster kernel density estimation. One of \code{"hpi_1"} (default),
 \code{"hpi_0"}, \code{"SJ"}, or a positive number. See \strong{Details}.}
+
+\item{na_rm}{logical. Whether to remove \code{NA} values from each variable
+before computing densities and medians. When \code{TRUE} (default), \code{NA}
+values are removed and a message is issued showing how many were removed
+per variable. When \code{FALSE}, \code{NA} values are passed directly to
+\code{stats::density()}, which will strip them with its own warning.}
 
 \item{font_size}{numeric. Font size passed to \code{cowplot::theme_cowplot}.
 Default is \code{14}.}
@@ -169,25 +176,25 @@ into a \strong{single faceted ggplot2 object} via \code{facet_wrap}.
 }
 \examples{
 set.seed(1)
-data <- data.frame(
+.data <- data.frame(
   cluster = rep(paste0("C", 1:3), each = 20),
   var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
   var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
 )
 # Default: overall + per-cluster density curves
-plot_list <- plot_cluster_density(data, cluster = "cluster")
+plot_list <- plot_cluster_density(.data, cluster = "cluster")
 
 # Overall density with cluster median lines only
-plot_cluster_density(data, cluster = "cluster", density = "overall")
+plot_cluster_density(.data, cluster = "cluster", density = "overall")
 
 # Per-cluster density curves only
-plot_cluster_density(data, cluster = "cluster", density = "cluster")
+plot_cluster_density(.data, cluster = "cluster", density = "cluster")
 
 # Even-weighted overall density
 plot_cluster_density(
-  data, cluster = "cluster", density_overall_weight = "even"
+  .data, cluster = "cluster", density_overall_weight = "even"
 )
 
 # Faceted plot with 2 columns
-plot_cluster_density(data, cluster = "cluster", n_col = 2)
+plot_cluster_density(.data, cluster = "cluster", n_col = 2)
 }

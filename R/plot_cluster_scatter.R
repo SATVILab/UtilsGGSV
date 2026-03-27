@@ -7,12 +7,39 @@
 #' The plot can use either raw variables (specified by the user) or dimensionality
 #' reduction components as axes.
 #'
-#' @param data data.frame. Rows are observations. Must contain a column identifying cluster membership and numeric variables.
-#' @param cluster character. Name of the column in `data` that identifies cluster membership.
+#' @param .data data.frame. Rows are observations. Must contain a column identifying cluster membership and numeric variables.
+#' @param cluster character. Name of the column in `.data` that identifies cluster membership.
 #' @param dim_red character or `NULL`. Dimensionality reduction method: one of `"none"`, `"pca"`, `"tsne"`, `"umap"`. If `NULL`, auto-selects `"none"` when exactly 2 numeric vars are available, otherwise `"pca"`.
-#' @param vars character vector or `NULL`. Names of numeric columns in `data` to use for the plot or reduction. If `NULL`, uses all numeric columns except `cluster` and `point_col_var`.
+#' @param vars character vector or `NULL`. Names of numeric columns in `.data` to use for the plot or reduction. If `NULL`, uses all numeric columns except `cluster` and `point_col_var`.
 #' @param point_col_var character or `NULL`. Column to use for point colour mapping. Default is same as `cluster`.
-#' @param point_col named vector or NULL. Custom colours for discrete `point_col_var` (named by level) or colour bounds for continuous `point_col_var` (length 3 low/mid/high).
+#' @param point_col named vector or `NULL`. Custom colours for discrete `point_col_var` (named by
+#'   level). Ignored for continuous `point_col_var` (use `col` instead).
+#' @param palette character or `NULL`. Named colour palette for the continuous `point_col_var` colour
+#'   scale. When not `NULL`, overrides `col` and `col_positions`. Available palettes:
+#'   `"bipolar"` (default, blue-white-red), `"alarm"` (green-white-red, good-to-bad),
+#'   `"accessible"` (blue-white-orange, colour-blind-safe diverging), `"heat"` (light-yellow to
+#'   dark-red, sequential), `"sky"` (white to navy, sequential). Set to `NULL` to use `col` and
+#'   `col_positions` directly. Ignored when `point_col_var` is discrete.
+#' @param col character vector. Colours used for the continuous `point_col_var` colour scale, ordered
+#'   from low to high values. Default is `c("#2166AC", "#F7F7F7", "#B2182B")` (blue, white, red).
+#'   Any number of colours (>= 2) is accepted. Ignored when `point_col_var` is discrete or when
+#'   `palette` is not `NULL`.
+#' @param col_positions numeric vector or `"auto"`. Positions (in \[0, 1\]) at which each colour in
+#'   `col` is placed on the colour scale. Must be the same length as `col`, sorted ascending, with
+#'   first value `0` and last value `1`. When `"auto"` (default) and `col` has exactly three colours,
+#'   the middle colour is stretched over `white_range`. In all other `"auto"` cases the colours are
+#'   evenly spaced from 0 to 1. Ignored when `point_col_var` is discrete or when `palette` is not
+#'   `NULL`.
+#' @param white_range numeric vector of length 2. The range of positions (on a 0-1 scale) over which
+#'   the middle colour is stretched. Only used when `col` has exactly three colours and
+#'   `col_positions = "auto"`. Also applied to diverging `palette` presets. Default is `c(0.4, 0.6)`.
+#'   Ignored when `point_col_var` is discrete.
+#' @param na_rm logical. Whether to remove observations with missing values in the variables used
+#'   for the plot axes (and dimensionality reduction, when applicable). When `TRUE` (default),
+#'   missing observations are removed and a message is issued showing how many. When `FALSE` and
+#'   `dim_red` is not `"none"`, an error is raised if any missing values are found (dimensionality
+#'   reduction algorithms cannot handle them). When `FALSE` and `dim_red = "none"`, observations
+#'   with missing axis values are silently dropped by ggplot2.
 #' @param point_size numeric. Size of observation points. Default is `2`.
 #' @param point_alpha numeric. Alpha transparency for observation points and legend guide. Default is `0.65`.
 #' @param centroid_size numeric. Size of centroid points. Default is `3`.
@@ -41,25 +68,30 @@
 #'
 #' @examples
 #' set.seed(1)
-#' data <- data.frame(
+#' .data <- data.frame(
 #'   cluster = rep(paste0("C", 1:3), each = 20),
 #'   var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
 #'   var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0)),
 #'   var3 = c(rnorm(20, 1), rnorm(20, -1), rnorm(20, 0))
 #' )
-#' plot_cluster_scatter(data, cluster = "cluster")
-#' plot_cluster_scatter(data, cluster = "cluster", dim_red = "none", vars = c("var1", "var2"))
-#' plot_cluster_scatter(data, cluster = "cluster", show_legend = FALSE)
+#' plot_cluster_scatter(.data, cluster = "cluster")
+#' plot_cluster_scatter(.data, cluster = "cluster", dim_red = "none", vars = c("var1", "var2"))
+#' plot_cluster_scatter(.data, cluster = "cluster", show_legend = FALSE)
 #' # Pass extra arguments to the dim-red function, e.g. disable scaling in PCA:
-#' plot_cluster_scatter(data, cluster = "cluster", dim_red = "pca",
+#' plot_cluster_scatter(.data, cluster = "cluster", dim_red = "pca",
 #'                      dim_red_args = list(scale. = FALSE))
-plot_cluster_scatter <- function(data,
+plot_cluster_scatter <- function(.data,
                                  cluster,
                                  dim_red = NULL,
                                  vars = NULL,
                                  dim_red_args = list(),
                                  point_col_var = NULL,
                                  point_col = NULL,
+                                 palette = "bipolar",
+                                 col = c("#2166AC", "#F7F7F7", "#B2182B"),
+                                 col_positions = "auto",
+                                 white_range = c(0.4, 0.6),
+                                 na_rm = TRUE,
                                  point_size = 2,
                                  point_alpha = 0.65,
                                  centroid_size = 3,
@@ -84,7 +116,7 @@ plot_cluster_scatter <- function(data,
                                  grid = cowplot::background_grid(
                                    major = "xy"
                                  )) {
-  .plot_cluster_validate(data, cluster, vars)
+  .plot_cluster_validate(.data, cluster, vars)
 
   if (is.null(point_col_var)) {
     point_col_var <- cluster
@@ -94,13 +126,16 @@ plot_cluster_scatter <- function(data,
       is.na(point_col_var)) {
     stop("`point_col_var` must be a single non-NA character string.", call. = FALSE)
   }
-  if (!(point_col_var %in% colnames(data))) {
+  if (!(point_col_var %in% colnames(.data))) {
     stop(
-      paste0("`point_col_var` column \"", point_col_var, "\" not found in `data`."),
+      paste0("`point_col_var` column \"", point_col_var, "\" not found in `.data`."),
       call. = FALSE
     )
   }
 
+  if (!is.logical(na_rm) || length(na_rm) != 1L || is.na(na_rm)) {
+    stop("`na_rm` must be TRUE or FALSE.", call. = FALSE)
+  }
   if (!is.logical(ggrepel) || length(ggrepel) != 1L || is.na(ggrepel)) {
     stop("`ggrepel` must be TRUE or FALSE.", call. = FALSE)
   }
@@ -123,8 +158,8 @@ plot_cluster_scatter <- function(data,
   }
 
   input_vars <- if (is.null(vars)) {
-    candidates <- setdiff(colnames(data), unique(c(cluster, point_col_var)))
-    candidates[sapply(data[, candidates, drop = FALSE], is.numeric)]
+    candidates <- setdiff(colnames(.data), unique(c(cluster, point_col_var)))
+    candidates[sapply(.data[, candidates, drop = FALSE], is.numeric)]
   } else {
     vars
   }
@@ -146,19 +181,49 @@ plot_cluster_scatter <- function(data,
   dim_red <- match.arg(dim_red, c("none", "pca", "tsne", "umap"))
 
   if (dim_red != "none" && length(input_vars) < 2) {
-    stop("dim_red=\"", dim_red, "\" requires at least two variables in vars or numeric variables in `data`.")
+    stop("dim_red=\"", dim_red, "\" requires at least two variables in vars or numeric variables in `.data`.")
   }
-
   if (dim_red == "none" && length(input_vars) < 2) {
-    stop("dim_red=\"none\" requires at least two variables in vars or numeric variables in `data`.")
+    stop("dim_red=\"none\" requires at least two variables in vars or numeric variables in `.data`.")
   }
 
-  complete_idx <- stats::complete.cases(data[, input_vars, drop = FALSE])
-  if (sum(complete_idx) == 0) {
-    stop("No complete cases after removing missing values for selected vars.")
+  # Drop as little as possible: for dim_red="none" only check the two axis
+  # variables; for reduction methods all input_vars must be complete.
+  vars_for_na_check <- if (dim_red == "none") {
+    input_vars[1:2]
+  } else {
+    input_vars
+  }
+  complete_idx <- stats::complete.cases(.data[, vars_for_na_check, drop = FALSE])
+  n_dropped <- sum(!complete_idx)
+  if (n_dropped > 0L) {
+    if (!na_rm) {
+      if (dim_red != "none") {
+        stop(
+          n_dropped, " observation(s) have missing values in the selected ",
+          "variables. Set na_rm = TRUE to remove them, or use dim_red = ",
+          "\"none\" with na_rm = FALSE to let ggplot2 handle missing ",
+          "coordinates.",
+          call. = FALSE
+        )
+      }
+      # dim_red == "none" + na_rm == FALSE: let ggplot2 handle
+    } else {
+      message(
+        "Removing ", n_dropped, " observation(s) with missing values in ",
+        if (dim_red == "none") "the axis variables." else "the selected variables."
+      )
+    }
   }
 
-  data_clean <- data[complete_idx, , drop = FALSE]
+  if (na_rm && n_dropped > 0L) {
+    if (sum(complete_idx) == 0L) {
+      stop("No complete cases remain after removing missing values.")
+    }
+    data_clean <- .data[complete_idx, , drop = FALSE]
+  } else {
+    data_clean <- .data
+  }
 
   if (dim_red == "none") {
     x_var <- input_vars[1]
@@ -234,6 +299,25 @@ plot_cluster_scatter <- function(data,
     }
   }
 
+  # Resolve palette → col / col_positions for continuous colour
+  if (!point_col_discrete) {
+    resolved <- .resolve_cluster_palette(palette, col, col_positions)
+    col <- resolved$col
+    col_positions <- resolved$col_positions
+    if (!is.character(col) || length(col) < 2) {
+      stop("`col` must be a character vector of length >= 2.", call. = FALSE)
+    }
+    if (!is.numeric(white_range) || length(white_range) != 2 ||
+        any(white_range < 0) || any(white_range > 1) ||
+        white_range[1] >= white_range[2]) {
+      stop(
+        "`white_range` must be a numeric vector of length 2 in [0, 1] with ",
+        "`white_range[1] < white_range[2]`.",
+        call. = FALSE
+      )
+    }
+  }
+
   centroid_tbl <- aggregate(cbind(x = x, y = y) ~ cluster, data = plot_data, FUN = stats::median)
 
   p <- ggplot2::ggplot(
@@ -253,30 +337,26 @@ plot_cluster_scatter <- function(data,
       }
       p <- p + ggplot2::scale_colour_manual(values = point_col)
     } else {
-      p <- p + ggplot2::scale_colour_brewer(palette = "Set2")
+      p <- p + ggplot2::scale_colour_brewer(palette = "Paired")
     }
 
     if (point_col_var == cluster) {
       if (!is.null(point_col)) {
         p <- p + ggplot2::scale_fill_manual(values = point_col)
       } else {
-        p <- p + ggplot2::scale_fill_brewer(palette = "Set2")
+        p <- p + ggplot2::scale_fill_brewer(palette = "Paired")
       }
     } else {
-      p <- p + ggplot2::scale_fill_brewer(palette = "Set2")
+      p <- p + ggplot2::scale_fill_brewer(palette = "Paired")
     }
   } else {
-    col_vals <- if (is.null(point_col)) {
-      c("#D53E4F", "white", "#3288BD")
-    } else {
-      if (length(point_col) != 3) {
-        stop("For continuous point_col_var, point_col should be a numeric or character vector of length 3 for low/mid/high colours.")
-      }
-      point_col
-    }
-    midpoint <- mean(range(plot_data$point_col, na.rm = TRUE))
-    p <- p + ggplot2::scale_colour_gradient2(low = col_vals[1], mid = col_vals[2], high = col_vals[3], midpoint = midpoint)
-    p <- p + ggplot2::scale_fill_brewer(palette = "Set2")
+    gradientn_args <- .build_gradientn_args(col, col_positions, white_range)
+    p <- p + ggplot2::scale_colour_gradientn(
+      colours = gradientn_args$colours,
+      values  = gradientn_args$values,
+      name    = point_col_var
+    )
+    p <- p + ggplot2::scale_fill_brewer(palette = "Paired")
   }
 
   if (!is.null(label_offset)) {
