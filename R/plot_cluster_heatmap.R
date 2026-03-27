@@ -109,6 +109,8 @@ plot_cluster_heatmap <- function(data,
                                  values_format = NULL,
                                  values_col = "black",
                                  values_size = 3) {
+  .plot_cluster_validate(data, cluster, vars)
+
   if (is.null(vars)) {
     vars <- setdiff(colnames(data), cluster)
   }
@@ -116,6 +118,43 @@ plot_cluster_heatmap <- function(data,
   scale_method <- match.arg(
     scale_method, c("ecdf", "zscore", "raw", "minmax", "minmax_var")
   )
+
+  if (!is.character(col) || length(col) < 2) {
+    stop("`col` must be a character vector of length >= 2.", call. = FALSE)
+  }
+  if (!identical(col_positions, "auto")) {
+    if (!is.numeric(col_positions) || length(col_positions) != length(col)) {
+      stop(
+        "`col_positions` must be \"auto\" or a numeric vector the same length as `col`.",
+        call. = FALSE
+      )
+    }
+    if (!isTRUE(all.equal(col_positions[1], 0)) ||
+        !isTRUE(all.equal(col_positions[length(col_positions)], 1))) {
+      stop(
+        "`col_positions` must start at 0 and end at 1.",
+        call. = FALSE
+      )
+    }
+    if (is.unsorted(col_positions)) {
+      stop("`col_positions` must be sorted in ascending order.", call. = FALSE)
+    }
+  }
+  if (!is.numeric(white_range) || length(white_range) != 2 ||
+      any(white_range < 0) || any(white_range > 1) ||
+      white_range[1] >= white_range[2]) {
+    stop(
+      paste0(
+        "`white_range` must be a numeric vector of length 2 with values in",
+        " [0, 1] and `white_range[1] < white_range[2]`."
+      ),
+      call. = FALSE
+    )
+  }
+  if (!is.logical(show_values) || length(show_values) != 1L ||
+      is.na(show_values)) {
+    stop("`show_values` must be TRUE or FALSE.", call. = FALSE)
+  }
 
   cluster_vec <- unique(data[[cluster]])
 

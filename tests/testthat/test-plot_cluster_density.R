@@ -566,21 +566,22 @@ test_that("plot_cluster_density rug invalid value errors", {
 
 # cluster coercion tests
 
-test_that("plot_cluster_density coerces numeric cluster to character", {
+test_that("plot_cluster_density errors when cluster column is integer (numeric)", {
   set.seed(1)
   data <- data.frame(
     cluster = rep(1:3, each = 20),
     var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2))
   )
-  result <- plot_cluster_density(data, cluster = "cluster", density = "overall")
-  expect_type(result, "list")
-  for (p in result) expect_s3_class(p, "ggplot")
+  expect_error(
+    plot_cluster_density(data, cluster = "cluster", density = "overall"),
+    "numeric"
+  )
 })
 
-test_that("plot_cluster_density numeric cluster vline data contains character values", {
+test_that("plot_cluster_density works with character cluster after manual conversion", {
   set.seed(1)
   data <- data.frame(
-    cluster = rep(1:3, each = 20),
+    cluster = as.character(rep(1:3, each = 20)),
     var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2))
   )
   result <- plot_cluster_density(data, cluster = "cluster", density = "overall")
@@ -839,4 +840,101 @@ test_that("plot_cluster_density bandwidth non-positive errors", {
     plot_cluster_density(data, cluster = "cluster", bandwidth = -1),
     "positive"
   )
+})
+
+test_that("plot_cluster_density errors when data is not a data.frame", {
+  expect_error(
+    plot_cluster_density(list(cluster = c("A", "B"), var1 = 1:2), cluster = "cluster"),
+    "`data` must be a data.frame"
+  )
+})
+
+test_that("plot_cluster_density errors when cluster is not a character string", {
+  data <- data.frame(
+    cluster = rep(c("A", "B"), each = 5),
+    var1 = rnorm(10)
+  )
+  expect_error(
+    plot_cluster_density(data, cluster = 1),
+    "single non-NA character string"
+  )
+})
+
+test_that("plot_cluster_density errors when cluster column is missing", {
+  data <- data.frame(
+    grp = rep(c("A", "B"), each = 5),
+    var1 = rnorm(10)
+  )
+  expect_error(
+    plot_cluster_density(data, cluster = "cluster"),
+    "not found in `data`"
+  )
+})
+
+test_that("plot_cluster_density errors when cluster column is numeric", {
+  data <- data.frame(
+    cluster = rep(c(1.0, 2.0), each = 5),
+    var1 = rnorm(10)
+  )
+  expect_error(
+    plot_cluster_density(data, cluster = "cluster"),
+    "numeric"
+  )
+})
+
+test_that("plot_cluster_density errors when cluster column has fewer than 2 unique values", {
+  data <- data.frame(
+    cluster = rep("A", 10),
+    var1 = rnorm(10)
+  )
+  expect_error(
+    plot_cluster_density(data, cluster = "cluster"),
+    "at least 2 unique"
+  )
+})
+
+test_that("plot_cluster_density errors when a vars column is missing", {
+  data <- data.frame(
+    cluster = rep(c("A", "B"), each = 5),
+    var1 = rnorm(10)
+  )
+  expect_error(
+    plot_cluster_density(data, cluster = "cluster", vars = c("var1", "var_missing")),
+    "not found in `data`"
+  )
+})
+
+test_that("plot_cluster_density errors when a vars column is not numeric", {
+  data <- data.frame(
+    cluster = rep(c("A", "B"), each = 5),
+    var1 = rnorm(10),
+    label = rep(c("x", "y"), 5)
+  )
+  expect_error(
+    plot_cluster_density(data, cluster = "cluster", vars = c("var1", "label")),
+    "not numeric"
+  )
+})
+
+test_that("plot_cluster_density errors when cluster column is integer", {
+  data <- data.frame(
+    cluster = rep(c(1L, 2L), each = 5),
+    var1 = rnorm(10)
+  )
+  expect_error(
+    plot_cluster_density(data, cluster = "cluster"),
+    "numeric"
+  )
+})
+
+test_that("plot_cluster_density works with factor cluster column", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = factor(rep(c("A", "B"), each = 20)),
+    var1 = rnorm(40),
+    var2 = rnorm(40)
+  )
+  result <- plot_cluster_density(data, cluster = "cluster")
+  expect_type(result, "list")
+  expect_s3_class(result[[1]], "ggplot")
 })

@@ -359,3 +359,162 @@ test_that("plot_cluster_heatmap five colours with auto positions evenly spaces c
   fill_scale <- p$scales$get_scales("fill")
   expect_equal(fill_scale$palette(0.5), "#F7F7F7")
 })
+
+test_that("plot_cluster_heatmap errors when data is not a data.frame", {
+  expect_error(
+    plot_cluster_heatmap(list(cluster = 1:3, var1 = 1:3), cluster = "cluster"),
+    "`data` must be a data.frame"
+  )
+})
+
+test_that("plot_cluster_heatmap errors when cluster is not a character string", {
+  data <- data.frame(
+    cluster = rep(c("A", "B"), each = 5),
+    var1 = rnorm(10)
+  )
+  expect_error(
+    plot_cluster_heatmap(data, cluster = 1),
+    "single non-NA character string"
+  )
+})
+
+test_that("plot_cluster_heatmap errors when cluster column is missing", {
+  data <- data.frame(
+    grp = rep(c("A", "B"), each = 5),
+    var1 = rnorm(10)
+  )
+  expect_error(
+    plot_cluster_heatmap(data, cluster = "cluster"),
+    "not found in `data`"
+  )
+})
+
+test_that("plot_cluster_heatmap errors when cluster column is numeric", {
+  data <- data.frame(
+    cluster = rep(c(1, 2), each = 5),
+    var1 = rnorm(10)
+  )
+  expect_error(
+    plot_cluster_heatmap(data, cluster = "cluster"),
+    "numeric"
+  )
+})
+
+test_that("plot_cluster_heatmap errors when cluster column has fewer than 2 unique values", {
+  data <- data.frame(
+    cluster = rep("A", 10),
+    var1 = rnorm(10)
+  )
+  expect_error(
+    plot_cluster_heatmap(data, cluster = "cluster"),
+    "at least 2 unique"
+  )
+})
+
+test_that("plot_cluster_heatmap errors when a vars column is missing", {
+  data <- data.frame(
+    cluster = rep(c("A", "B"), each = 5),
+    var1 = rnorm(10)
+  )
+  expect_error(
+    plot_cluster_heatmap(data, cluster = "cluster", vars = c("var1", "var_missing")),
+    "not found in `data`"
+  )
+})
+
+test_that("plot_cluster_heatmap errors when a vars column is not numeric", {
+  data <- data.frame(
+    cluster = rep(c("A", "B"), each = 5),
+    var1 = rnorm(10),
+    label = rep(c("x", "y"), 5)
+  )
+  expect_error(
+    plot_cluster_heatmap(data, cluster = "cluster", vars = c("var1", "label")),
+    "not numeric"
+  )
+})
+
+test_that("plot_cluster_heatmap errors when col is not a character vector", {
+  data <- data.frame(
+    cluster = rep(c("A", "B"), each = 5),
+    var1 = rnorm(10)
+  )
+  expect_error(
+    plot_cluster_heatmap(data, cluster = "cluster", col = 1:3),
+    "`col` must be a character vector"
+  )
+})
+
+test_that("plot_cluster_heatmap errors when col has fewer than 2 elements", {
+  data <- data.frame(
+    cluster = rep(c("A", "B"), each = 5),
+    var1 = rnorm(10)
+  )
+  expect_error(
+    plot_cluster_heatmap(data, cluster = "cluster", col = "#FF0000"),
+    "`col` must be a character vector of length >= 2"
+  )
+})
+
+test_that("plot_cluster_heatmap errors when col_positions does not start at 0 and end at 1", {
+  data <- data.frame(
+    cluster = rep(c("A", "B"), each = 5),
+    var1 = rnorm(10)
+  )
+  expect_error(
+    plot_cluster_heatmap(
+      data, cluster = "cluster",
+      col = c("#2166AC", "#F7F7F7", "#B2182B"),
+      col_positions = c(0.1, 0.5, 0.9)
+    ),
+    "start at 0 and end at 1"
+  )
+})
+
+test_that("plot_cluster_heatmap errors when col_positions wrong length", {
+  data <- data.frame(
+    cluster = rep(c("A", "B"), each = 5),
+    var1 = rnorm(10)
+  )
+  expect_error(
+    plot_cluster_heatmap(
+      data, cluster = "cluster",
+      col = c("#2166AC", "#F7F7F7", "#B2182B"),
+      col_positions = c(0, 1)
+    ),
+    "same length as `col`"
+  )
+})
+
+test_that("plot_cluster_heatmap errors when show_values is not logical", {
+  data <- data.frame(
+    cluster = rep(c("A", "B"), each = 5),
+    var1 = rnorm(10)
+  )
+  expect_error(
+    plot_cluster_heatmap(data, cluster = "cluster", show_values = "yes"),
+    "`show_values` must be TRUE or FALSE"
+  )
+})
+
+test_that("plot_cluster_heatmap errors when cluster column is integer", {
+  data <- data.frame(
+    cluster = rep(c(1L, 2L), each = 5),
+    var1 = rnorm(10)
+  )
+  expect_error(
+    plot_cluster_heatmap(data, cluster = "cluster"),
+    "numeric"
+  )
+})
+
+test_that("plot_cluster_heatmap works with factor cluster column", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = factor(rep(c("A", "B"), each = 10)),
+    var1 = rnorm(20),
+    var2 = rnorm(20)
+  )
+  p <- plot_cluster_heatmap(data, cluster = "cluster")
+  expect_s3_class(p, "ggplot")
+})

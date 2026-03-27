@@ -187,6 +187,8 @@ plot_cluster_density <- function(data,
     stop("`bandwidth` must be a positive number.", call. = FALSE)
   }
 
+  .plot_cluster_validate(data, cluster, vars)
+
   # Coerce cluster column to character unless it is already a factor,
   # ensuring ggplot2 always treats cluster as a discrete variable.
   if (!is.factor(data[[cluster]])) {
