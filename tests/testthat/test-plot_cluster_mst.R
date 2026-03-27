@@ -54,7 +54,7 @@ test_that("plot_cluster_mst errors with fewer than two clusters", {
   data <- data.frame(cluster = rep("C1", 10), var1 = rnorm(10))
   expect_error(
     plot_cluster_mst(data, cluster = "cluster"),
-    "At least two clusters"
+    "at least 2 unique"
   )
 })
 
@@ -141,7 +141,7 @@ test_that("plot_cluster_mst col_clusters applies colour scale", {
   }
 })
 
-test_that("plot_cluster_mst custom heatmap colours apply to fill scale", {
+test_that("plot_cluster_mst custom colours apply to fill scale", {
   set.seed(1)
   data <- data.frame(
     cluster = rep(paste0("C", 1:3), each = 20),
@@ -150,7 +150,7 @@ test_that("plot_cluster_mst custom heatmap colours apply to fill scale", {
   )
   result <- plot_cluster_mst(
     data, cluster = "cluster",
-    col_high = "#FF0000", col_mid = "#FFFFFF", col_low = "#0000FF"
+    col = c("#0000FF", "#FFFFFF", "#FF0000")
   )
   for (p in result) {
     fill_scale <- p$scales$get_scales("fill")
@@ -297,3 +297,114 @@ test_that("plot_cluster_mst suppress_axes TRUE suppresses axes regardless of coo
   }
 })
 
+
+test_that("plot_cluster_mst errors when data is not a data.frame", {
+  expect_error(
+    plot_cluster_mst(list(cluster = c("A", "B"), var1 = 1:2), cluster = "cluster"),
+    "`data` must be a data.frame"
+  )
+})
+
+test_that("plot_cluster_mst errors when cluster is not a character string", {
+  data <- data.frame(
+    cluster = rep(c("A", "B"), each = 5),
+    var1 = rnorm(10)
+  )
+  expect_error(
+    plot_cluster_mst(data, cluster = 1),
+    "single non-NA character string"
+  )
+})
+
+test_that("plot_cluster_mst errors when cluster column is missing", {
+  data <- data.frame(
+    grp = rep(c("A", "B"), each = 5),
+    var1 = rnorm(10)
+  )
+  expect_error(
+    plot_cluster_mst(data, cluster = "cluster"),
+    "not found in `data`"
+  )
+})
+
+test_that("plot_cluster_mst errors when cluster column is numeric", {
+  data <- data.frame(
+    cluster = rep(c(1.0, 2.0), each = 5),
+    var1 = rnorm(10)
+  )
+  expect_error(
+    plot_cluster_mst(data, cluster = "cluster"),
+    "numeric"
+  )
+})
+
+test_that("plot_cluster_mst errors when a vars column is missing", {
+  data <- data.frame(
+    cluster = rep(c("A", "B"), each = 5),
+    var1 = rnorm(10)
+  )
+  expect_error(
+    plot_cluster_mst(data, cluster = "cluster", vars = c("var1", "var_missing")),
+    "not found in `data`"
+  )
+})
+
+test_that("plot_cluster_mst errors when a vars column is not numeric", {
+  data <- data.frame(
+    cluster = rep(c("A", "B"), each = 5),
+    var1 = rnorm(10),
+    label = rep(c("x", "y"), 5)
+  )
+  expect_error(
+    plot_cluster_mst(data, cluster = "cluster", vars = c("var1", "label")),
+    "not numeric"
+  )
+})
+
+test_that("plot_cluster_mst errors when white_range is invalid", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(c("A", "B"), each = 10),
+    var1 = rnorm(20)
+  )
+  expect_error(
+    plot_cluster_mst(data, cluster = "cluster", white_range = c(0.7, 0.3)),
+    "`white_range`"
+  )
+})
+
+test_that("plot_cluster_mst errors when coord_equal is not logical", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(c("A", "B"), each = 10),
+    var1 = rnorm(20)
+  )
+  expect_error(
+    plot_cluster_mst(data, cluster = "cluster", coord_equal = "yes"),
+    "`coord_equal` must be TRUE or FALSE"
+  )
+})
+
+test_that("plot_cluster_mst errors when suppress_axes is not logical or NULL", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(c("A", "B"), each = 10),
+    var1 = rnorm(20)
+  )
+  expect_error(
+    plot_cluster_mst(data, cluster = "cluster", suppress_axes = "yes"),
+    "`suppress_axes` must be TRUE, FALSE, or NULL"
+  )
+})
+
+test_that("plot_cluster_mst works with factor cluster column", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = factor(rep(c("A", "B"), each = 15)),
+    var1 = c(rnorm(15, 2), rnorm(15, -2)),
+    var2 = rnorm(30)
+  )
+  result <- plot_cluster_mst(data, cluster = "cluster")
+  expect_type(result, "list")
+  for (p in result) expect_s3_class(p, "ggplot")
+})

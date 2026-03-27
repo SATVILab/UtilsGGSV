@@ -49,14 +49,19 @@
 #' @param col_clusters named character vector or `NULL`. Per-cluster colours
 #'   applied to node borders and text labels. Names should match cluster
 #'   labels. When `NULL` (default), the default ggplot2 colour scale is used.
-#' @param col_high character. Colour for high values (100th percentile).
-#'   Default is `"#B2182B"`.
-#' @param col_mid character. Colour for the middle of the value range.
-#'   Default is `"#F7F7F7"`.
-#' @param col_low character. Colour for low values (0th percentile).
-#'   Default is `"#2166AC"`.
-#' @param white_range numeric vector of length 2. The range of percentile
-#'   values (on a 0-1 scale) that map to `col_mid`. Default is `c(0.4, 0.6)`.
+#' @param col character vector. Colours used to fill nodes, ordered from low
+#'   to high values. Default is `c("#2166AC", "#F7F7F7", "#B2182B")` (blue,
+#'   white, red). Any number of colours (>= 2) is accepted.
+#' @param col_positions numeric vector or `"auto"`. Positions (in \[0, 1\]) at
+#'   which each colour in `col` is placed on the fill scale. Must be the same
+#'   length as `col`, sorted in ascending order, with the first value `0` and
+#'   the last value `1`. When `"auto"` (default) and `col` has exactly three
+#'   colours, the middle colour is stretched over `white_range`. In all other
+#'   `"auto"` cases the colours are evenly spaced from 0 to 1.
+#' @param white_range numeric vector of length 2. The range of positions (on a
+#'   0-1 scale) over which the middle colour is stretched. Only used when `col`
+#'   has exactly three colours and `col_positions = "auto"`.
+#'   Default is `c(0.4, 0.6)`.
 #' @param n_col integer or `NULL`. Number of columns passed to
 #'   `cowplot::plot_grid`. If supplied (or if `n_row` is supplied) a single
 #'   combined figure is returned instead of a list. Default is `NULL`.
@@ -106,9 +111,8 @@ plot_cluster_mst <- function(data,
                               coord_equal = TRUE,
                               suppress_axes = NULL,
                               col_clusters = NULL,
-                              col_high = "#B2182B",
-                              col_mid = "#F7F7F7",
-                              col_low = "#2166AC",
+                              col = c("#2166AC", "#F7F7F7", "#B2182B"),
+                              col_positions = "auto",
                               white_range = c(0.4, 0.6),
                               n_col = NULL,
                               n_row = NULL,
@@ -133,6 +137,49 @@ plot_cluster_mst <- function(data,
                               )) {
   layout_algorithm <- match.arg(layout_algorithm)
 
+  .plot_cluster_validate(data, cluster, vars)
+
+  if (!is.logical(coord_equal) || length(coord_equal) != 1L || is.na(coord_equal)) {
+    stop("`coord_equal` must be TRUE or FALSE.", call. = FALSE)
+  }
+  if (!is.null(suppress_axes) &&
+      (!is.logical(suppress_axes) || length(suppress_axes) != 1L ||
+       is.na(suppress_axes))) {
+    stop("`suppress_axes` must be TRUE, FALSE, or NULL.", call. = FALSE)
+  }
+  if (!is.character(col) || length(col) < 2) {
+    stop("`col` must be a character vector of length >= 2.", call. = FALSE)
+  }
+  if (!identical(col_positions, "auto")) {
+    if (!is.numeric(col_positions) || length(col_positions) != length(col)) {
+      stop(
+        "`col_positions` must be \"auto\" or a numeric vector the same length as `col`.",
+        call. = FALSE
+      )
+    }
+    if (!isTRUE(all.equal(col_positions[1], 0)) ||
+        !isTRUE(all.equal(col_positions[length(col_positions)], 1))) {
+      stop(
+        "`col_positions` must start at 0 and end at 1.",
+        call. = FALSE
+      )
+    }
+    if (is.unsorted(col_positions)) {
+      stop("`col_positions` must be sorted in ascending order.", call. = FALSE)
+    }
+  }
+  if (!is.numeric(white_range) || length(white_range) != 2 ||
+      any(white_range < 0) || any(white_range > 1) ||
+      white_range[1] >= white_range[2]) {
+    stop(
+      paste0(
+        "`white_range` must be a numeric vector of length 2 with values in",
+        " [0, 1] and `white_range[1] < white_range[2]`."
+      ),
+      call. = FALSE
+    )
+  }
+
   if (is.null(suppress_axes)) suppress_axes <- coord_equal
 
   if (is.null(vars)) {
@@ -141,10 +188,6 @@ plot_cluster_mst <- function(data,
 
   cluster_vec <- unique(data[[cluster]])
 
-  if (length(cluster_vec) < 2L) {
-    stop("At least two clusters are required to compute an MST.")
-  }
-
   med_mat <- .plot_cluster_mst_medians(data, cluster, vars, cluster_vec)
   dist_mat <- as.matrix(stats::dist(med_mat))
   node_tbl_base <- .plot_cluster_mst_layout(
@@ -152,8 +195,6 @@ plot_cluster_mst <- function(data,
   )
   edge_tbl <- .plot_cluster_mst_edges(dist_mat, node_tbl_base)
   perc_tbl <- .plot_cluster_mst_percentiles(data, cluster, vars, cluster_vec)
-  colour_values <- c(0, white_range[1], white_range[2], 1)
-
   plot_list <- stats::setNames(
     lapply(vars, function(v) {
       perc_v <- perc_tbl[perc_tbl$variable == v, ]
@@ -163,10 +204,9 @@ plot_cluster_mst <- function(data,
         node_tbl = node_tbl,
         edge_tbl = edge_tbl,
         col_clusters = col_clusters,
-        col_high = col_high,
-        col_mid = col_mid,
-        col_low = col_low,
-        colour_values = colour_values,
+        col = col,
+        col_positions = col_positions,
+        white_range = white_range,
         layout_algorithm = layout_algorithm,
         coord_equal = coord_equal,
         suppress_axes = suppress_axes,
@@ -301,10 +341,24 @@ plot_cluster_mst <- function(data,
 }
 
 .plot_cluster_mst_plot_one <- function(node_tbl, edge_tbl, col_clusters,
-                                        col_high, col_mid, col_low,
-                                        colour_values, layout_algorithm,
+                                        col, col_positions, white_range,
+                                        layout_algorithm,
                                         coord_equal, suppress_axes,
                                         thm, grid) {
+  n_col <- length(col)
+  if (identical(col_positions, "auto")) {
+    if (n_col == 3L) {
+      plot_colours <- c(col[1], col[2], col[2], col[3])
+      plot_positions <- c(0, white_range[1], white_range[2], 1)
+    } else {
+      plot_colours <- col
+      plot_positions <- seq(0, 1, length.out = n_col)
+    }
+  } else {
+    plot_colours <- col
+    plot_positions <- col_positions
+  }
+
   axis_labels <- if (layout_algorithm == "kamada-kawai") {
     list(x = "KK 1", y = "KK 2")
   } else {
@@ -336,8 +390,8 @@ plot_cluster_mst <- function(data,
       vjust = -1
     ) +
     ggplot2::scale_fill_gradientn(
-      colours = c(col_low, col_mid, col_mid, col_high),
-      values = colour_values,
+      colours = plot_colours,
+      values = plot_positions,
       limits = c(0, 1),
       name = "Relative\nvalue",
       labels = scales::percent
