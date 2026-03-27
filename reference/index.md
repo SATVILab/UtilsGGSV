@@ -37,19 +37,41 @@ Utilities for saving plots
 - [`ggsave2()`](https://satvilab.github.io/UtilsGGSV/reference/ggsave2.md)
   : Save plot in multiple formats using cowplot::ggsave2
 
-## Cluster Plots
+## Group Plots
 
-Functions for visualising cluster characteristics
+Functions for visualising group characteristics
 
-- [`plot_cluster_heatmap()`](https://satvilab.github.io/UtilsGGSV/reference/plot_cluster_heatmap.md)
-  : Plot heat map of scaled variable values per cluster
-- [`plot_cluster_density()`](https://satvilab.github.io/UtilsGGSV/reference/plot_cluster_density.md)
-  : Plot density of variable values with per-cluster overlays
-- [`plot_cluster_mst()`](https://satvilab.github.io/UtilsGGSV/reference/plot_cluster_mst.md)
-  : Plot minimum-spanning tree of clusters with per-variable node
+- [`plot_group_heatmap()`](https://satvilab.github.io/UtilsGGSV/reference/plot_group_heatmap.md)
+  [`plot_cluster_heatmap()`](https://satvilab.github.io/UtilsGGSV/reference/plot_group_heatmap.md)
+  : Plot heat map of scaled variable values per group
+- [`plot_group_density()`](https://satvilab.github.io/UtilsGGSV/reference/plot_group_density.md)
+  [`plot_cluster_density()`](https://satvilab.github.io/UtilsGGSV/reference/plot_group_density.md)
+  : Plot density of variable values with per-group overlays
+- [`plot_group_mst()`](https://satvilab.github.io/UtilsGGSV/reference/plot_group_mst.md)
+  [`plot_cluster_mst()`](https://satvilab.github.io/UtilsGGSV/reference/plot_group_mst.md)
+  : Plot minimum-spanning tree of groups with per-variable node
   colouring
-- [`plot_cluster_scatter()`](https://satvilab.github.io/UtilsGGSV/reference/plot_cluster_scatter.md)
-  : Biaxial scatter plot with cluster medians overlaid
+- [`plot_group_scatter()`](https://satvilab.github.io/UtilsGGSV/reference/plot_group_scatter.md)
+  [`plot_cluster_scatter()`](https://satvilab.github.io/UtilsGGSV/reference/plot_group_scatter.md)
+  : Biaxial scatter plot with group medians overlaid
+
+## Cluster Plots (Aliases)
+
+Aliases of group plot functions for backward compatibility
+
+- [`plot_group_heatmap()`](https://satvilab.github.io/UtilsGGSV/reference/plot_group_heatmap.md)
+  [`plot_cluster_heatmap()`](https://satvilab.github.io/UtilsGGSV/reference/plot_group_heatmap.md)
+  : Plot heat map of scaled variable values per group
+- [`plot_group_density()`](https://satvilab.github.io/UtilsGGSV/reference/plot_group_density.md)
+  [`plot_cluster_density()`](https://satvilab.github.io/UtilsGGSV/reference/plot_group_density.md)
+  : Plot density of variable values with per-group overlays
+- [`plot_group_mst()`](https://satvilab.github.io/UtilsGGSV/reference/plot_group_mst.md)
+  [`plot_cluster_mst()`](https://satvilab.github.io/UtilsGGSV/reference/plot_group_mst.md)
+  : Plot minimum-spanning tree of groups with per-variable node
+  colouring
+- [`plot_group_scatter()`](https://satvilab.github.io/UtilsGGSV/reference/plot_group_scatter.md)
+  [`plot_cluster_scatter()`](https://satvilab.github.io/UtilsGGSV/reference/plot_group_scatter.md)
+  : Biaxial scatter plot with group medians overlaid
 
 ## Cluster Analysis
 
