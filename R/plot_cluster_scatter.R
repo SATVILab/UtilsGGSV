@@ -10,7 +10,7 @@
 #' @param .data data.frame. Rows are observations. Must contain a column identifying group membership and numeric variables.
 #' @param group character. Name of the column in `.data` that identifies group membership.
 #' @param dim_red character or `NULL`. Dimensionality reduction method: one of `"none"`, `"pca"`, `"tsne"`, `"umap"`. If `NULL`, auto-selects `"none"` when exactly 2 numeric vars are available, otherwise `"pca"`.
-#' @param vars character vector or `NULL`. Names of numeric columns in `.data` to use for the plot or reduction. If `NULL`, uses all numeric columns except `cluster` and `point_col_var`.
+#' @param vars character vector or `NULL`. Names of numeric columns in `.data` to use for the plot or reduction. If `NULL`, uses all numeric columns except `group` and `point_col_var`.
 #' @param point_col_var character or `NULL`. Column to use for point colour mapping. Default is same as `cluster`.
 #' @param point_col named vector or `NULL`. Custom colours for discrete `point_col_var` (named by
 #'   level). Ignored for continuous `point_col_var` (use `col` instead).

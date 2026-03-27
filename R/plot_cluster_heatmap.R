@@ -15,7 +15,7 @@
 #' @param group character. Name of the column in `.data` that identifies
 #'   group membership.
 #' @param vars character vector or `NULL`. Names of columns in `.data` to
-#'   use as variables. If `NULL`, all columns except `cluster` are used.
+#'   use as variables. If `NULL`, all columns except `group` are used.
 #'   Default is `NULL`.
 #' @param scale_method character. Method used to scale variable values for
 #'   colouring cells. One of `"ecdf"` (default), `"zscore"`, `"raw"`,

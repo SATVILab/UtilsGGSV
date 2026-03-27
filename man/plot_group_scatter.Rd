@@ -43,7 +43,7 @@ plot_cluster_scatter(.data, cluster, ...)
 
 \item{dim_red}{character or \code{NULL}. Dimensionality reduction method: one of \code{"none"}, \code{"pca"}, \code{"tsne"}, \code{"umap"}. If \code{NULL}, auto-selects \code{"none"} when exactly 2 numeric vars are available, otherwise \code{"pca"}.}
 
-\item{vars}{character vector or \code{NULL}. Names of numeric columns in \code{.data} to use for the plot or reduction. If \code{NULL}, uses all numeric columns except \code{cluster} and \code{point_col_var}.}
+\item{vars}{character vector or \code{NULL}. Names of numeric columns in \code{.data} to use for the plot or reduction. If \code{NULL}, uses all numeric columns except \code{group} and \code{point_col_var}.}
 
 \item{dim_red_args}{named list. Additional arguments passed to the
 dimensionality reduction function, overriding any defaults set by

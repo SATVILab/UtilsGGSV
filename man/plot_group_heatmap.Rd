@@ -36,7 +36,7 @@ identifying group membership and columns for variable values.}
 group membership.}
 
 \item{vars}{character vector or \code{NULL}. Names of columns in \code{.data} to
-use as variables. If \code{NULL}, all columns except \code{cluster} are used.
+use as variables. If \code{NULL}, all columns except \code{group} are used.
 Default is \code{NULL}.}
 
 \item{scale_method}{character. Method used to scale variable values for
