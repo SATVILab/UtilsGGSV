@@ -1,8 +1,8 @@
 #' @md
-#' @title Plot density of variable values with per-cluster overlays
+#' @title Plot density of variable values with per-group overlays
 #'
 #' @description
-#' For each variable, plots kernel density estimates with per-cluster overlays
+#' For each variable, plots kernel density estimates with per-group overlays
 #' (density curves and/or median lines). Returns a named list of ggplot2
 #' objects or a single faceted plot.
 #'
@@ -12,28 +12,28 @@
 #' The `density` argument controls what is shown:
 #'
 #' - `"both"` (default): the overall density curve plus one density curve per
-#'   cluster, coloured by cluster. Cluster curves are scaled according to the
+#'   group, coloured by group. Group curves are scaled according to the
 #'   `scale` argument.
 #' - `"overall"`: the overall density of all observations with a vertical line
-#'   per cluster at that cluster's median value.
-#' - `"cluster"`: one density curve per cluster, coloured by cluster.
+#'   per group at that group's median value.
+#' - `"cluster"`: one density curve per group, coloured by group.
 #'
 #' ## Rug
 #'
 #' A rug is added by default. The `rug` argument controls which data it shows:
 #'
-#' - `NULL` (default): per-cluster rug when `density` is `"cluster"` or
+#' - `NULL` (default): per-group rug when `density` is `"cluster"` or
 #'   `"both"`, overall rug when `density` is `"overall"`.
-#' - `"cluster"`: per-cluster rug, coloured by cluster.
-#' - `"overall"`: overall rug (no cluster colouring).
+#' - `"cluster"`: per-group rug, coloured by group.
+#' - `"overall"`: overall rug (no group colouring).
 #'
 #' ## Bandwidth
 #'
-#' The `bandwidth` argument controls per-cluster bandwidth selection (used for
-#' per-cluster density curves and for the even-weighted overall density):
+#' The `bandwidth` argument controls per-group bandwidth selection (used for
+#' per-group density curves and for the even-weighted overall density):
 #'
 #' - `"hpi_1"` (default): `ks::hpi(x, deriv.order = 1)` --- plug-in bandwidth
-#'   based on the first derivative, less sensitive to cluster size than SJ.
+#'   based on the first derivative, less sensitive to group size than SJ.
 #' - `"hpi_0"`: `ks::hpi(x, deriv.order = 0)` --- plug-in bandwidth based on
 #'   the density itself.
 #' - `"SJ"`: Sheather-Jones bandwidth via `stats::bw.SJ()`.
@@ -49,14 +49,14 @@
 #' into a **single faceted ggplot2 object** via `facet_wrap`.
 #'
 #' @param .data data.frame. Rows are observations. Must contain a column
-#'   identifying cluster membership and columns for variable values.
-#' @param cluster character. Name of the column in `.data` that identifies
-#'   cluster membership.
+#'   identifying group membership and columns for variable values.
+#' @param group character. Name of the column in `.data` that identifies
+#'   group membership.
 #' @param vars character vector or `NULL`. Names of columns in `.data` to
-#'   use as variables. If `NULL`, all columns except `cluster` are used.
+#'   use as variables. If `NULL`, all columns except `group` are used.
 #'   Default is `NULL`.
-#' @param col_clusters named character vector or `NULL`. Per-cluster colours.
-#'   Names should match cluster labels. When `NULL` (default), the default
+#' @param col_clusters named character vector or `NULL`. Per-group colours.
+#'   Names should match group labels. When `NULL` (default), the default
 #'   ggplot2 colour scale is used.
 #' @param n_col integer or `NULL`. Number of columns passed to
 #'   `ggplot2::facet_wrap`. If supplied (or if `n_row` is supplied) a single
@@ -126,28 +126,28 @@
 #' @examples
 #' set.seed(1)
 #' .data <- data.frame(
-#'   cluster = rep(paste0("C", 1:3), each = 20),
+#'   group = rep(paste0("C", 1:3), each = 20),
 #'   var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
 #'   var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
 #' )
-#' # Default: overall + per-cluster density curves
-#' plot_list <- plot_cluster_density(.data, cluster = "cluster")
+#' # Default: overall + per-group density curves
+#' plot_list <- plot_group_density(.data, group = "group")
 #'
-#' # Overall density with cluster median lines only
-#' plot_cluster_density(.data, cluster = "cluster", density = "overall")
+#' # Overall density with group median lines only
+#' plot_group_density(.data, group = "group", density = "overall")
 #'
-#' # Per-cluster density curves only
-#' plot_cluster_density(.data, cluster = "cluster", density = "cluster")
+#' # Per-group density curves only
+#' plot_group_density(.data, group = "group", density = "cluster")
 #'
 #' # Even-weighted overall density
-#' plot_cluster_density(
-#'   .data, cluster = "cluster", density_overall_weight = "even"
+#' plot_group_density(
+#'   .data, group = "group", density_overall_weight = "even"
 #' )
 #'
 #' # Faceted plot with 2 columns
-#' plot_cluster_density(.data, cluster = "cluster", n_col = 2)
-plot_cluster_density <- function(.data,
-                                 cluster,
+#' plot_group_density(.data, group = "group", n_col = 2)
+plot_group_density <- function(.data,
+                                 group,
                                  vars = NULL,
                                  col_clusters = NULL,
                                  n_col = NULL,
@@ -176,6 +176,7 @@ plot_cluster_density <- function(.data,
                                  grid = cowplot::background_grid(
                                    major = "xy"
                                  )) {
+  cluster <- group
   density <- match.arg(density, c("both", "overall", "cluster"))
   scale <- match.arg(scale, c("max_overall", "max_cluster", "free"))
   exclude_min <- match.arg(exclude_min, c("no", "overall", "variable"))
@@ -423,7 +424,7 @@ plot_cluster_density <- function(.data,
                   xintercept = .data$median, colour = .data$cluster
                 )
               ) +
-              ggplot2::labs(x = v, y = "Density", colour = "Cluster")
+              ggplot2::labs(x = v, y = "Density", colour = "Group")
           } else {
             dens_tbl <- tibble::tibble(value = dens_vals)
             p <- ggplot2::ggplot(
@@ -436,7 +437,7 @@ plot_cluster_density <- function(.data,
                   xintercept = .data$median, colour = .data$cluster
                 )
               ) +
-              ggplot2::labs(x = v, y = "Density", colour = "Cluster")
+              ggplot2::labs(x = v, y = "Density", colour = "Group")
           }
         } else {
           if (!is.null(density_overall_weight)) {
@@ -459,7 +460,7 @@ plot_cluster_density <- function(.data,
               )
             ) +
               ggplot2::geom_line() +
-              ggplot2::labs(x = v, y = "Density", colour = "Cluster")
+              ggplot2::labs(x = v, y = "Density", colour = "Group")
           } else {
             p <- ggplot2::ggplot() +
               ggplot2::geom_line(
@@ -472,7 +473,7 @@ plot_cluster_density <- function(.data,
                   x = .data$x, y = .data$y, colour = .data$cluster
                 )
               ) +
-              ggplot2::labs(x = v, y = "Density", colour = "Cluster")
+              ggplot2::labs(x = v, y = "Density", colour = "Group")
           }
         }
 
@@ -540,7 +541,7 @@ plot_cluster_density <- function(.data,
           ncol = n_col,
           nrow = n_row
         ) +
-        ggplot2::labs(x = "Value", y = "Density", colour = "Cluster")
+        ggplot2::labs(x = "Value", y = "Density", colour = "Group")
     } else {
       p <- ggplot2::ggplot(long_tbl, ggplot2::aes(x = .data$value)) +
         ggplot2::geom_density() +
@@ -554,7 +555,7 @@ plot_cluster_density <- function(.data,
           ncol = n_col,
           nrow = n_row
         ) +
-        ggplot2::labs(x = "Value", y = "Density", colour = "Cluster")
+        ggplot2::labs(x = "Value", y = "Density", colour = "Group")
     }
   } else {
     overall_dens_tbl <- purrr::map_df(vars, function(v) {
@@ -603,7 +604,7 @@ plot_cluster_density <- function(.data,
           ncol = n_col,
           nrow = n_row
         ) +
-        ggplot2::labs(x = "Value", y = "Density", colour = "Cluster")
+        ggplot2::labs(x = "Value", y = "Density", colour = "Group")
     } else {
       p <- ggplot2::ggplot() +
         ggplot2::geom_line(
@@ -622,7 +623,7 @@ plot_cluster_density <- function(.data,
           ncol = n_col,
           nrow = n_row
         ) +
-        ggplot2::labs(x = "Value", y = "Density", colour = "Cluster")
+        ggplot2::labs(x = "Value", y = "Density", colour = "Group")
     }
   }
 
@@ -641,4 +642,12 @@ plot_cluster_density <- function(.data,
   if (!is.null(grid)) p <- p + grid
 
   p
+}
+
+#' @rdname plot_group_density
+#' @param cluster character. Name of the column in `.data` that identifies
+#'   group membership. Alias for the `group` parameter.
+#' @export
+plot_cluster_density <- function(.data, cluster, ...) {
+  plot_group_density(.data, group = cluster, ...)
 }

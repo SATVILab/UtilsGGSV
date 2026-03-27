@@ -1,19 +1,19 @@
 #' @md
-#' @title Plot heat map of scaled variable values per cluster
+#' @title Plot heat map of scaled variable values per group
 #'
 #' @description
 #' Creates a heat map where each tile shows a scaled summary of a variable for
-#' a cluster. The scaling method is controlled by the `scale_method` parameter.
+#' a group. The scaling method is controlled by the `scale_method` parameter.
 #' By default (`scale_method = "ecdf"`), each tile shows the percentile of the
-#' cluster's median value compared against the empirical cumulative distribution
+#' group's median value compared against the empirical cumulative distribution
 #' function (ECDF) of that variable across all observations not belonging to the
-#' cluster. Clusters and variables are ordered along the axes via hierarchical
+#' group. Groups and variables are ordered along the axes via hierarchical
 #' clustering.
 #'
 #' @param .data data.frame. Rows are observations. Must contain a column
-#'   identifying cluster membership and columns for variable values.
-#' @param cluster character. Name of the column in `.data` that identifies
-#'   cluster membership.
+#'   identifying group membership and columns for variable values.
+#' @param group character. Name of the column in `.data` that identifies
+#'   group membership.
 #' @param vars character vector or `NULL`. Names of columns in `.data` to
 #'   use as variables. If `NULL`, all columns except `cluster` are used.
 #'   Default is `NULL`.
@@ -93,15 +93,15 @@
 #' @examples
 #' set.seed(1)
 #' .data <- data.frame(
-#'   cluster = rep(paste0("C", 1:3), each = 20),
+#'   group = rep(paste0("C", 1:3), each = 20),
 #'   var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
 #'   var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
 #' )
-#' plot_cluster_heatmap(.data, cluster = "cluster")
-#' plot_cluster_heatmap(.data, cluster = "cluster", show_values = TRUE)
-#' plot_cluster_heatmap(.data, cluster = "cluster", palette = "alarm")
-plot_cluster_heatmap <- function(.data,
-                                 cluster,
+#' plot_group_heatmap(.data, group = "group")
+#' plot_group_heatmap(.data, group = "group", show_values = TRUE)
+#' plot_group_heatmap(.data, group = "group", palette = "alarm")
+plot_group_heatmap <- function(.data,
+                                 group,
                                  vars = NULL,
                                  scale_method = "ecdf",
                                  palette = "bipolar",
@@ -128,6 +128,7 @@ plot_cluster_heatmap <- function(.data,
                                  values_format = NULL,
                                  values_col = "black",
                                  values_size = 3) {
+  cluster <- group
   .plot_cluster_validate(.data, cluster, vars)
 
   if (is.null(vars)) {
@@ -390,7 +391,7 @@ plot_cluster_heatmap <- function(.data,
   ) +
     ggplot2::geom_raster() +
     fill_scale +
-    ggplot2::labs(x = "Cluster", y = "Variable")
+    ggplot2::labs(x = "Group", y = "Variable")
 
   if (!is.null(thm)) {
     p <- p + thm
@@ -418,4 +419,12 @@ plot_cluster_heatmap <- function(.data,
   }
 
   p
+}
+
+#' @rdname plot_group_heatmap
+#' @param cluster character. Name of the column in `.data` that identifies
+#'   group membership. Alias for the `group` parameter.
+#' @export
+plot_cluster_heatmap <- function(.data, cluster, ...) {
+  plot_group_heatmap(.data, group = cluster, ...)
 }
