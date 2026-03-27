@@ -203,6 +203,10 @@ plot_cluster_scatter(.data, cluster, ...)
   character. Name of the column in `.data` that identifies group
   membership. Alias for the `group` parameter.
 
+- ...:
+
+  Additional arguments passed to `plot_group_scatter()`.
+
 ## Examples
 
 ``` r

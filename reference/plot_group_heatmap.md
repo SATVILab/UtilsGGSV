@@ -170,6 +170,10 @@ plot_cluster_heatmap(.data, cluster, ...)
   character. Name of the column in `.data` that identifies group
   membership. Alias for the `group` parameter.
 
+- ...:
+
+  Additional arguments passed to `plot_group_heatmap()`.
+
 ## Value
 
 A ggplot object.

@@ -218,6 +218,10 @@ plot_cluster_mst(.data, cluster, ...)
   character. Name of the column in `.data` that identifies group
   membership. Alias for the `group` parameter.
 
+- ...:
+
+  Additional arguments passed to `plot_group_mst()`.
+
 ## Value
 
 A named list of ggplot2 objects (one per variable) when neither `n_col`

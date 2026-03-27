@@ -9,11 +9,11 @@
 Source:
 [`DESCRIPTION`](https://github.com/SATVILab/UtilsGGSV/blob/main/DESCRIPTION)
 
-Rodo M (2026). *UtilsGGSV: Utility functions for ggplot2*. R package
+Rodo M (2026). *UtilsGGSV: Utility Functions for ggplot2*. R package
 version 0.9.0, <https://satvilab.github.io/UtilsGGSV/>.
 
     @Manual{,
-      title = {UtilsGGSV: Utility functions for ggplot2},
+      title = {UtilsGGSV: Utility Functions for ggplot2},
       author = {Miguel Rodo},
       year = {2026},
       note = {R package version 0.9.0},

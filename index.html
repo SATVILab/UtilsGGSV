@@ -57,7 +57,33 @@
 </h1></div>
 <!-- badges: start -->
 
-<p>The goal of UtilsGGSV is to provide utility functions for plotting in R using <code>ggplot2</code>.</p>
+<p>UtilsGGSV provides <code>ggplot2</code>-based utilities that solve two common pain points in exploratory data analysis:</p>
+<ol style="list-style-type: decimal">
+<li>
+<strong>Cluster / group characterisation</strong> — the <code>plot_group_*</code> family creates publication-ready plots that help you understand what makes each cluster (or any labelled group) distinctive:
+<ul>
+<li>
+<code><a href="reference/plot_group_heatmap.html">plot_group_heatmap()</a></code> — ECDF-percentile heat map showing each group’s relative position for every variable.</li>
+<li>
+<code><a href="reference/plot_group_density.html">plot_group_density()</a></code> — per-variable density plots with per-group overlays (density curves and/or median lines).</li>
+<li>
+<code><a href="reference/plot_group_scatter.html">plot_group_scatter()</a></code> — biaxial scatter with optional PCA / t-SNE / UMAP projection and cluster centroids.</li>
+<li>
+<code><a href="reference/plot_group_mst.html">plot_group_mst()</a></code> — minimum-spanning-tree layout coloured by the same ECDF scale as the heat map.</li>
+</ul>
+</li>
+<li>
+<strong>Correlation visualisation</strong> — <code><a href="reference/ggcorr.html">ggcorr()</a></code> creates paired scatter plots with Spearman, Pearson, Kendall, or concordance correlation coefficients overlaid as a formatted table, with support for log / asinh / any <code>scales</code> transformation.</li>
+</ol>
+<p>Additional helpers round out the toolkit:</p>
+<ul>
+<li>
+<code><a href="reference/axis_limits.html">axis_limits()</a></code> — force equal axis limits or expand axis coordinates without manually computing values.</li>
+<li>
+<code><a href="reference/add_text_column.html">add_text_column()</a></code> — place a column of text annotations at a consistent relative position regardless of the underlying axis transformation.</li>
+<li>
+<code><a href="reference/get_trans.html">get_trans()</a></code> — retrieve any <code>scales</code> transformation by name, including higher-root and <code>asinh</code> transformations not available in base <code>scales</code>.</li>
+</ul>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
@@ -393,6 +419,12 @@
 </ul>
 </div>
 
+<div class="community">
+<h2 data-toc-skip>Community</h2>
+<ul class="list-unstyled">
+<li><a href="CONTRIBUTING.html">Contributing guide</a></li>
+</ul>
+</div>
 
 <div class="citation">
 <h2 data-toc-skip>Citation</h2>

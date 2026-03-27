@@ -169,6 +169,10 @@ plot_cluster_density(.data, cluster, ...)
   character. Name of the column in `.data` that identifies group
   membership. Alias for the `group` parameter.
 
+- ...:
+
+  Additional arguments passed to `plot_group_density()`.
+
 ## Value
 
 A named list of ggplot2 objects (one per variable) when neither `n_col`

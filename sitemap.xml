@@ -1,5 +1,6 @@
 <urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
 <url><loc>https://satvilab.github.io/UtilsGGSV/404.html</loc></url>
+<url><loc>https://satvilab.github.io/UtilsGGSV/CONTRIBUTING.html</loc></url>
 <url><loc>https://satvilab.github.io/UtilsGGSV/LICENSE-text.html</loc></url>
 <url><loc>https://satvilab.github.io/UtilsGGSV/LICENSE.html</loc></url>
 <url><loc>https://satvilab.github.io/UtilsGGSV/articles/UtilsGGSV.html</loc></url>
@@ -7,6 +8,7 @@
 <url><loc>https://satvilab.github.io/UtilsGGSV/authors.html</loc></url>
 <url><loc>https://satvilab.github.io/UtilsGGSV/copilot-instructions.html</loc></url>
 <url><loc>https://satvilab.github.io/UtilsGGSV/index.html</loc></url>
+<url><loc>https://satvilab.github.io/UtilsGGSV/news/index.html</loc></url>
 <url><loc>https://satvilab.github.io/UtilsGGSV/reference/add_text_column.html</loc></url>
 <url><loc>https://satvilab.github.io/UtilsGGSV/reference/axis_limits.html</loc></url>
 <url><loc>https://satvilab.github.io/UtilsGGSV/reference/cluster_merge_bin.html</loc></url>
