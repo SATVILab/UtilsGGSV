@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot_cluster_density.R
 \name{plot_cluster_density}
 \alias{plot_cluster_density}
-\title{Plot density of variable values with per-cluster median lines}
+\title{Plot density of variable values with per-cluster overlays}
 \usage{
 plot_cluster_density(
   data,
@@ -11,11 +11,14 @@ plot_cluster_density(
   col_clusters = NULL,
   n_col = NULL,
   n_row = NULL,
-  density = "overall",
+  density = "both",
   scale = "max_overall",
   scales = "free_y",
   expand_coord = NULL,
   exclude_min = "no",
+  rug = NULL,
+  density_overall_weight = NULL,
+  bandwidth = "hpi_1",
   font_size = 14,
   thm = cowplot::theme_cowplot(font_size = font_size) + ggplot2::theme(plot.background =
     ggplot2::element_rect(fill = "white", colour = NA), panel.background =
@@ -46,11 +49,10 @@ faceted plot is returned instead of a list. Default is \code{NULL}.}
 \code{ggplot2::facet_wrap}. If supplied (or if \code{n_col} is supplied) a single
 faceted plot is returned instead of a list. Default is \code{NULL}.}
 
-\item{density}{character. What density to display. One of \code{"overall"}
-(default: overall density curve plus cluster median lines), \code{"cluster"}
-(one density curve per cluster, coloured by cluster), or \code{"both"} (overall
-density curve plus per-cluster density curves). When \code{"cluster"} or
-\code{"both"}, the \code{scale} argument controls how cluster densities are scaled.}
+\item{density}{character. What density to display. One of \code{"both"} (default:
+overall density curve plus per-cluster density curves), \code{"overall"}
+(overall density curve plus cluster median lines), or \code{"cluster"} (one
+density curve per cluster, coloured by cluster). See \strong{Details}.}
 
 \item{scale}{character. How to scale per-cluster density curves. Only
 relevant when \code{density} is \code{"cluster"} or \code{"both"}. One of
@@ -79,6 +81,23 @@ value equals the global minimum across all variables), or \code{"variable"}
 (for each variable, exclude observations whose value equals that
 variable's minimum).}
 
+\item{rug}{character or \code{NULL}. Controls the rug added below the density.
+\code{NULL} (default): per-cluster rug when \code{density} is \code{"cluster"} or
+\code{"both"}, overall rug when \code{density} is \code{"overall"}. \code{"cluster"}:
+per-cluster rug, coloured by cluster. \code{"overall"}: overall rug with no
+cluster colouring. See \strong{Details}.}
+
+\item{density_overall_weight}{character or \code{NULL}. Controls weighting of the
+overall density when \code{density} is \code{"overall"} or \code{"both"}. \code{NULL}
+(default): the overall density is estimated from all observations pooled
+together. \code{"even"}: the overall density is computed as an equal-weight
+average of per-cluster kernel densities, preventing larger clusters from
+dominating the density estimate. Ignored when \code{density} is \code{"cluster"}.}
+
+\item{bandwidth}{character or positive numeric. Bandwidth used for
+per-cluster kernel density estimation. One of \code{"hpi_1"} (default),
+\code{"hpi_0"}, \code{"SJ"}, or a positive number. See \strong{Details}.}
+
 \item{font_size}{numeric. Font size passed to \code{cowplot::theme_cowplot}.
 Default is \code{14}.}
 
@@ -95,20 +114,58 @@ A named list of ggplot2 objects (one per variable) when neither
 \code{facet_wrap} panels when \code{n_col} or \code{n_row} is specified.
 }
 \description{
-For each variable, plots the density of values and optionally overlays
-per-cluster density curves or cluster median lines. The \code{density} argument
-controls what is shown:
+For each variable, plots kernel density estimates with per-cluster overlays
+(density curves and/or median lines). Returns a named list of ggplot2
+objects or a single faceted plot.
+}
+\details{
+\subsection{Density modes}{
+
+The \code{density} argument controls what is shown:
 \itemize{
-\item \code{"overall"} (default): the overall density of all observations with a
-vertical line per cluster at that cluster's median value.
+\item \code{"both"} (default): the overall density curve plus one density curve per
+cluster, coloured by cluster. Cluster curves are scaled according to the
+\code{scale} argument.
+\item \code{"overall"}: the overall density of all observations with a vertical line
+per cluster at that cluster's median value.
 \item \code{"cluster"}: one density curve per cluster, coloured by cluster.
-\item \code{"both"}: the overall density curve and one density curve per cluster,
-with the cluster curves scaled according to the \code{scale} argument.
+}
 }
 
-By default the function returns a \strong{named list of ggplot2 objects}, one
-per variable. If \code{n_col} or \code{n_row} is supplied the plots are instead
-combined into a \strong{single faceted ggplot2 object} via \code{facet_wrap}.
+\subsection{Rug}{
+
+A rug is added by default. The \code{rug} argument controls which data it shows:
+\itemize{
+\item \code{NULL} (default): per-cluster rug when \code{density} is \code{"cluster"} or
+\code{"both"}, overall rug when \code{density} is \code{"overall"}.
+\item \code{"cluster"}: per-cluster rug, coloured by cluster.
+\item \code{"overall"}: overall rug (no cluster colouring).
+}
+}
+
+\subsection{Bandwidth}{
+
+The \code{bandwidth} argument controls per-cluster bandwidth selection (used for
+per-cluster density curves and for the even-weighted overall density):
+\itemize{
+\item \code{"hpi_1"} (default): \code{ks::hpi(x, deriv.order = 1)} --- plug-in bandwidth
+based on the first derivative, less sensitive to cluster size than SJ.
+\item \code{"hpi_0"}: \code{ks::hpi(x, deriv.order = 0)} --- plug-in bandwidth based on
+the density itself.
+\item \code{"SJ"}: Sheather-Jones bandwidth via \code{stats::bw.SJ()}.
+\item A positive numeric value: use that value as the bandwidth directly.
+}
+
+If bandwidth estimation fails, a warning is issued and the default
+(\code{stats::bw.nrd0}) bandwidth is used as a fallback.
+}
+
+\subsection{Layout}{
+
+By default the function returns a \strong{named list of ggplot2 objects}, one per
+variable. If \code{n_col} or \code{n_row} is supplied the plots are instead combined
+into a \strong{single faceted ggplot2 object} via \code{facet_wrap}.
+}
 }
 \examples{
 set.seed(1)
@@ -117,14 +174,19 @@ data <- data.frame(
   var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
   var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
 )
-# Default: overall density with cluster median lines
+# Default: overall + per-cluster density curves
 plot_list <- plot_cluster_density(data, cluster = "cluster")
 
-# Per-cluster density curves
+# Overall density with cluster median lines only
+plot_cluster_density(data, cluster = "cluster", density = "overall")
+
+# Per-cluster density curves only
 plot_cluster_density(data, cluster = "cluster", density = "cluster")
 
-# Both overall and per-cluster densities (default scaling: max_overall)
-plot_cluster_density(data, cluster = "cluster", density = "both")
+# Even-weighted overall density
+plot_cluster_density(
+  data, cluster = "cluster", density_overall_weight = "even"
+)
 
 # Faceted plot with 2 columns
 plot_cluster_density(data, cluster = "cluster", n_col = 2)
