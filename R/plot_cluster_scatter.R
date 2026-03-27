@@ -84,20 +84,42 @@ plot_cluster_scatter <- function(.data,
                                  grid = cowplot::background_grid(
                                    major = "xy"
                                  )) {
-  if (!is.data.frame(.data)) {
-    stop(".data must be a data frame.")
-  }
-
-  if (!is.character(cluster) || length(cluster) != 1 || !(cluster %in% colnames(.data))) {
-    stop("cluster must be a single column name present in .data")
-  }
+  .plot_cluster_validate(.data, cluster, vars)
 
   if (is.null(point_col_var)) {
     point_col_var <- cluster
   }
 
-  if (!is.character(point_col_var) || length(point_col_var) != 1 || !(point_col_var %in% colnames(.data))) {
-    stop("point_col_var must be a single column name present in .data")
+  if (!is.character(point_col_var) || length(point_col_var) != 1L ||
+      is.na(point_col_var)) {
+    stop("`point_col_var` must be a single non-NA character string.", call. = FALSE)
+  }
+  if (!(point_col_var %in% colnames(.data))) {
+    stop(
+      paste0("`point_col_var` column \"", point_col_var, "\" not found in `data`."),
+      call. = FALSE
+    )
+  }
+
+  if (!is.logical(ggrepel) || length(ggrepel) != 1L || is.na(ggrepel)) {
+    stop("`ggrepel` must be TRUE or FALSE.", call. = FALSE)
+  }
+  if (!is.logical(show_legend) || length(show_legend) != 1L || is.na(show_legend)) {
+    stop("`show_legend` must be TRUE or FALSE.", call. = FALSE)
+  }
+  if (!is.numeric(point_size) || length(point_size) != 1L || point_size <= 0) {
+    stop("`point_size` must be a single positive number.", call. = FALSE)
+  }
+  if (!is.numeric(point_alpha) || length(point_alpha) != 1L ||
+      point_alpha < 0 || point_alpha > 1) {
+    stop("`point_alpha` must be a single number in [0, 1].", call. = FALSE)
+  }
+  if (!is.numeric(centroid_size) || length(centroid_size) != 1L ||
+      centroid_size <= 0) {
+    stop("`centroid_size` must be a single positive number.", call. = FALSE)
+  }
+  if (!is.list(dim_red_args)) {
+    stop("`dim_red_args` must be a list.", call. = FALSE)
   }
 
   if (!is.null(vars)) {

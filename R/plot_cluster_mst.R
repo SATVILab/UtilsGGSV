@@ -133,6 +133,28 @@ plot_cluster_mst <- function(data,
                               )) {
   layout_algorithm <- match.arg(layout_algorithm)
 
+  .plot_cluster_validate(data, cluster, vars)
+
+  if (!is.logical(coord_equal) || length(coord_equal) != 1L || is.na(coord_equal)) {
+    stop("`coord_equal` must be TRUE or FALSE.", call. = FALSE)
+  }
+  if (!is.null(suppress_axes) &&
+      (!is.logical(suppress_axes) || length(suppress_axes) != 1L ||
+       is.na(suppress_axes))) {
+    stop("`suppress_axes` must be TRUE, FALSE, or NULL.", call. = FALSE)
+  }
+  if (!is.numeric(white_range) || length(white_range) != 2 ||
+      any(white_range < 0) || any(white_range > 1) ||
+      white_range[1] >= white_range[2]) {
+    stop(
+      paste0(
+        "`white_range` must be a numeric vector of length 2 with values in",
+        " [0, 1] and `white_range[1] < white_range[2]`."
+      ),
+      call. = FALSE
+    )
+  }
+
   if (is.null(suppress_axes)) suppress_axes <- coord_equal
 
   if (is.null(vars)) {
@@ -140,10 +162,6 @@ plot_cluster_mst <- function(data,
   }
 
   cluster_vec <- unique(data[[cluster]])
-
-  if (length(cluster_vec) < 2L) {
-    stop("At least two clusters are required to compute an MST.")
-  }
 
   med_mat <- .plot_cluster_mst_medians(data, cluster, vars, cluster_vec)
   dist_mat <- as.matrix(stats::dist(med_mat))

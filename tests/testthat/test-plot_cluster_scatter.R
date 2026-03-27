@@ -318,3 +318,188 @@ test_that("plot_cluster_scatter passes dim_red_args to umap", {
 
   expect_s3_class(result, "ggplot")
 })
+
+test_that("plot_cluster_scatter errors when data is not a data.frame", {
+  expect_error(
+    plot_cluster_scatter(list(cluster = c("A", "B"), var1 = 1:2, var2 = 1:2),
+                         cluster = "cluster"),
+    "`data` must be a data.frame"
+  )
+})
+
+test_that("plot_cluster_scatter errors when cluster is not a character string", {
+  data <- data.frame(
+    cluster = rep(c("A", "B"), each = 10),
+    var1 = rnorm(20),
+    var2 = rnorm(20)
+  )
+  expect_error(
+    plot_cluster_scatter(data, cluster = 1),
+    "single non-NA character string"
+  )
+})
+
+test_that("plot_cluster_scatter errors when cluster column is missing", {
+  data <- data.frame(
+    grp = rep(c("A", "B"), each = 10),
+    var1 = rnorm(20),
+    var2 = rnorm(20)
+  )
+  expect_error(
+    plot_cluster_scatter(data, cluster = "cluster"),
+    "not found in"
+  )
+})
+
+test_that("plot_cluster_scatter errors when cluster column is numeric", {
+  data <- data.frame(
+    cluster = rep(c(1.0, 2.0), each = 10),
+    var1 = rnorm(20),
+    var2 = rnorm(20)
+  )
+  expect_error(
+    plot_cluster_scatter(data, cluster = "cluster"),
+    "numeric"
+  )
+})
+
+test_that("plot_cluster_scatter errors when cluster column is integer", {
+  data <- data.frame(
+    cluster = rep(c(1L, 2L), each = 10),
+    var1 = rnorm(20),
+    var2 = rnorm(20)
+  )
+  expect_error(
+    plot_cluster_scatter(data, cluster = "cluster"),
+    "numeric"
+  )
+})
+
+test_that("plot_cluster_scatter errors when cluster has only one unique value", {
+  data <- data.frame(
+    cluster = rep("A", 20),
+    var1 = rnorm(20),
+    var2 = rnorm(20)
+  )
+  expect_error(
+    plot_cluster_scatter(data, cluster = "cluster"),
+    "at least 2 unique"
+  )
+})
+
+test_that("plot_cluster_scatter errors when vars column is missing", {
+  data <- data.frame(
+    cluster = rep(c("A", "B"), each = 10),
+    var1 = rnorm(20),
+    var2 = rnorm(20)
+  )
+  expect_error(
+    plot_cluster_scatter(data, cluster = "cluster",
+                         vars = c("var1", "var_missing")),
+    "not found in"
+  )
+})
+
+test_that("plot_cluster_scatter errors when vars column is not numeric", {
+  data <- data.frame(
+    cluster = rep(c("A", "B"), each = 10),
+    var1 = rnorm(20),
+    label = rep(c("x", "y"), 10)
+  )
+  expect_error(
+    plot_cluster_scatter(data, cluster = "cluster",
+                         vars = c("var1", "label"),
+                         dim_red = "none"),
+    "not numeric"
+  )
+})
+
+test_that("plot_cluster_scatter errors when point_col_var column is missing", {
+  data <- data.frame(
+    cluster = rep(c("A", "B"), each = 10),
+    var1 = rnorm(20),
+    var2 = rnorm(20)
+  )
+  expect_error(
+    plot_cluster_scatter(data, cluster = "cluster",
+                         point_col_var = "no_such_col"),
+    "not found"
+  )
+})
+
+test_that("plot_cluster_scatter errors when ggrepel is not logical", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(c("A", "B"), each = 10),
+    var1 = rnorm(20),
+    var2 = rnorm(20)
+  )
+  expect_error(
+    plot_cluster_scatter(data, cluster = "cluster", ggrepel = "yes"),
+    "`ggrepel` must be TRUE or FALSE"
+  )
+})
+
+test_that("plot_cluster_scatter errors when show_legend is not logical", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(c("A", "B"), each = 10),
+    var1 = rnorm(20),
+    var2 = rnorm(20)
+  )
+  expect_error(
+    plot_cluster_scatter(data, cluster = "cluster", show_legend = "yes"),
+    "`show_legend` must be TRUE or FALSE"
+  )
+})
+
+test_that("plot_cluster_scatter errors when point_size is not a positive number", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(c("A", "B"), each = 10),
+    var1 = rnorm(20),
+    var2 = rnorm(20)
+  )
+  expect_error(
+    plot_cluster_scatter(data, cluster = "cluster", point_size = -1),
+    "`point_size` must be a single positive number"
+  )
+})
+
+test_that("plot_cluster_scatter errors when point_alpha is out of range", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(c("A", "B"), each = 10),
+    var1 = rnorm(20),
+    var2 = rnorm(20)
+  )
+  expect_error(
+    plot_cluster_scatter(data, cluster = "cluster", point_alpha = 1.5),
+    "`point_alpha` must be a single number in"
+  )
+})
+
+test_that("plot_cluster_scatter errors when dim_red_args is not a list", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(c("A", "B"), each = 10),
+    var1 = rnorm(20),
+    var2 = rnorm(20)
+  )
+  expect_error(
+    plot_cluster_scatter(data, cluster = "cluster", dim_red_args = "bad"),
+    "`dim_red_args` must be a list"
+  )
+})
+
+test_that("plot_cluster_scatter works with factor cluster column", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = factor(rep(c("A", "B"), each = 20)),
+    var1 = c(rnorm(20, 2), rnorm(20, -2)),
+    var2 = c(rnorm(20, 1), rnorm(20, -1)),
+    var3 = rnorm(40)
+  )
+  result <- plot_cluster_scatter(data, cluster = "cluster")
+  expect_s3_class(result, "ggplot")
+})
