@@ -1,9 +1,9 @@
 #' @md
-#' @title Plot minimum-spanning tree of clusters with per-variable node colouring
+#' @title Plot minimum-spanning tree of groups with per-variable node colouring
 #'
 #' @description
-#' Computes the minimum-spanning tree (MST) over clusters, where the distance
-#' between two clusters is the Euclidean distance between their median variable
+#' Computes the minimum-spanning tree (MST) over groups, where the distance
+#' between two groups is the Euclidean distance between their median variable
 #' profiles. The MST is built from the full pairwise Euclidean distance matrix
 #' (i.e. a fully connected undirected weighted graph), matching the approach
 #' used by FlowSOM (`BuildMST`). The node layout is determined once and shared
@@ -17,10 +17,10 @@
 #' - `"mds"`: uses classical multidimensional scaling (`stats::cmdscale`) of
 #'   the full Euclidean distance matrix.
 #'
-#' For each variable, a separate plot is produced in which each cluster node
+#' For each variable, a separate plot is produced in which each group node
 #' is **filled** according to the ECDF-standardised percentile of that
-#' cluster's median value for the variable — the same scaling used by
-#' [plot_cluster_heatmap()]. The node border and label colour encode cluster
+#' group's median value for the variable — the same scaling used by
+#' [plot_group_heatmap()]. The node border and label colour encode group
 #' identity and can be overridden via `col_clusters`.
 #'
 #' By default the function returns a **named list of ggplot2 objects**, one
@@ -28,11 +28,11 @@
 #' a single figure using `cowplot::plot_grid`, with variable names as labels.
 #'
 #' @param .data data.frame. Rows are observations. Must contain a column
-#'   identifying cluster membership and columns for variable values.
-#' @param cluster character. Name of the column in `.data` that identifies
-#'   cluster membership.
+#'   identifying group membership and columns for variable values.
+#' @param group character. Name of the column in `.data` that identifies
+#'   group membership.
 #' @param vars character vector or `NULL`. Names of columns in `.data` to
-#'   use as variables. If `NULL`, all columns except `cluster` are used.
+#'   use as variables. If `NULL`, all columns except `group` are used.
 #'   Default is `NULL`.
 #' @param layout_algorithm character. Layout algorithm for positioning nodes.
 #'   One of `"kamada-kawai"` (default) or `"mds"`. `"kamada-kawai"` uses the
@@ -108,20 +108,20 @@
 #' @examples
 #' set.seed(1)
 #' .data <- data.frame(
-#'   cluster = rep(paste0("C", 1:3), each = 20),
+#'   group = rep(paste0("C", 1:3), each = 20),
 #'   var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
 #'   var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
 #' )
 #' # Default: Kamada-Kawai layout, returns a named list of plots
-#' plot_list <- plot_cluster_mst(.data, cluster = "cluster")
+#' plot_list <- plot_group_mst(.data, group = "group")
 #'
 #' # MDS layout
-#' plot_cluster_mst(.data, cluster = "cluster", layout_algorithm = "mds")
+#' plot_group_mst(.data, group = "group", layout_algorithm = "mds")
 #'
 #' # Combined grid with 2 columns
-#' plot_cluster_mst(.data, cluster = "cluster", n_col = 2)
-plot_cluster_mst <- function(.data,
-                              cluster,
+#' plot_group_mst(.data, group = "group", n_col = 2)
+plot_group_mst <- function(.data,
+                              group,
                               vars = NULL,
                               layout_algorithm = c("kamada-kawai", "mds"),
                               coord_equal = TRUE,
@@ -153,6 +153,7 @@ plot_cluster_mst <- function(.data,
                               grid = cowplot::background_grid(
                                 major = "xy"
                               )) {
+  cluster <- group
   layout_algorithm <- match.arg(layout_algorithm)
 
   .plot_cluster_validate(.data, cluster, vars)
@@ -435,7 +436,7 @@ plot_cluster_mst <- function(.data,
       name    = "Relative\nvalue",
       labels  = scales::percent
     ) +
-    ggplot2::labs(x = axis_labels$x, y = axis_labels$y, colour = "Cluster")
+    ggplot2::labs(x = axis_labels$x, y = axis_labels$y, colour = "Group")
 
   if (coord_equal) p <- p + ggplot2::coord_equal()
 
@@ -458,4 +459,12 @@ plot_cluster_mst <- function(.data,
   }
 
   p
+}
+
+#' @rdname plot_group_mst
+#' @param cluster character. Name of the column in `.data` that identifies
+#'   group membership. Alias for the `group` parameter.
+#' @export
+plot_cluster_mst <- function(.data, cluster, ...) {
+  plot_group_mst(.data, group = cluster, ...)
 }

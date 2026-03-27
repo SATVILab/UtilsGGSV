@@ -1,16 +1,16 @@
 #' @md
-#' @title Biaxial scatter plot with cluster medians overlaid
+#' @title Biaxial scatter plot with group medians overlaid
 #'
 #' @description
-#' Creates a biaxial scatter plot with observations colored by cluster assignment.
-#' Median cluster centroids are overlaid as large points and labeled with cluster names.
+#' Creates a biaxial scatter plot with observations colored by group assignment.
+#' Median group centroids are overlaid as large points and labeled with group names.
 #' The plot can use either raw variables (specified by the user) or dimensionality
 #' reduction components as axes.
 #'
-#' @param .data data.frame. Rows are observations. Must contain a column identifying cluster membership and numeric variables.
-#' @param cluster character. Name of the column in `.data` that identifies cluster membership.
+#' @param .data data.frame. Rows are observations. Must contain a column identifying group membership and numeric variables.
+#' @param group character. Name of the column in `.data` that identifies group membership.
 #' @param dim_red character or `NULL`. Dimensionality reduction method: one of `"none"`, `"pca"`, `"tsne"`, `"umap"`. If `NULL`, auto-selects `"none"` when exactly 2 numeric vars are available, otherwise `"pca"`.
-#' @param vars character vector or `NULL`. Names of numeric columns in `.data` to use for the plot or reduction. If `NULL`, uses all numeric columns except `cluster` and `point_col_var`.
+#' @param vars character vector or `NULL`. Names of numeric columns in `.data` to use for the plot or reduction. If `NULL`, uses all numeric columns except `group` and `point_col_var`.
 #' @param point_col_var character or `NULL`. Column to use for point colour mapping. Default is same as `cluster`.
 #' @param point_col named vector or `NULL`. Custom colours for discrete `point_col_var` (named by
 #'   level). Ignored for continuous `point_col_var` (use `col` instead).
@@ -69,19 +69,19 @@
 #' @examples
 #' set.seed(1)
 #' .data <- data.frame(
-#'   cluster = rep(paste0("C", 1:3), each = 20),
+#'   group = rep(paste0("C", 1:3), each = 20),
 #'   var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
 #'   var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0)),
 #'   var3 = c(rnorm(20, 1), rnorm(20, -1), rnorm(20, 0))
 #' )
-#' plot_cluster_scatter(.data, cluster = "cluster")
-#' plot_cluster_scatter(.data, cluster = "cluster", dim_red = "none", vars = c("var1", "var2"))
-#' plot_cluster_scatter(.data, cluster = "cluster", show_legend = FALSE)
+#' plot_group_scatter(.data, group = "group")
+#' plot_group_scatter(.data, group = "group", dim_red = "none", vars = c("var1", "var2"))
+#' plot_group_scatter(.data, group = "group", show_legend = FALSE)
 #' # Pass extra arguments to the dim-red function, e.g. disable scaling in PCA:
-#' plot_cluster_scatter(.data, cluster = "cluster", dim_red = "pca",
+#' plot_group_scatter(.data, group = "group", dim_red = "pca",
 #'                      dim_red_args = list(scale. = FALSE))
-plot_cluster_scatter <- function(.data,
-                                 cluster,
+plot_group_scatter <- function(.data,
+                                 group,
                                  dim_red = NULL,
                                  vars = NULL,
                                  dim_red_args = list(),
@@ -116,6 +116,7 @@ plot_cluster_scatter <- function(.data,
                                  grid = cowplot::background_grid(
                                    major = "xy"
                                  )) {
+  cluster <- group
   .plot_cluster_validate(.data, cluster, vars)
 
   if (is.null(point_col_var)) {
@@ -398,8 +399,8 @@ plot_cluster_scatter <- function(.data,
     ggplot2::labs(
       x = if (is.null(x_lab)) x_var else x_lab,
       y = if (is.null(y_lab)) y_var else y_lab,
-      colour = if (point_col_var == cluster) "Cluster" else point_col_var,
-      fill = "Cluster"
+      colour = if (point_col_var == cluster) "Group" else point_col_var,
+      fill = "Group"
     ) +
     ggplot2::guides(colour = ggplot2::guide_legend(override.aes = list(alpha = point_alpha)))
 
@@ -413,3 +414,10 @@ plot_cluster_scatter <- function(.data,
   p
 }
 
+#' @rdname plot_group_scatter
+#' @param cluster character. Name of the column in `.data` that identifies
+#'   group membership. Alias for the `group` parameter.
+#' @export
+plot_cluster_scatter <- function(.data, cluster, ...) {
+  plot_group_scatter(.data, group = cluster, ...)
+}

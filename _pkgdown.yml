@@ -45,8 +45,16 @@ reference:
   - save_plot
   - ggsave2
 
-- title: Cluster Plots
-  desc: Functions for visualising cluster characteristics
+- title: Group Plots
+  desc: Functions for visualising group characteristics
+  contents:
+  - plot_group_heatmap
+  - plot_group_density
+  - plot_group_mst
+  - plot_group_scatter
+
+- title: Cluster Plots (Aliases)
+  desc: Aliases of group plot functions for backward compatibility
   contents:
   - plot_cluster_heatmap
   - plot_cluster_density
