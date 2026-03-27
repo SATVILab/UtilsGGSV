@@ -105,6 +105,11 @@
 #' @param bandwidth character or positive numeric. Bandwidth used for
 #'   per-cluster kernel density estimation. One of `"hpi_1"` (default),
 #'   `"hpi_0"`, `"SJ"`, or a positive number. See **Details**.
+#' @param na_rm logical. Whether to remove `NA` values from each variable
+#'   before computing densities and medians. When `TRUE` (default), `NA`
+#'   values are removed and a message is issued showing how many were removed
+#'   per variable. When `FALSE`, `NA` values are passed directly to
+#'   `stats::density()`, which will strip them with its own warning.
 #' @param font_size numeric. Font size passed to `cowplot::theme_cowplot`.
 #'   Default is `14`.
 #' @param thm ggplot2 theme object or `NULL`. Default is
@@ -155,6 +160,7 @@ plot_cluster_density <- function(.data,
                                  rug = NULL,
                                  density_overall_weight = NULL,
                                  bandwidth = "hpi_1",
+                                 na_rm = TRUE,
                                  font_size = 14,
                                  thm = cowplot::theme_cowplot(
                                    font_size = font_size
@@ -186,17 +192,23 @@ plot_cluster_density <- function(.data,
   } else if (bandwidth <= 0) {
     stop("`bandwidth` must be a positive number.", call. = FALSE)
   }
+  if (!is.logical(na_rm) || length(na_rm) != 1L || is.na(na_rm)) {
+    stop("`na_rm` must be TRUE or FALSE.", call. = FALSE)
+  }
 
   .plot_cluster_validate(.data, cluster, vars)
 
+  # Alias to avoid rlang .data pronoun masking inside purrr closures
+  data <- .data
+
   # Coerce cluster column to character unless it is already a factor,
   # ensuring ggplot2 always treats cluster as a discrete variable.
-  if (!is.factor(.data[[cluster]])) {
-    .data[[cluster]] <- as.character(.data[[cluster]])
+  if (!is.factor(data[[cluster]])) {
+    data[[cluster]] <- as.character(data[[cluster]])
   }
 
   if (is.null(vars)) {
-    vars <- setdiff(colnames(.data), cluster)
+    vars <- setdiff(colnames(data), cluster)
   }
 
   use_facet <- !is.null(n_col) || !is.null(n_row)
@@ -210,27 +222,41 @@ plot_cluster_density <- function(.data,
   }
 
   global_min <- if (exclude_min == "overall") {
-    min(unlist(lapply(vars, function(v) .data[[v]])), na.rm = TRUE)
+    min(unlist(lapply(vars, function(v) data[[v]])), na.rm = TRUE)
   } else {
     NULL
   }
 
   var_mins <- if (exclude_min == "variable") {
     stats::setNames(
-      lapply(vars, function(v) min(.data[[v]], na.rm = TRUE)),
+      lapply(vars, function(v) min(data[[v]], na.rm = TRUE)),
       vars
     )
   } else {
     NULL
   }
 
+  # Helper: apply exclude_min filter (does NOT handle NAs).
   .filter_vals <- function(vals, v) {
     if (exclude_min == "no") return(vals)
     min_val <- if (exclude_min == "overall") global_min else var_mins[[v]]
     vals[vals != min_val]
   }
 
-  cluster_vec <- unique(.data[[cluster]])
+  # Helper: strip NAs from a vector, messaging if any removed (na_rm = TRUE)
+  # or returning the vector unchanged (na_rm = FALSE, left to density()).
+  .strip_na <- function(vals, v, context = NULL) {
+    n_na <- sum(is.na(vals))
+    if (n_na == 0L) return(vals)
+    if (na_rm) {
+      ctx <- if (!is.null(context)) paste0(" (", context, ")") else ""
+      message("Removing ", n_na, " NA value(s) from variable '", v, "'", ctx, ".")
+      return(vals[!is.na(vals)])
+    }
+    vals
+  }
+
+  cluster_vec <- unique(data[[cluster]])
 
   # Helper: resolve per-cluster bandwidth from the `bandwidth` argument.
   .resolve_bw <- function(vals) {
@@ -271,7 +297,8 @@ plot_cluster_density <- function(.data,
     x_grid <- seq(from, to, length.out = n_grid)
 
     y_list <- lapply(cluster_vec, function(cl) {
-      cl_vals <- .filter_vals(all_vals[.data[[cluster]] == cl], v)
+      cl_vals <- .filter_vals(all_vals[data[[cluster]] == cl], v)
+      cl_vals <- .strip_na(cl_vals, v, paste0("cluster '", cl, "'"))
       if (length(cl_vals) < 2) return(NULL)
       bw <- .resolve_bw(cl_vals)
       d <- stats::density(cl_vals, from = from, to = to, n = n_grid, bw = bw)
@@ -289,7 +316,8 @@ plot_cluster_density <- function(.data,
   # optionally scaled.
   .cluster_dens_tbl <- function(all_vals, v, max_y_ref = NULL) {
     purrr::map_df(cluster_vec, function(cl) {
-      cl_vals <- .filter_vals(all_vals[.data[[cluster]] == cl], v)
+      cl_vals <- .filter_vals(all_vals[data[[cluster]] == cl], v)
+      cl_vals <- .strip_na(cl_vals, v, paste0("cluster '", cl, "'"))
       if (length(cl_vals) < 2) return(tibble::tibble())
       bw <- .resolve_bw(cl_vals)
       d <- stats::density(cl_vals, bw = bw)
@@ -322,7 +350,7 @@ plot_cluster_density <- function(.data,
       )
     } else {
       rug_cl_tbl <- purrr::map_df(cluster_vec, function(cl) {
-        cl_vals <- .filter_vals(all_vals[.data[[cluster]] == cl], v)
+        cl_vals <- .filter_vals(all_vals[data[[cluster]] == cl], v)
         tibble::tibble(rug_x = cl_vals, cluster = cl)
       })
       p + ggplot2::geom_rug(
@@ -341,7 +369,7 @@ plot_cluster_density <- function(.data,
       rug_long_tbl <- purrr::map_df(vars, function(v) {
         tibble::tibble(
           variable = v,
-          rug_x = .filter_vals(.data[[v]], v)
+          rug_x = .filter_vals(data[[v]], v)
         )
       })
       p + ggplot2::geom_rug(
@@ -353,7 +381,7 @@ plot_cluster_density <- function(.data,
     } else {
       rug_long_tbl <- purrr::map_df(vars, function(v) {
         purrr::map_df(cluster_vec, function(cl) {
-          cl_vals <- .filter_vals(.data[[v]][.data[[cluster]] == cl], v)
+          cl_vals <- .filter_vals(data[[v]][data[[cluster]] == cl], v)
           tibble::tibble(variable = v, rug_x = cl_vals, cluster = cl)
         })
       })
@@ -369,15 +397,16 @@ plot_cluster_density <- function(.data,
   if (!use_facet) {
     plot_list <- stats::setNames(
       lapply(vars, function(v) {
-        all_vals <- .data[[v]]
+        all_vals  <- data[[v]]
+        all_vals  <- .strip_na(all_vals, v)
         dens_vals <- .filter_vals(all_vals, v)
 
         if (density == "overall") {
           med_tbl <- purrr::map_df(cluster_vec, function(cl) {
-            cl_vals <- .filter_vals(all_vals[.data[[cluster]] == cl], v)
+            cl_vals <- .filter_vals(all_vals[data[[cluster]] == cl], v)
             tibble::tibble(
               cluster = cl,
-              median = stats::median(cl_vals, na.rm = TRUE)
+              median  = stats::median(cl_vals, na.rm = FALSE)
             )
           })
 
@@ -471,23 +500,25 @@ plot_cluster_density <- function(.data,
 
   if (density == "overall") {
     long_tbl <- purrr::map_df(vars, function(v) {
-      tibble::tibble(variable = v, value = .filter_vals(.data[[v]], v))
+      all_vals <- .strip_na(data[[v]], v)
+      tibble::tibble(variable = v, value = .filter_vals(all_vals, v))
     })
 
     median_tbl <- purrr::map_df(vars, function(v) {
+      all_vals <- .strip_na(data[[v]], v)
       purrr::map_df(cluster_vec, function(cl) {
-        vals <- .filter_vals(.data[[v]][.data[[cluster]] == cl], v)
+        vals <- .filter_vals(all_vals[data[[cluster]] == cl], v)
         tibble::tibble(
           variable = v,
-          cluster = cl,
-          median = stats::median(vals, na.rm = TRUE)
+          cluster  = cl,
+          median   = stats::median(vals, na.rm = FALSE)
         )
       })
     })
 
     if (!is.null(density_overall_weight)) {
       overall_dens_tbl <- purrr::map_df(vars, function(v) {
-        all_vals <- .data[[v]]
+        all_vals  <- .strip_na(data[[v]], v)
         dens_vals <- .filter_vals(all_vals, v)
         d <- .even_weight_dens_tbl(dens_vals, all_vals, v)
         if (is.null(d)) return(tibble::tibble())
@@ -527,7 +558,7 @@ plot_cluster_density <- function(.data,
     }
   } else {
     overall_dens_tbl <- purrr::map_df(vars, function(v) {
-      all_vals <- .data[[v]]
+      all_vals  <- .strip_na(data[[v]], v)
       dens_vals <- .filter_vals(all_vals, v)
       d <- if (!is.null(density_overall_weight)) {
         .even_weight_dens_tbl(dens_vals, all_vals, v)
@@ -540,7 +571,7 @@ plot_cluster_density <- function(.data,
     })
 
     cluster_dens_tbl <- purrr::map_df(vars, function(v) {
-      all_vals <- .data[[v]]
+      all_vals  <- .strip_na(data[[v]], v)
       dens_vals <- .filter_vals(all_vals, v)
       max_y_ref <- if (scale == "max_overall") {
         od <- if (!is.null(density_overall_weight)) {

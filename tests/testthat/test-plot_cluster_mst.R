@@ -150,6 +150,7 @@ test_that("plot_cluster_mst custom colours apply to fill scale", {
   )
   result <- plot_cluster_mst(
     data, cluster = "cluster",
+    palette = NULL,
     col = c("#0000FF", "#FFFFFF", "#FF0000")
   )
   for (p in result) {
@@ -301,7 +302,7 @@ test_that("plot_cluster_mst suppress_axes TRUE suppresses axes regardless of coo
 test_that("plot_cluster_mst errors when data is not a data.frame", {
   expect_error(
     plot_cluster_mst(list(cluster = c("A", "B"), var1 = 1:2), cluster = "cluster"),
-    "`data` must be a data.frame"
+    "`\\.data` must be a data.frame"
   )
 })
 
@@ -323,7 +324,7 @@ test_that("plot_cluster_mst errors when cluster column is missing", {
   )
   expect_error(
     plot_cluster_mst(data, cluster = "cluster"),
-    "not found in `data`"
+    "not found in `\\.data`"
   )
 })
 
@@ -345,7 +346,7 @@ test_that("plot_cluster_mst errors when a vars column is missing", {
   )
   expect_error(
     plot_cluster_mst(data, cluster = "cluster", vars = c("var1", "var_missing")),
-    "not found in `data`"
+    "not found in `\\.data`"
   )
 })
 

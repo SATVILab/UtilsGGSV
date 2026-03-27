@@ -27,11 +27,11 @@
 #' per variable. If `n_col` or `n_row` is supplied the plots are combined into
 #' a single figure using `cowplot::plot_grid`, with variable names as labels.
 #'
-#' @param data data.frame. Rows are observations. Must contain a column
+#' @param .data data.frame. Rows are observations. Must contain a column
 #'   identifying cluster membership and columns for variable values.
-#' @param cluster character. Name of the column in `data` that identifies
+#' @param cluster character. Name of the column in `.data` that identifies
 #'   cluster membership.
-#' @param vars character vector or `NULL`. Names of columns in `data` to
+#' @param vars character vector or `NULL`. Names of columns in `.data` to
 #'   use as variables. If `NULL`, all columns except `cluster` are used.
 #'   Default is `NULL`.
 #' @param layout_algorithm character. Layout algorithm for positioning nodes.
@@ -48,20 +48,36 @@
 #'   from `coord_equal` — axes are suppressed when equal scaling is active.
 #' @param col_clusters named character vector or `NULL`. Per-cluster colours
 #'   applied to node borders and text labels. Names should match cluster
-#'   labels. When `NULL` (default), the default ggplot2 colour scale is used.
+#'   labels. When `NULL` (default), a colour-blind-friendly palette
+#'   (`"Paired"`) is used.
+#' @param palette character or `NULL`. Named colour palette for the continuous
+#'   node fill scale. When not `NULL`, overrides `col` and `col_positions`.
+#'   Available palettes: `"bipolar"` (default, blue-white-red), `"alarm"`
+#'   (green-white-red, good-to-bad), `"accessible"` (blue-white-orange,
+#'   colour-blind-safe diverging), `"heat"` (light-yellow to dark-red,
+#'   sequential), `"sky"` (white to navy, sequential). Set to `NULL` to use
+#'   `col` and `col_positions` directly.
 #' @param col character vector. Colours used to fill nodes, ordered from low
 #'   to high values. Default is `c("#2166AC", "#F7F7F7", "#B2182B")` (blue,
-#'   white, red). Any number of colours (>= 2) is accepted.
+#'   white, red). Any number of colours (>= 2) is accepted. Ignored when
+#'   `palette` is not `NULL`.
 #' @param col_positions numeric vector or `"auto"`. Positions (in \[0, 1\]) at
 #'   which each colour in `col` is placed on the fill scale. Must be the same
 #'   length as `col`, sorted in ascending order, with the first value `0` and
 #'   the last value `1`. When `"auto"` (default) and `col` has exactly three
 #'   colours, the middle colour is stretched over `white_range`. In all other
-#'   `"auto"` cases the colours are evenly spaced from 0 to 1.
+#'   `"auto"` cases the colours are evenly spaced from 0 to 1. Ignored when
+#'   `palette` is not `NULL`.
 #' @param white_range numeric vector of length 2. The range of positions (on a
 #'   0-1 scale) over which the middle colour is stretched. Only used when `col`
-#'   has exactly three colours and `col_positions = "auto"`.
-#'   Default is `c(0.4, 0.6)`.
+#'   has exactly three colours and `col_positions = "auto"`. Also applied to
+#'   diverging `palette` presets. Default is `c(0.4, 0.6)`.
+#' @param na_rm logical. Whether to remove `NA` values before computing
+#'   per-cluster medians and ECDF percentiles. When `TRUE` (default), `NA`
+#'   values are removed and a message is issued showing how many were removed
+#'   per variable. When `FALSE`, `NA` values are passed through: node fill
+#'   values will be `NA` (rendered as grey by default) where a variable has no
+#'   non-missing observations in a cluster.
 #' @param n_col integer or `NULL`. Number of columns passed to
 #'   `cowplot::plot_grid`. If supplied (or if `n_row` is supplied) a single
 #'   combined figure is returned instead of a list. Default is `NULL`.
@@ -91,29 +107,31 @@
 #'
 #' @examples
 #' set.seed(1)
-#' data <- data.frame(
+#' .data <- data.frame(
 #'   cluster = rep(paste0("C", 1:3), each = 20),
 #'   var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
 #'   var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
 #' )
 #' # Default: Kamada-Kawai layout, returns a named list of plots
-#' plot_list <- plot_cluster_mst(data, cluster = "cluster")
+#' plot_list <- plot_cluster_mst(.data, cluster = "cluster")
 #'
 #' # MDS layout
-#' plot_cluster_mst(data, cluster = "cluster", layout_algorithm = "mds")
+#' plot_cluster_mst(.data, cluster = "cluster", layout_algorithm = "mds")
 #'
 #' # Combined grid with 2 columns
-#' plot_cluster_mst(data, cluster = "cluster", n_col = 2)
-plot_cluster_mst <- function(data,
+#' plot_cluster_mst(.data, cluster = "cluster", n_col = 2)
+plot_cluster_mst <- function(.data,
                               cluster,
                               vars = NULL,
                               layout_algorithm = c("kamada-kawai", "mds"),
                               coord_equal = TRUE,
                               suppress_axes = NULL,
                               col_clusters = NULL,
+                              palette = "bipolar",
                               col = c("#2166AC", "#F7F7F7", "#B2182B"),
                               col_positions = "auto",
                               white_range = c(0.4, 0.6),
+                              na_rm = TRUE,
                               n_col = NULL,
                               n_row = NULL,
                               label_x = 0,
@@ -137,7 +155,7 @@ plot_cluster_mst <- function(data,
                               )) {
   layout_algorithm <- match.arg(layout_algorithm)
 
-  .plot_cluster_validate(data, cluster, vars)
+  .plot_cluster_validate(.data, cluster, vars)
 
   if (!is.logical(coord_equal) || length(coord_equal) != 1L || is.na(coord_equal)) {
     stop("`coord_equal` must be TRUE or FALSE.", call. = FALSE)
@@ -147,6 +165,15 @@ plot_cluster_mst <- function(data,
        is.na(suppress_axes))) {
     stop("`suppress_axes` must be TRUE, FALSE, or NULL.", call. = FALSE)
   }
+  if (!is.logical(na_rm) || length(na_rm) != 1L || is.na(na_rm)) {
+    stop("`na_rm` must be TRUE or FALSE.", call. = FALSE)
+  }
+
+  # Resolve palette → col / col_positions
+  resolved <- .resolve_cluster_palette(palette, col, col_positions)
+  col <- resolved$col
+  col_positions <- resolved$col_positions
+
   if (!is.character(col) || length(col) < 2) {
     stop("`col` must be a character vector of length >= 2.", call. = FALSE)
   }
@@ -183,21 +210,21 @@ plot_cluster_mst <- function(data,
   if (is.null(suppress_axes)) suppress_axes <- coord_equal
 
   if (is.null(vars)) {
-    vars <- setdiff(colnames(data), cluster)
+    vars <- setdiff(colnames(.data), cluster)
   }
 
-  cluster_vec <- unique(data[[cluster]])
+  cluster_vec <- unique(.data[[cluster]])
 
-  med_mat <- .plot_cluster_mst_medians(data, cluster, vars, cluster_vec)
+  med_mat  <- .plot_cluster_mst_medians(.data, cluster, vars, cluster_vec, na_rm)
   dist_mat <- as.matrix(stats::dist(med_mat))
   node_tbl_base <- .plot_cluster_mst_layout(
     dist_mat, cluster_vec, layout_algorithm
   )
   edge_tbl <- .plot_cluster_mst_edges(dist_mat, node_tbl_base)
-  perc_tbl <- .plot_cluster_mst_percentiles(data, cluster, vars, cluster_vec)
+  perc_tbl <- .plot_cluster_mst_percentiles(.data, cluster, vars, cluster_vec, na_rm)
   plot_list <- stats::setNames(
     lapply(vars, function(v) {
-      perc_v <- perc_tbl[perc_tbl$variable == v, ]
+      perc_v   <- perc_tbl[perc_tbl$variable == v, ]
       node_tbl <- node_tbl_base
       node_tbl$fill <- perc_v$perc[match(node_tbl$cluster, perc_v$cluster)]
       .plot_cluster_mst_plot_one(
@@ -231,14 +258,20 @@ plot_cluster_mst <- function(data,
   )
 }
 
-.plot_cluster_mst_medians <- function(data, cluster, vars, cluster_vec) {
+.plot_cluster_mst_medians <- function(.data, cluster, vars, cluster_vec, na_rm) {
+  data <- .data  # alias to avoid rlang .data pronoun masking in lapply
   med_mat <- do.call(rbind, lapply(cluster_vec, function(cl) {
     cl_mask <- data[[cluster]] == cl
-    vapply(
-      vars,
-      function(v) stats::median(data[[v]][cl_mask], na.rm = TRUE),
-      numeric(1L)
-    )
+    vapply(vars, function(v) {
+      vals <- data[[v]][cl_mask]
+      n_na <- sum(is.na(vals))
+      if (n_na > 0L && na_rm) {
+        message("Removing ", n_na, " NA value(s) from variable '", v,
+                "' in cluster '", cl, "'.")
+        vals <- vals[!is.na(vals)]
+      }
+      stats::median(vals, na.rm = FALSE)
+    }, numeric(1L))
   }))
   rownames(med_mat) <- cluster_vec
   colnames(med_mat) <- vars
@@ -324,17 +357,35 @@ plot_cluster_mst <- function(data,
   )
 }
 
-.plot_cluster_mst_percentiles <- function(data, cluster, vars, cluster_vec) {
+.plot_cluster_mst_percentiles <- function(.data, cluster, vars, cluster_vec, na_rm) {
+  data <- .data  # alias to avoid rlang .data pronoun masking in purrr
   purrr::map_df(cluster_vec, function(clust) {
-    obs_in <- data[[cluster]] == clust
-    data_out <- data[!obs_in, ]
+    obs_in   <- data[[cluster]] == clust
+    v_in_all  <- data[obs_in, , drop = FALSE]
+    v_out_all <- data[!obs_in, , drop = FALSE]
     purrr::map_df(vars, function(var) {
-      med <- stats::median(data[[var]][obs_in], na.rm = TRUE)
-      ecdf_fn <- stats::ecdf(data_out[[var]])
+      v_in  <- v_in_all[[var]]
+      v_out <- v_out_all[[var]]
+      if (na_rm) {
+        n_in  <- sum(is.na(v_in))
+        n_out <- sum(is.na(v_out))
+        if (n_in > 0L) {
+          message("Removing ", n_in, " NA value(s) from variable '", var,
+                  "' in cluster '", clust, "'.")
+          v_in <- v_in[!is.na(v_in)]
+        }
+        if (n_out > 0L) {
+          message("Removing ", n_out, " NA value(s) from variable '", var,
+                  "' outside cluster '", clust, "'.")
+          v_out <- v_out[!is.na(v_out)]
+        }
+      }
+      med     <- stats::median(v_in,  na.rm = FALSE)
+      ecdf_fn <- stats::ecdf(v_out)
       tibble::tibble(
-        cluster = clust,
+        cluster  = clust,
         variable = var,
-        perc = ecdf_fn(med)
+        perc     = ecdf_fn(med)
       )
     })
   })
@@ -345,19 +396,7 @@ plot_cluster_mst <- function(data,
                                         layout_algorithm,
                                         coord_equal, suppress_axes,
                                         thm, grid) {
-  n_col <- length(col)
-  if (identical(col_positions, "auto")) {
-    if (n_col == 3L) {
-      plot_colours <- c(col[1], col[2], col[2], col[3])
-      plot_positions <- c(0, white_range[1], white_range[2], 1)
-    } else {
-      plot_colours <- col
-      plot_positions <- seq(0, 1, length.out = n_col)
-    }
-  } else {
-    plot_colours <- col
-    plot_positions <- col_positions
-  }
+  gradientn_args <- .build_gradientn_args(col, col_positions, white_range)
 
   axis_labels <- if (layout_algorithm == "kamada-kawai") {
     list(x = "KK 1", y = "KK 2")
@@ -390,11 +429,11 @@ plot_cluster_mst <- function(data,
       vjust = -1
     ) +
     ggplot2::scale_fill_gradientn(
-      colours = plot_colours,
-      values = plot_positions,
-      limits = c(0, 1),
-      name = "Relative\nvalue",
-      labels = scales::percent
+      colours = gradientn_args$colours,
+      values  = gradientn_args$values,
+      limits  = c(0, 1),
+      name    = "Relative\nvalue",
+      labels  = scales::percent
     ) +
     ggplot2::labs(x = axis_labels$x, y = axis_labels$y, colour = "Cluster")
 
@@ -402,6 +441,8 @@ plot_cluster_mst <- function(data,
 
   if (!is.null(col_clusters)) {
     p <- p + ggplot2::scale_colour_manual(values = col_clusters)
+  } else {
+    p <- p + ggplot2::scale_colour_brewer(palette = "Paired")
   }
 
   if (!is.null(thm)) p <- p + thm

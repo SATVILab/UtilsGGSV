@@ -5,17 +5,18 @@
 \title{Plot minimum-spanning tree of clusters with per-variable node colouring}
 \usage{
 plot_cluster_mst(
-  data,
+  .data,
   cluster,
   vars = NULL,
   layout_algorithm = c("kamada-kawai", "mds"),
   coord_equal = TRUE,
   suppress_axes = NULL,
   col_clusters = NULL,
-  col_high = "#B2182B",
-  col_mid = "#F7F7F7",
-  col_low = "#2166AC",
+  palette = "bipolar",
+  col = c("#2166AC", "#F7F7F7", "#B2182B"),
+  col_positions = "auto",
   white_range = c(0.4, 0.6),
+  na_rm = TRUE,
   n_col = NULL,
   n_row = NULL,
   label_x = 0,
@@ -30,13 +31,13 @@ plot_cluster_mst(
 )
 }
 \arguments{
-\item{data}{data.frame. Rows are observations. Must contain a column
+\item{.data}{data.frame. Rows are observations. Must contain a column
 identifying cluster membership and columns for variable values.}
 
-\item{cluster}{character. Name of the column in \code{data} that identifies
+\item{cluster}{character. Name of the column in \code{.data} that identifies
 cluster membership.}
 
-\item{vars}{character vector or \code{NULL}. Names of columns in \code{data} to
+\item{vars}{character vector or \code{NULL}. Names of columns in \code{.data} to
 use as variables. If \code{NULL}, all columns except \code{cluster} are used.
 Default is \code{NULL}.}
 
@@ -57,19 +58,41 @@ from \code{coord_equal} — axes are suppressed when equal scaling is active.}
 
 \item{col_clusters}{named character vector or \code{NULL}. Per-cluster colours
 applied to node borders and text labels. Names should match cluster
-labels. When \code{NULL} (default), the default ggplot2 colour scale is used.}
+labels. When \code{NULL} (default), a colour-blind-friendly palette
+(\code{"Paired"}) is used.}
 
-\item{col_high}{character. Colour for high values (100th percentile).
-Default is \code{"#B2182B"}.}
+\item{palette}{character or \code{NULL}. Named colour palette for the continuous
+node fill scale. When not \code{NULL}, overrides \code{col} and \code{col_positions}.
+Available palettes: \code{"bipolar"} (default, blue-white-red), \code{"alarm"}
+(green-white-red, good-to-bad), \code{"accessible"} (blue-white-orange,
+colour-blind-safe diverging), \code{"heat"} (light-yellow to dark-red,
+sequential), \code{"sky"} (white to navy, sequential). Set to \code{NULL} to use
+\code{col} and \code{col_positions} directly.}
 
-\item{col_mid}{character. Colour for the middle of the value range.
-Default is \code{"#F7F7F7"}.}
+\item{col}{character vector. Colours used to fill nodes, ordered from low
+to high values. Default is \code{c("#2166AC", "#F7F7F7", "#B2182B")} (blue,
+white, red). Any number of colours (>= 2) is accepted. Ignored when
+\code{palette} is not \code{NULL}.}
 
-\item{col_low}{character. Colour for low values (0th percentile).
-Default is \code{"#2166AC"}.}
+\item{col_positions}{numeric vector or \code{"auto"}. Positions (in [0, 1]) at
+which each colour in \code{col} is placed on the fill scale. Must be the same
+length as \code{col}, sorted in ascending order, with the first value \code{0} and
+the last value \code{1}. When \code{"auto"} (default) and \code{col} has exactly three
+colours, the middle colour is stretched over \code{white_range}. In all other
+\code{"auto"} cases the colours are evenly spaced from 0 to 1. Ignored when
+\code{palette} is not \code{NULL}.}
 
-\item{white_range}{numeric vector of length 2. The range of percentile
-values (on a 0-1 scale) that map to \code{col_mid}. Default is \code{c(0.4, 0.6)}.}
+\item{white_range}{numeric vector of length 2. The range of positions (on a
+0-1 scale) over which the middle colour is stretched. Only used when \code{col}
+has exactly three colours and \code{col_positions = "auto"}. Also applied to
+diverging \code{palette} presets. Default is \code{c(0.4, 0.6)}.}
+
+\item{na_rm}{logical. Whether to remove \code{NA} values before computing
+per-cluster medians and ECDF percentiles. When \code{TRUE} (default), \code{NA}
+values are removed and a message is issued showing how many were removed
+per variable. When \code{FALSE}, \code{NA} values are passed through: node fill
+values will be \code{NA} (rendered as grey by default) where a variable has no
+non-missing observations in a cluster.}
 
 \item{n_col}{integer or \code{NULL}. Number of columns passed to
 \code{cowplot::plot_grid}. If supplied (or if \code{n_row} is supplied) a single
@@ -135,17 +158,17 @@ a single figure using \code{cowplot::plot_grid}, with variable names as labels.
 }
 \examples{
 set.seed(1)
-data <- data.frame(
+.data <- data.frame(
   cluster = rep(paste0("C", 1:3), each = 20),
   var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
   var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
 )
 # Default: Kamada-Kawai layout, returns a named list of plots
-plot_list <- plot_cluster_mst(data, cluster = "cluster")
+plot_list <- plot_cluster_mst(.data, cluster = "cluster")
 
 # MDS layout
-plot_cluster_mst(data, cluster = "cluster", layout_algorithm = "mds")
+plot_cluster_mst(.data, cluster = "cluster", layout_algorithm = "mds")
 
 # Combined grid with 2 columns
-plot_cluster_mst(data, cluster = "cluster", n_col = 2)
+plot_cluster_mst(.data, cluster = "cluster", n_col = 2)
 }

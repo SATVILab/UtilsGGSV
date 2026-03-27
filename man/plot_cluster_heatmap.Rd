@@ -5,13 +5,15 @@
 \title{Plot heat map of scaled variable values per cluster}
 \usage{
 plot_cluster_heatmap(
-  data,
+  .data,
   cluster,
   vars = NULL,
   scale_method = "ecdf",
+  palette = "bipolar",
   col = c("#2166AC", "#F7F7F7", "#B2182B"),
   col_positions = "auto",
   white_range = c(0.4, 0.6),
+  na_rm = TRUE,
   font_size = 14,
   thm = cowplot::theme_cowplot(font_size = font_size) + ggplot2::theme(plot.background =
     ggplot2::element_rect(fill = "white", colour = NA), panel.background =
@@ -24,7 +26,7 @@ plot_cluster_heatmap(
 )
 }
 \arguments{
-\item{data}{data.frame. Rows are observations. Must contain a column
+\item{.data}{data.frame. Rows are observations. Must contain a column
 identifying cluster membership and columns for variable values.}
 
 \item{cluster}{character. Name of the column in \code{data} that identifies
@@ -56,9 +58,18 @@ separately. Fill values are in [0, 1] and the legend uses percent
 labels.
 }}
 
+\item{palette}{character or \code{NULL}. Named colour palette for the continuous
+fill scale. When not \code{NULL}, overrides \code{col} and \code{col_positions}. Available
+palettes: \code{"bipolar"} (default, blue-white-red), \code{"alarm"}
+(green-white-red, good-to-bad), \code{"accessible"} (blue-white-orange,
+colour-blind-safe diverging), \code{"heat"} (light-yellow to dark-red,
+sequential), \code{"sky"} (white to navy, sequential). Set to \code{NULL} to use
+\code{col} and \code{col_positions} directly.}
+
 \item{col}{character vector. Colours used to fill tiles, ordered from low
 to high values. Default is \code{c("#2166AC", "#F7F7F7", "#B2182B")} (blue,
-white, red). Any number of colours (>= 2) is accepted.}
+white, red). Any number of colours (>= 2) is accepted. Ignored when
+\code{palette} is not \code{NULL}.}
 
 \item{col_positions}{numeric vector or \code{"auto"}. Positions (in [0, 1]) at
 which each colour in \code{col} is placed on the fill scale. Must be the same
@@ -66,11 +77,20 @@ length as \code{col}, sorted in ascending order, with the first value \code{0} a
 the last value \code{1}. When \code{"auto"} (default) and \code{col} has exactly three
 colours and \code{scale_method = "ecdf"}, the middle colour is stretched over
 \code{white_range} (the current default behaviour). In all other \code{"auto"} cases
-the colours are evenly spaced from 0 to 1.}
+the colours are evenly spaced from 0 to 1. Ignored when \code{palette} is not
+\code{NULL}.}
 
 \item{white_range}{numeric vector of length 2. The range of positions (on a
 0-1 scale) over which the middle colour is stretched. Only used when \code{col}
-has exactly three colours, \code{scale_method = "ecdf"}, and \code{col_positions = "auto"}. Default is \code{c(0.4, 0.6)}.}
+has exactly three colours, \code{scale_method = "ecdf"}, and \code{col_positions = "auto"}. Also applied to diverging \code{palette} presets (those with
+\code{col_positions = "auto"}). Default is \code{c(0.4, 0.6)}.}
+
+\item{na_rm}{logical. Whether to remove \code{NA} values before computing
+per-cluster statistics. When \code{TRUE} (default), \code{NA} values are removed
+and a message is issued showing how many were removed per variable. When
+\code{FALSE}, \code{NA} values are passed through: tile fill values will be \code{NA}
+(rendered as grey by default) where a variable has no non-missing
+observations in a cluster.}
 
 \item{font_size}{numeric. Font size passed to \code{cowplot::theme_cowplot}.
 Default is \code{14}.}
@@ -112,11 +132,12 @@ clustering.
 }
 \examples{
 set.seed(1)
-data <- data.frame(
+.data <- data.frame(
   cluster = rep(paste0("C", 1:3), each = 20),
   var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
   var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
 )
-plot_cluster_heatmap(data, cluster = "cluster")
-plot_cluster_heatmap(data, cluster = "cluster", show_values = TRUE)
+plot_cluster_heatmap(.data, cluster = "cluster")
+plot_cluster_heatmap(.data, cluster = "cluster", show_values = TRUE)
+plot_cluster_heatmap(.data, cluster = "cluster", palette = "alarm")
 }

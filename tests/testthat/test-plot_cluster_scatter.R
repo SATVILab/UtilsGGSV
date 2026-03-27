@@ -323,7 +323,7 @@ test_that("plot_cluster_scatter errors when data is not a data.frame", {
   expect_error(
     plot_cluster_scatter(list(cluster = c("A", "B"), var1 = 1:2, var2 = 1:2),
                          cluster = "cluster"),
-    "`data` must be a data.frame"
+    "`\\.data` must be a data.frame"
   )
 })
 
