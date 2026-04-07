@@ -21,7 +21,7 @@ two bins (\verb{<= t} and \verb{> t}), two thresholds create three bins, and
 so on.}
 }
 \value{
-A named list with two elements:
+A named list with two elements and a \code{"thresholds"} attribute:
 \itemize{
 \item \code{assign}: a \code{\link[tibble:tibble]{tibble::tibble()}} with one row per observation and
 columns \code{orig} (original cluster label) and \code{merged} (merged
@@ -33,6 +33,11 @@ indices with \code{"_"}) and \code{descriptive} (human-readable
 bin-combination description formed by joining per-variable range
 descriptions with \code{"; "}).
 }
+
+The \code{"thresholds"} attribute stores the input \code{thresholds} list so
+that downstream functions such as \code{\link[=cluster_merge_unimodal]{cluster_merge_unimodal()}} can
+re-use the bin boundaries without requiring the caller to pass them
+again.
 }
 \description{
 Assigns each cluster to a bin for each variable based on where the
