@@ -70,3 +70,8 @@ reference:
   - cluster_som_merge
   - cluster_merge_bin
   - cluster_merge_unimodal
+
+- title: Cluster Simulation
+  desc: Functions for simulating high-dimensional single-cell data
+  contents:
+  - cluster_sim
