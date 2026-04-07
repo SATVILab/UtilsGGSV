@@ -61,7 +61,7 @@ if (full) {
   noise_dims         <- 2L
 }
 
-transforms <- c("none", "faust_gamma")
+transforms <- c("none", "faust_gamma")[[1]]
 ```
 
 ## 1. Helpers
@@ -94,7 +94,7 @@ Applies all four algorithms to a single data matrix:
 ``` r
 run_algorithms <- function(mat, vars) {
   thresholds <- stats::setNames(
-    lapply(vars, function(v) 0),
+    lapply(vars, function(v) 4),
     vars
   )
 
@@ -177,6 +177,21 @@ if (nzchar(precomputed_path) && file.exists(precomputed_path)) {
           noise_dims         = noise_dims,
           transform          = tx
         )
+        p <- UtilsGGSV::plot_group_density(
+          .data = sim$data |>
+            dplyr::mutate(cluster_id = as.character(cluster_id)),
+          group = "cluster_id",
+          vars = c(paste0("dim_", 1:5), paste0("noise_", 1:2)),
+          n_col = 3
+        )
+        if (!dir.exists("_tmp")) dir.create("_tmp")
+        ggplot2::ggsave(
+          plot = p,
+          filename = file.path("_tmp", "p-test.png"),
+          units = "cm",
+          width = 30,
+          height = 15
+        )
 
         dim_vars    <- paste0("dim_", seq_len(n_dims))
         mat         <- as.data.frame(sim$data[, dim_vars])
@@ -248,6 +263,22 @@ if (nzchar(precomputed_path) && file.exists(precomputed_path)) {
   }
 }
 #> No pre-computed results found; running simulation grid...
+#> Warning in RColorBrewer::brewer.pal(n, pal): n too large, allowed maximum for palette Paired is 12
+#> Returning the palette you asked for with that many colors
+#> Warning: Removed 10752 rows containing missing values or values outside the scale range
+#> (`geom_line()`).
+#> Warning in RColorBrewer::brewer.pal(n, pal): n too large, allowed maximum for palette Paired is 12
+#> Returning the palette you asked for with that many colors
+#> Warning: Removed 10752 rows containing missing values or values outside the scale range
+#> (`geom_line()`).
+#> Warning in RColorBrewer::brewer.pal(n, pal): n too large, allowed maximum for palette Paired is 12
+#> Returning the palette you asked for with that many colors
+#> Warning: Removed 46592 rows containing missing values or values outside the scale range
+#> (`geom_line()`).
+#> Warning in RColorBrewer::brewer.pal(n, pal): n too large, allowed maximum for palette Paired is 12
+#> Returning the palette you asked for with that many colors
+#> Warning: Removed 46592 rows containing missing values or values outside the scale range
+#> (`geom_line()`).
 ```
 
 ## 3. Visualisations
@@ -373,7 +404,7 @@ if (has_single_pop) {
 | Algorithm     | Median k | Min k | Max k |
 |:--------------|---------:|------:|------:|
 | FlowSOM       |        9 |     9 |     9 |
-| Louvain       |       23 |    22 |    25 |
+| Louvain       |       23 |    22 |    28 |
 | Louvain_merge |        1 |     1 |     1 |
 | SOM_merge     |        1 |     1 |     1 |
 

@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">UtilsGGSV</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.9.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.10.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -119,7 +119,7 @@ the vignette runs a quick demonstration with reduced parameters.</p>
 <span>  <span class="va">noise_dims</span>         <span class="op">&lt;-</span> <span class="fl">2L</span></span>
 <span><span class="op">}</span></span>
 <span></span>
-<span><span class="va">transforms</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"none"</span>, <span class="st">"faust_gamma"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">transforms</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"none"</span>, <span class="st">"faust_gamma"</span><span class="op">)</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="helpers">1. Helpers<a class="anchor" aria-label="anchor" href="#helpers"></a>
@@ -151,7 +151,7 @@ dependencies:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">run_algorithms</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">mat</span>, <span class="va">vars</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">thresholds</span> <span class="op">&lt;-</span> <span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/setNames.html" class="external-link">setNames</a></span><span class="op">(</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">vars</span>, <span class="kw">function</span><span class="op">(</span><span class="va">v</span><span class="op">)</span> <span class="fl">0</span><span class="op">)</span>,</span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">vars</span>, <span class="kw">function</span><span class="op">(</span><span class="va">v</span><span class="op">)</span> <span class="fl">4</span><span class="op">)</span>,</span>
 <span>    <span class="va">vars</span></span>
 <span>  <span class="op">)</span></span>
 <span></span>
@@ -234,6 +234,21 @@ Otherwise the simulation grid defined above is executed.</p>
 <span>          noise_dims         <span class="op">=</span> <span class="va">noise_dims</span>,</span>
 <span>          transform          <span class="op">=</span> <span class="va">tx</span></span>
 <span>        <span class="op">)</span></span>
+<span>        <span class="va">p</span> <span class="op">&lt;-</span> <span class="fu">UtilsGGSV</span><span class="fu">::</span><span class="fu"><a href="../reference/plot_group_density.html">plot_group_density</a></span><span class="op">(</span></span>
+<span>          .data <span class="op">=</span> <span class="va">sim</span><span class="op">$</span><span class="va">data</span> <span class="op">|&gt;</span></span>
+<span>            <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>cluster_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="va">cluster_id</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>          group <span class="op">=</span> <span class="st">"cluster_id"</span>,</span>
+<span>          vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"dim_"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"noise_"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>          n_col <span class="op">=</span> <span class="fl">3</span></span>
+<span>        <span class="op">)</span></span>
+<span>        <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.exists</a></span><span class="op">(</span><span class="st">"_tmp"</span><span class="op">)</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.create</a></span><span class="op">(</span><span class="st">"_tmp"</span><span class="op">)</span></span>
+<span>        <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggsave.html" class="external-link">ggsave</a></span><span class="op">(</span></span>
+<span>          plot <span class="op">=</span> <span class="va">p</span>,</span>
+<span>          filename <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="st">"_tmp"</span>, <span class="st">"p-test.png"</span><span class="op">)</span>,</span>
+<span>          units <span class="op">=</span> <span class="st">"cm"</span>,</span>
+<span>          width <span class="op">=</span> <span class="fl">30</span>,</span>
+<span>          height <span class="op">=</span> <span class="fl">15</span></span>
+<span>        <span class="op">)</span></span>
 <span></span>
 <span>        <span class="va">dim_vars</span>    <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"dim_"</span>, <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">n_dims</span><span class="op">)</span><span class="op">)</span></span>
 <span>        <span class="va">mat</span>         <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">sim</span><span class="op">$</span><span class="va">data</span><span class="op">[</span>, <span class="va">dim_vars</span><span class="op">]</span><span class="op">)</span></span>
@@ -304,7 +319,23 @@ Otherwise the simulation grid defined above is executed.</p>
 <span>    <span class="op">)</span><span class="op">)</span></span>
 <span>  <span class="op">}</span></span>
 <span><span class="op">}</span></span>
-<span><span class="co">#&gt; No pre-computed results found; running simulation grid...</span></span></code></pre></div>
+<span><span class="co">#&gt; No pre-computed results found; running simulation grid...</span></span>
+<span><span class="co">#&gt; Warning in RColorBrewer::brewer.pal(n, pal): n too large, allowed maximum for palette Paired is 12</span></span>
+<span><span class="co">#&gt; Returning the palette you asked for with that many colors</span></span>
+<span><span class="co">#&gt; Warning: Removed 10752 rows containing missing values or values outside the scale range</span></span>
+<span><span class="co">#&gt; (`geom_line()`).</span></span>
+<span><span class="co">#&gt; Warning in RColorBrewer::brewer.pal(n, pal): n too large, allowed maximum for palette Paired is 12</span></span>
+<span><span class="co">#&gt; Returning the palette you asked for with that many colors</span></span>
+<span><span class="co">#&gt; Warning: Removed 10752 rows containing missing values or values outside the scale range</span></span>
+<span><span class="co">#&gt; (`geom_line()`).</span></span>
+<span><span class="co">#&gt; Warning in RColorBrewer::brewer.pal(n, pal): n too large, allowed maximum for palette Paired is 12</span></span>
+<span><span class="co">#&gt; Returning the palette you asked for with that many colors</span></span>
+<span><span class="co">#&gt; Warning: Removed 46592 rows containing missing values or values outside the scale range</span></span>
+<span><span class="co">#&gt; (`geom_line()`).</span></span>
+<span><span class="co">#&gt; Warning in RColorBrewer::brewer.pal(n, pal): n too large, allowed maximum for palette Paired is 12</span></span>
+<span><span class="co">#&gt; Returning the palette you asked for with that many colors</span></span>
+<span><span class="co">#&gt; Warning: Removed 46592 rows containing missing values or values outside the scale range</span></span>
+<span><span class="co">#&gt; (`geom_line()`).</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="visualisations">3. Visualisations<a class="anchor" aria-label="anchor" href="#visualisations"></a>
@@ -443,7 +474,7 @@ toward one cluster.</p>
 <td align="left">Louvain</td>
 <td align="right">23</td>
 <td align="right">22</td>
-<td align="right">25</td>
+<td align="right">28</td>
 </tr>
 <tr class="odd">
 <td align="left">Louvain_merge</td>
