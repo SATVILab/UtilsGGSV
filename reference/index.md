@@ -81,3 +81,10 @@ Functions for analysing and merging clusters
   : Merge clusters based on variable bin thresholds
 - [`cluster_merge_unimodal()`](https://satvilab.github.io/UtilsGGSV/reference/cluster_merge_unimodal.md)
   : Merge clusters that remain unimodal when combined
+
+## Cluster Simulation
+
+Functions for simulating high-dimensional single-cell data
+
+- [`cluster_sim()`](https://satvilab.github.io/UtilsGGSV/reference/cluster_sim.md)
+  : Simulate High-Dimensional Single-Cell Clusters (FAUST Method)
