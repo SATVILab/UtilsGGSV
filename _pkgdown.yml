@@ -17,6 +17,8 @@ navbar:
       menu:
       - text: Getting Started with UtilsGGSV
         href: articles/UtilsGGSV.html
+      - text: Benchmarking Merge Algorithms
+        href: articles/benchmarking-merges.html
 
 reference:
 - title: Correlation Plotting
