@@ -8,9 +8,9 @@ cluster_som_merge(
   data,
   vars = NULL,
   thresholds,
-  x_dim = 5L,
-  y_dim = 5L,
-  rlen = 100L,
+  x_dim = 10L,
+  y_dim = 10L,
+  rlen = 10L,
   topo = "rectangular",
   max_label_diff = 2L,
   ignore_labels = NULL,
@@ -32,13 +32,16 @@ Passed to \code{\link[=cluster_merge_bin]{cluster_merge_bin()}}. Each element is
 of threshold values for the variable given by the element name.}
 
 \item{x_dim}{integer(1).
-Number of columns in the SOM grid. Default \code{5L}.}
+Number of columns in the SOM grid. Default \code{10L} (matching
+FlowSOM).}
 
 \item{y_dim}{integer(1).
-Number of rows in the SOM grid. Default \code{5L}.}
+Number of rows in the SOM grid. Default \code{10L} (matching
+FlowSOM).}
 
 \item{rlen}{integer(1).
-Number of training iterations. Default \code{100L}.}
+Number of training iterations. Default \code{10L} (matching
+FlowSOM).}
 
 \item{topo}{character(1).
 Grid topology passed to \code{\link[kohonen:unit.distances]{kohonen::somgrid()}}.

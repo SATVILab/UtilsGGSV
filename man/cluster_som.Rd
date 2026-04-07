@@ -7,9 +7,9 @@
 cluster_som(
   data,
   vars = NULL,
-  x_dim = 5L,
-  y_dim = 5L,
-  rlen = 100L,
+  x_dim = 10L,
+  y_dim = 10L,
+  rlen = 10L,
   topo = "rectangular"
 )
 }
@@ -22,13 +22,16 @@ Column names to use for clustering.
 If \code{NULL} (default), all columns are used.}
 
 \item{x_dim}{integer(1).
-Number of columns in the SOM grid. Default \code{5L}.}
+Number of columns in the SOM grid. Default \code{10L} (matching
+FlowSOM).}
 
 \item{y_dim}{integer(1).
-Number of rows in the SOM grid. Default \code{5L}.}
+Number of rows in the SOM grid. Default \code{10L} (matching
+FlowSOM).}
 
 \item{rlen}{integer(1).
-Number of training iterations. Default \code{100L}.}
+Number of training iterations. Default \code{10L} (matching
+FlowSOM).}
 
 \item{topo}{character(1).
 Grid topology passed to \code{\link[kohonen:unit.distances]{kohonen::somgrid()}}.
@@ -52,6 +55,9 @@ The function:
 \item Trains a SOM on the scaled data.
 \item Returns the unit assignment for each observation.
 }
+
+The default grid size (10 × 10) and training length (\code{rlen = 10})
+match the defaults used by FlowSOM's \code{BuildSOM}.
 
 The \code{kohonen} package must be installed.
 }

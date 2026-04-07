@@ -59,7 +59,7 @@ elements \code{assign} and \code{label} and a \code{"thresholds"} attribute.
 }
 \description{
 End-to-end wrapper that applies Louvain clustering
-(\code{\link[igraph:cluster_louvain]{igraph::cluster_louvain()}}), then merges clusters by variable bin
+(\code{\link[=cluster_louvain]{cluster_louvain()}}), then merges clusters by variable bin
 thresholds (\code{\link[=cluster_merge_bin]{cluster_merge_bin()}}), and finally merges unimodal
 neighbours (\code{\link[=cluster_merge_unimodal]{cluster_merge_unimodal()}}).
 }

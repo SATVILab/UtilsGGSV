@@ -12,11 +12,14 @@
 #'   Column names to use for clustering.
 #'   If `NULL` (default), all columns are used.
 #' @param x_dim integer(1).
-#'   Number of columns in the SOM grid. Default `5L`.
+#'   Number of columns in the SOM grid. Default `10L` (matching
+#'   FlowSOM).
 #' @param y_dim integer(1).
-#'   Number of rows in the SOM grid. Default `5L`.
+#'   Number of rows in the SOM grid. Default `10L` (matching
+#'   FlowSOM).
 #' @param rlen integer(1).
-#'   Number of training iterations. Default `100L`.
+#'   Number of training iterations. Default `10L` (matching
+#'   FlowSOM).
 #' @param topo character(1).
 #'   Grid topology passed to [kohonen::somgrid()].
 #'   One of `"rectangular"` (default) or `"hexagonal"`.
@@ -31,6 +34,9 @@
 #' 2. Creates a SOM grid of size `x_dim` × `y_dim`.
 #' 3. Trains a SOM on the scaled data.
 #' 4. Returns the unit assignment for each observation.
+#'
+#' The default grid size (10 × 10) and training length (`rlen = 10`)
+#' match the defaults used by FlowSOM's `BuildSOM`.
 #'
 #' The `kohonen` package must be installed.
 #'
@@ -47,9 +53,9 @@
 #' table(cl)
 cluster_som <- function(data,
                         vars = NULL,
-                        x_dim = 5L,
-                        y_dim = 5L,
-                        rlen = 100L,
+                        x_dim = 10L,
+                        y_dim = 10L,
+                        rlen = 10L,
                         topo = "rectangular") {
   if (!requireNamespace("kohonen", quietly = TRUE)) {
     stop(
@@ -142,9 +148,9 @@ cluster_som <- function(data,
 cluster_som_merge <- function(data,
                               vars = NULL,
                               thresholds,
-                              x_dim = 5L,
-                              y_dim = 5L,
-                              rlen = 100L,
+                              x_dim = 10L,
+                              y_dim = 10L,
+                              rlen = 10L,
                               topo = "rectangular",
                               max_label_diff = 2L,
                               ignore_labels = NULL,
