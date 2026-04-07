@@ -65,16 +65,18 @@ test_that("cluster_sim weights sum to 1", {
 
 test_that("cluster_sim spike-in adjusts weights correctly", {
   set.seed(1)
+  spiked_idx <- c(1L, 2L)
+  non_spiked_idx <- c(3L, 4L)
   sim <- cluster_sim(
     n_samples = 4, n_clusters = 5, n_dims = 3,
     n_cells_per_sample = 100,
-    spike_clusters = 1L, spike_samples = c(1L, 2L),
+    spike_clusters = 1L, spike_samples = spiked_idx,
     spike_fold_change = 2
   )
   base_w <- sim$metadata$base_weights
 
   # Spiked samples: cluster 1 weight is doubled
- for (s in c(1, 2)) {
+  for (s in spiked_idx) {
     sw <- sim$metadata$weights[[s]]
     expect_equal(sw[1], base_w[1] * 2)
     expect_equal(sum(sw), 1)
@@ -85,7 +87,7 @@ test_that("cluster_sim spike-in adjusts weights correctly", {
   }
 
   # Non-spiked samples: weights unchanged
-  for (s in c(3, 4)) {
+  for (s in non_spiked_idx) {
     expect_equal(sim$metadata$weights[[s]], base_w)
   }
 })

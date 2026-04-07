@@ -215,7 +215,7 @@ cluster_sim <- function(n_samples = 20L,
   }
 }
 
-#' Initialise FAUST reference weight vector
+#' Initialize FAUST reference weight vector
 #' @noRd
 .cluster_sim_init_weights <- function(n_clusters, base_cluster_weights) {
   if (!is.null(base_cluster_weights)) return(base_cluster_weights)
