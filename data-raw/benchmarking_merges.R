@@ -73,12 +73,12 @@ ari <- function(labels_true, labels_pred) {
 
   a <- sum_comb2(ct)
   b <- sum_comb2(rowSums(ct))
-  c <- sum_comb2(colSums(ct))
+  cc <- sum_comb2(colSums(ct))
   n <- sum(ct)
   d <- choose(n, 2)
 
-  expected <- b * c / d
-  max_index <- (b + c) / 2
+  expected <- b * cc / d
+  max_index <- (b + cc) / 2
   if (max_index == expected) return(1)
   (a - expected) / (max_index - expected)
 }
@@ -187,6 +187,7 @@ for (it in seq_len(5L)) {
 
 # ---- Save -------------------------------------------------------------------
 
+dir.create("inst/extdata", recursive = TRUE, showWarnings = FALSE)
 saveRDS(
   list(
     results         = results,
