@@ -37,6 +37,7 @@ Imports:
     tibble,
     igraph,
     ggrepel,
-    ks
+    ks,
+    diptest
 Roxygen: list(markdown = TRUE)
 VignetteBuilder: knitr

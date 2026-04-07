@@ -65,3 +65,4 @@ reference:
   desc: Functions for analysing and merging clusters
   contents:
   - cluster_merge_bin
+  - cluster_merge_unimodal

@@ -18,7 +18,7 @@
 #'   two bins (`<= t` and `> t`), two thresholds create three bins, and
 #'   so on.
 #'
-#' @return A named list with two elements:
+#' @return A named list with two elements and a `"thresholds"` attribute:
 #'
 #' - `assign`: a [tibble::tibble()] with one row per observation and
 #'   columns `orig` (original cluster label) and `merged` (merged
@@ -29,6 +29,11 @@
 #'   indices with `"_"`) and `descriptive` (human-readable
 #'   bin-combination description formed by joining per-variable range
 #'   descriptions with `"; "`).
+#'
+#' The `"thresholds"` attribute stores the input `thresholds` list so
+#' that downstream functions such as [cluster_merge_unimodal()] can
+#' re-use the bin boundaries without requiring the caller to pass them
+#' again.
 #'
 #' @export
 #'
@@ -55,7 +60,9 @@ cluster_merge_bin <- function(data, cluster, thresholds) {
     merged = label_tbl$level[match(cluster, label_tbl$orig)]
   )
 
-  list(assign = assign_tbl, label = label_tbl)
+  result <- list(assign = assign_tbl, label = label_tbl)
+  attr(result, "thresholds") <- thresholds
+  result
 }
 
 .cluster_merge_bin_label <- function(data,
