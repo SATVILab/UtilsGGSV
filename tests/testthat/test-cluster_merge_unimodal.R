@@ -75,7 +75,7 @@ test_that("cluster_merge_unimodal does not merge bimodal clusters", {
   set.seed(42)
   n <- 200
   # Clusters with well-separated modes: clearly bimodal when merged
- v1 <- c(rnorm(n, -5, 0.5), rnorm(n, 5, 0.5))
+  v1 <- c(rnorm(n, -5, 0.5), rnorm(n, 5, 0.5))
   v2 <- c(rnorm(n, 0, 0.5), rnorm(n, 0, 0.5))
   mat <- cbind(v1 = v1, v2 = v2)
   cl <- rep(c("A", "B"), each = n)
