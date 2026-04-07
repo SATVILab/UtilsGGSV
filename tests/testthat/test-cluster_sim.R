@@ -161,3 +161,174 @@ test_that("cluster_sim handles single dimension", {
   expect_true("dim_1" %in% names(sim$data))
   expect_equal(nrow(sim$data), 50)
 })
+
+# ---- noise_dims tests -------------------------------------------------------
+
+test_that("cluster_sim noise_dims appends noise columns", {
+  set.seed(1)
+  sim <- cluster_sim(
+    n_samples = 2, n_clusters = 3, n_dims = 4,
+    n_cells_per_sample = 100, noise_dims = 3
+  )
+  expect_true(all(paste0("noise_", 1:3) %in% names(sim$data)))
+  expect_true(all(paste0("dim_", 1:4) %in% names(sim$data)))
+  expect_equal(nrow(sim$data), 2 * 100)
+})
+
+test_that("cluster_sim with noise_dims NULL adds no noise columns", {
+  set.seed(1)
+  sim <- cluster_sim(
+    n_samples = 1, n_clusters = 2, n_dims = 3,
+    n_cells_per_sample = 50, noise_dims = NULL
+  )
+  expect_false(any(grepl("^noise_", names(sim$data))))
+})
+
+test_that("cluster_sim validates noise_dims", {
+  expect_error(cluster_sim(noise_dims = -1))
+  expect_error(cluster_sim(noise_dims = 1.5))
+  expect_error(cluster_sim(noise_dims = "a"))
+})
+
+# ---- distribution tests ------------------------------------------------------
+
+test_that("cluster_sim distribution = 't' produces output", {
+  set.seed(1)
+  sim <- cluster_sim(
+    n_samples = 1, n_clusters = 3, n_dims = 4,
+    n_cells_per_sample = 100, distribution = "t", df = 5
+  )
+  expect_s3_class(sim$data, "tbl_df")
+  expect_equal(nrow(sim$data), 100)
+  expect_true(all(paste0("dim_", 1:4) %in% names(sim$data)))
+})
+
+test_that("cluster_sim distribution = 't' differs from 'normal'", {
+  set.seed(1)
+  sim_norm <- cluster_sim(
+    n_samples = 1, n_clusters = 2, n_dims = 3,
+    n_cells_per_sample = 200, distribution = "normal"
+  )
+  set.seed(1)
+  sim_t <- cluster_sim(
+    n_samples = 1, n_clusters = 2, n_dims = 3,
+    n_cells_per_sample = 200, distribution = "t", df = 3
+  )
+  dim_cols <- paste0("dim_", 1:3)
+  expect_false(identical(sim_norm$data[dim_cols], sim_t$data[dim_cols]))
+})
+
+# ---- batch_effect_shift tests ------------------------------------------------
+
+test_that("cluster_sim batch effect shifts perturbed means", {
+  set.seed(1)
+  shift_val <- 5
+  sim <- cluster_sim(
+    n_samples = 4, n_clusters = 3, n_dims = 2,
+    n_cells_per_sample = 100,
+    batch_effect_shift = shift_val,
+    batch_samples = c(1L, 2L)
+  )
+  # Batch-affected means include the shift on top of the perturbation.
+  # Across all clusters the average difference between batch and non-batch
+
+  # means should be close to shift_val (perturbation noise averages out).
+  batch_means <- rowMeans(sim$metadata$perturbed_means[[1]])
+  non_batch_means <- rowMeans(sim$metadata$perturbed_means[[3]])
+  avg_diff <- mean(batch_means - non_batch_means)
+  expect_gt(avg_diff, 0)
+
+  expect_s3_class(sim$data, "tbl_df")
+  expect_equal(nrow(sim$data), 4 * 100)
+})
+
+test_that("cluster_sim batch effect with vector shift works", {
+  set.seed(1)
+  shift_vec <- c(2, -3, 1)
+  sim <- cluster_sim(
+    n_samples = 2, n_clusters = 3, n_dims = 3,
+    n_cells_per_sample = 50,
+    batch_effect_shift = shift_vec,
+    batch_samples = 1L
+  )
+  expect_s3_class(sim$data, "tbl_df")
+  expect_equal(nrow(sim$data), 2 * 50)
+})
+
+test_that("cluster_sim validates batch effect parameters", {
+  # Only one of the two provided
+  expect_error(
+    cluster_sim(batch_effect_shift = 5),
+    "batch_effect_shift.*batch_samples"
+  )
+  expect_error(
+    cluster_sim(batch_samples = 1L),
+    "batch_effect_shift.*batch_samples"
+  )
+  # Wrong length shift vector
+  expect_error(
+    cluster_sim(
+      n_dims = 3, batch_effect_shift = c(1, 2),
+      batch_samples = 1L
+    )
+  )
+})
+
+# ---- knockout tests ----------------------------------------------------------
+
+test_that("cluster_sim knockout zeroes cluster weights", {
+  set.seed(1)
+  ko_sample <- 1L
+  ko_cluster <- 2L
+  sim <- cluster_sim(
+    n_samples = 3, n_clusters = 4, n_dims = 3,
+    n_cells_per_sample = 200,
+    knockout_clusters = ko_cluster,
+    knockout_samples = ko_sample
+  )
+  # In knocked-out sample, weight of cluster 2 should be 0
+  expect_equal(sim$metadata$weights[[ko_sample]][ko_cluster], 0)
+  # Weights still sum to 1
+  expect_equal(sum(sim$metadata$weights[[ko_sample]]), 1)
+
+  # Non-affected samples retain original weights
+  expect_equal(sim$metadata$weights[[2]], sim$metadata$base_weights)
+  expect_equal(sim$metadata$weights[[3]], sim$metadata$base_weights)
+})
+
+test_that("cluster_sim knockout removes cells of knocked-out cluster", {
+  set.seed(1)
+  sim <- cluster_sim(
+    n_samples = 2, n_clusters = 3, n_dims = 2,
+    n_cells_per_sample = 500,
+    knockout_clusters = 1L,
+    knockout_samples = 1L
+  )
+  sample1 <- sim$data[sim$data$sample_id == 1, ]
+  sample2 <- sim$data[sim$data$sample_id == 2, ]
+  # No cells from cluster 1 in knocked-out sample
+  expect_false(1L %in% sample1$cluster_id)
+  # Cluster 1 present in non-affected sample
+  expect_true(1L %in% sample2$cluster_id)
+})
+
+test_that("cluster_sim validates knockout parameters", {
+  # Only one of the two provided
+  expect_error(
+    cluster_sim(knockout_clusters = 1L),
+    "knockout_clusters.*knockout_samples"
+  )
+  expect_error(
+    cluster_sim(knockout_samples = 1L),
+    "knockout_clusters.*knockout_samples"
+  )
+  # Cannot knock out all clusters
+  expect_error(
+    cluster_sim(
+      n_clusters = 3,
+      knockout_clusters = c(1L, 2L, 3L),
+      knockout_samples = 1L
+    ),
+    "Cannot knock out all clusters"
+  )
+})

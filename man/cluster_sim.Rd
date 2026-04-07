@@ -16,7 +16,14 @@ cluster_sim(
   transform = c("none", "faust_gamma"),
   spike_clusters = NULL,
   spike_samples = NULL,
-  spike_fold_change = 2
+  spike_fold_change = 2,
+  noise_dims = NULL,
+  distribution = c("normal", "t"),
+  df = 3,
+  batch_effect_shift = NULL,
+  batch_samples = NULL,
+  knockout_clusters = NULL,
+  knockout_samples = NULL
 )
 }
 \arguments{
@@ -51,11 +58,41 @@ spike to (e.g., "responders").}
 
 \item{spike_fold_change}{Numeric. The multiplier for the spiked cluster
 weights.}
+
+\item{noise_dims}{Integer. Number of nuisance noise columns to append,
+sampled from a standard normal distribution. If \code{NULL} (default), no noise
+columns are added.}
+
+\item{distribution}{Character. Distribution used to generate cell data.
+\code{"normal"} (default) uses \code{\link[MASS:mvrnorm]{MASS::mvrnorm()}}; \code{"t"} uses
+\code{\link[mvtnorm:Mvt]{mvtnorm::rmvt()}} for heavier tails. Requires the \pkg{mvtnorm} package
+when set to \code{"t"}.}
+
+\item{df}{Numeric. Degrees of freedom for the multivariate t-distribution.
+Only used when \code{distribution = "t"}. Default is \code{3}.}
+
+\item{batch_effect_shift}{Numeric scalar or vector of length \code{n_dims}. Mean
+shift applied to samples indicated by \code{batch_samples} to simulate a
+batch effect. If \code{NULL} (default), no batch effect is applied.}
+
+\item{batch_samples}{Integer vector. Indices of samples that receive the
+batch effect shift. Must be provided together with \code{batch_effect_shift}.}
+
+\item{knockout_clusters}{Integer vector. Indices of clusters whose
+probability is set to zero in the samples given by \code{knockout_samples}.
+Must be provided together with \code{knockout_samples}.}
+
+\item{knockout_samples}{Integer vector. Indices of samples where
+\code{knockout_clusters} are removed. Must be provided together with
+\code{knockout_clusters}.}
 }
 \value{
 A list containing:
+
 \item{data}{A tibble of the simulated data with \code{sample_id}, \code{cell_id},
-\code{cluster_id}, and one column per dimension (\code{dim_1}, \code{dim_2}, ...).}
+\code{cluster_id}, and one column per dimension (\code{dim_1}, \code{dim_2}, ...).
+When \code{noise_dims} is set, additional columns \code{noise_1}, \code{noise_2}, ...
+are appended.}
 \item{metadata}{A list containing true parameters: base means, perturbed
 means per sample, covariance matrices, and exact weight vectors.}
 }

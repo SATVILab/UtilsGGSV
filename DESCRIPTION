@@ -18,6 +18,7 @@ Suggests:
     DescTools,
     knitr,
     kohonen,
+    mvtnorm,
     palmerpenguins,
     remotes,
     rmarkdown,

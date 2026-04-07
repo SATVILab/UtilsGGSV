@@ -25,10 +25,33 @@
 #'   spike to (e.g., "responders").
 #' @param spike_fold_change Numeric. The multiplier for the spiked cluster
 #'   weights.
+#' @param noise_dims Integer. Number of nuisance noise columns to append,
+#'   sampled from a standard normal distribution. If `NULL` (default), no noise
+#'   columns are added.
+#' @param distribution Character. Distribution used to generate cell data.
+#'   `"normal"` (default) uses [MASS::mvrnorm()]; `"t"` uses
+#'   [mvtnorm::rmvt()] for heavier tails. Requires the \pkg{mvtnorm} package
+#'   when set to `"t"`.
+#' @param df Numeric. Degrees of freedom for the multivariate t-distribution.
+#'   Only used when `distribution = "t"`. Default is `3`.
+#' @param batch_effect_shift Numeric scalar or vector of length `n_dims`. Mean
+#'   shift applied to samples indicated by `batch_samples` to simulate a
+#'   batch effect. If `NULL` (default), no batch effect is applied.
+#' @param batch_samples Integer vector. Indices of samples that receive the
+#'   batch effect shift. Must be provided together with `batch_effect_shift`.
+#' @param knockout_clusters Integer vector. Indices of clusters whose
+#'   probability is set to zero in the samples given by `knockout_samples`.
+#'   Must be provided together with `knockout_samples`.
+#' @param knockout_samples Integer vector. Indices of samples where
+#'   `knockout_clusters` are removed. Must be provided together with
+#'   `knockout_clusters`.
 #'
 #' @return A list containing:
+#'
 #'   \item{data}{A tibble of the simulated data with `sample_id`, `cell_id`,
-#'     `cluster_id`, and one column per dimension (`dim_1`, `dim_2`, ...).}
+#'     `cluster_id`, and one column per dimension (`dim_1`, `dim_2`, ...).
+#'     When `noise_dims` is set, additional columns `noise_1`, `noise_2`, ...
+#'     are appended.}
 #'   \item{metadata}{A list containing true parameters: base means, perturbed
 #'     means per sample, covariance matrices, and exact weight vectors.}
 #'
@@ -52,12 +75,23 @@ cluster_sim <- function(n_samples = 20L,
                         transform = c("none", "faust_gamma"),
                         spike_clusters = NULL,
                         spike_samples = NULL,
-                        spike_fold_change = 2) {
+                        spike_fold_change = 2,
+                        noise_dims = NULL,
+                        distribution = c("normal", "t"),
+                        df = 3,
+                        batch_effect_shift = NULL,
+                        batch_samples = NULL,
+                        knockout_clusters = NULL,
+                        knockout_samples = NULL) {
   transform <- match.arg(transform)
+  distribution <- match.arg(distribution)
   .cluster_sim_validate(
     n_samples, n_clusters, n_dims, n_cells_per_sample,
     base_cluster_weights, expr_modes, var_bounds, mean_perturb_sd,
-    spike_clusters, spike_samples, spike_fold_change
+    spike_clusters, spike_samples, spike_fold_change,
+    noise_dims, distribution, df,
+    batch_effect_shift, batch_samples,
+    knockout_clusters, knockout_samples
   )
 
   # 1. Initialize weights
@@ -76,6 +110,11 @@ cluster_sim <- function(n_samples = 20L,
   meta_weights <- vector("list", n_samples)
   dim_names <- paste0("dim_", seq_len(n_dims))
 
+  # Resolve batch_effect_shift to a vector of length n_dims
+  if (!is.null(batch_effect_shift) && length(batch_effect_shift) == 1L) {
+    batch_effect_shift <- rep(batch_effect_shift, n_dims)
+  }
+
   for (s in seq_len(n_samples)) {
     # 3. Determine sample-specific weights (apply spike if applicable)
     sample_weights <- if (!is.null(spike_samples) && s %in% spike_samples) {
@@ -83,12 +122,23 @@ cluster_sim <- function(n_samples = 20L,
     } else {
       weights
     }
+
+    # Apply knockout: zero out specified clusters for knockout samples
+    if (!is.null(knockout_samples) && s %in% knockout_samples) {
+      sample_weights <- .cluster_sim_knockout_weights(
+        sample_weights, knockout_clusters
+      )
+    }
+
     meta_weights[[s]] <- sample_weights
 
     # 4. Draw cell counts via rmultinom
     cell_counts <- as.integer(
       stats::rmultinom(1, size = n_cells_per_sample, prob = sample_weights)
     )
+
+    # Determine if batch effect applies to this sample
+    apply_batch <- !is.null(batch_samples) && s %in% batch_samples
 
     # 5. Generate per-cluster data
     all_x <- matrix(0, nrow = n_cells_per_sample, ncol = n_dims)
@@ -103,6 +153,12 @@ cluster_sim <- function(n_samples = 20L,
         stats::rnorm(n_dims, mean = 0, sd = mean_perturb_sd)
       )
       mu_sk <- base_means[k, ] + perturbation
+
+      # Apply batch effect shift to mean
+      if (apply_batch) {
+        mu_sk <- mu_sk + batch_effect_shift
+      }
+
       perturbed_means_s[k, ] <- mu_sk
 
       # Generate covariance matrix
@@ -111,7 +167,11 @@ cluster_sim <- function(n_samples = 20L,
 
       n_k <- cell_counts[k]
       if (n_k > 0L) {
-        x <- MASS::mvrnorm(n = n_k, mu = mu_sk, Sigma = sigma_sk)
+        x <- if (distribution == "t") {
+          mvtnorm::rmvt(n = n_k, sigma = sigma_sk, df = df, delta = mu_sk)
+        } else {
+          MASS::mvrnorm(n = n_k, mu = mu_sk, Sigma = sigma_sk)
+        }
         if (!is.matrix(x)) x <- matrix(x, nrow = 1L)
 
         # 6. Apply transformation if requested
@@ -131,6 +191,18 @@ cluster_sim <- function(n_samples = 20L,
 
     dim_df <- as.data.frame(all_x)
     names(dim_df) <- dim_names
+
+    # Append noise dimensions if requested
+    if (!is.null(noise_dims) && noise_dims > 0L) {
+      noise_mat <- matrix(
+        stats::rnorm(n_cells_per_sample * noise_dims),
+        nrow = n_cells_per_sample, ncol = noise_dims
+      )
+      noise_df <- as.data.frame(noise_mat)
+      names(noise_df) <- paste0("noise_", seq_len(noise_dims))
+      dim_df <- cbind(dim_df, noise_df)
+    }
+
     data_list[[s]] <- cbind(
       data.frame(
         sample_id = rep(s, n_cells_per_sample),
@@ -164,7 +236,10 @@ cluster_sim <- function(n_samples = 20L,
                                   base_cluster_weights, expr_modes,
                                   var_bounds, mean_perturb_sd,
                                   spike_clusters, spike_samples,
-                                  spike_fold_change) {
+                                  spike_fold_change,
+                                  noise_dims, distribution, df,
+                                  batch_effect_shift, batch_samples,
+                                  knockout_clusters, knockout_samples) {
   stopifnot(
     is.numeric(n_samples), length(n_samples) == 1L, n_samples >= 1L,
     is.numeric(n_clusters), length(n_clusters) == 1L, n_clusters >= 1L,
@@ -211,6 +286,78 @@ cluster_sim <- function(n_samples = 20L,
       all(spike_samples >= 1L),
       all(spike_samples <= n_samples),
       all(spike_samples == floor(spike_samples))
+    )
+  }
+
+  # Validate noise_dims
+  if (!is.null(noise_dims)) {
+    stopifnot(
+      is.numeric(noise_dims), length(noise_dims) == 1L, noise_dims >= 1L,
+      noise_dims == floor(noise_dims)
+    )
+  }
+
+  # Validate distribution / df
+  if (distribution == "t") {
+    if (!requireNamespace("mvtnorm", quietly = TRUE)) {
+      stop(
+        "Package 'mvtnorm' is required for distribution = \"t\". ",
+        "Install it with install.packages(\"mvtnorm\")."
+      )
+    }
+    stopifnot(is.numeric(df), length(df) == 1L, df > 0)
+  }
+
+  # Validate batch effect parameters
+  if (xor(is.null(batch_effect_shift), is.null(batch_samples))) {
+    stop(
+      "Both 'batch_effect_shift' and 'batch_samples' must be provided, ",
+      "or both must be NULL."
+    )
+  }
+
+  if (!is.null(batch_effect_shift)) {
+    stopifnot(
+      is.numeric(batch_effect_shift),
+      length(batch_effect_shift) == 1L || length(batch_effect_shift) == n_dims
+    )
+  }
+
+  if (!is.null(batch_samples)) {
+    stopifnot(
+      is.numeric(batch_samples),
+      all(batch_samples >= 1L),
+      all(batch_samples <= n_samples),
+      all(batch_samples == floor(batch_samples))
+    )
+  }
+
+  # Validate knockout parameters
+  if (xor(is.null(knockout_clusters), is.null(knockout_samples))) {
+    stop(
+      "Both 'knockout_clusters' and 'knockout_samples' must be provided, ",
+      "or both must be NULL."
+    )
+  }
+
+  if (!is.null(knockout_clusters)) {
+    stopifnot(
+      is.numeric(knockout_clusters),
+      all(knockout_clusters >= 1L),
+      all(knockout_clusters <= n_clusters),
+      all(knockout_clusters == floor(knockout_clusters))
+    )
+    if (length(knockout_clusters) >= n_clusters) {
+      stop("Cannot knock out all clusters.")
+    }
+  }
+
+  if (!is.null(knockout_samples)) {
+    stopifnot(
+      is.numeric(knockout_samples),
+      all(knockout_samples >= 1L),
+      all(knockout_samples <= n_samples),
+      all(knockout_samples == floor(knockout_samples))
     )
   }
 }
@@ -270,4 +417,12 @@ cluster_sim <- function(n_samples = 20L,
   # Scale correlation matrix to covariance matrix
   D <- diag(sqrt(vars), nrow = n_dims)
   D %*% R %*% D
+}
+
+#' Zero out knocked-out clusters and renormalise weights
+#' @noRd
+.cluster_sim_knockout_weights <- function(weights, knockout_clusters) {
+  w <- weights
+  w[knockout_clusters] <- 0
+  w / sum(w)
 }
