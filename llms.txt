@@ -523,8 +523,16 @@ Aliases of group plot functions for backward compatibility
 
 ## Cluster Analysis
 
-Functions for analysing and merging clusters
+Functions for clustering, analysing and merging clusters
 
+- [`cluster_louvain()`](https://satvilab.github.io/UtilsGGSV/reference/cluster_louvain.md)
+  : Louvain community-detection clustering
+- [`cluster_som()`](https://satvilab.github.io/UtilsGGSV/reference/cluster_som.md)
+  : Self-Organizing Map (SOM) clustering
+- [`cluster_louvain_merge()`](https://satvilab.github.io/UtilsGGSV/reference/cluster_louvain_merge.md)
+  : Louvain clustering with bin and unimodal merging
+- [`cluster_som_merge()`](https://satvilab.github.io/UtilsGGSV/reference/cluster_som_merge.md)
+  : SOM clustering with bin and unimodal merging
 - [`cluster_merge_bin()`](https://satvilab.github.io/UtilsGGSV/reference/cluster_merge_bin.md)
   : Merge clusters based on variable bin thresholds
 - [`cluster_merge_unimodal()`](https://satvilab.github.io/UtilsGGSV/reference/cluster_merge_unimodal.md)
