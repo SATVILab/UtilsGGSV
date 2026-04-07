@@ -17,6 +17,7 @@ Suggests:
     covr,
     DescTools,
     knitr,
+    kohonen,
     palmerpenguins,
     remotes,
     rmarkdown,
@@ -38,6 +39,7 @@ Imports:
     igraph,
     ggrepel,
     ks,
-    diptest
+    diptest,
+    FNN
 Roxygen: list(markdown = TRUE)
 VignetteBuilder: knitr

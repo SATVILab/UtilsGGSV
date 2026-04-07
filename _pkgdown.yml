@@ -62,7 +62,11 @@ reference:
   - plot_cluster_scatter
 
 - title: Cluster Analysis
-  desc: Functions for analysing and merging clusters
+  desc: Functions for clustering, analysing and merging clusters
   contents:
+  - cluster_louvain
+  - cluster_som
+  - cluster_louvain_merge
+  - cluster_som_merge
   - cluster_merge_bin
   - cluster_merge_unimodal
