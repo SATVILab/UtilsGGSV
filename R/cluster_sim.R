@@ -424,9 +424,5 @@ cluster_sim <- function(n_samples = 20L,
 .cluster_sim_knockout_weights <- function(weights, knockout_clusters) {
   w <- weights
   w[knockout_clusters] <- 0
-  remaining <- sum(w)
-  if (remaining <= 0) {
-    stop("All cluster weights are zero after knockout.")
-  }
-  w / remaining
+  w / sum(w)
 }

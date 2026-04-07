@@ -171,8 +171,6 @@ test_that("cluster_sim noise_dims appends noise columns", {
     n_cells_per_sample = 100, noise_dims = 3
   )
   expect_true(all(paste0("noise_", 1:3) %in% names(sim$data)))
-  # dim columns still present
-
   expect_true(all(paste0("dim_", 1:4) %in% names(sim$data)))
   expect_equal(nrow(sim$data), 2 * 100)
 })
@@ -231,13 +229,15 @@ test_that("cluster_sim batch effect shifts perturbed means", {
     batch_effect_shift = shift_val,
     batch_samples = c(1L, 2L)
   )
-  # Batch-affected means should differ from non-affected by ~shift_val
-  # (modulo perturbation randomness, but the shift is added deterministically)
-  # The metadata perturbed_means for batch samples include the shift
-  batch_means <- sim$metadata$perturbed_means[[1]]
-  non_batch_means <- sim$metadata$perturbed_means[[3]]
-  # Can't compare directly because of randomness, but we can
-  # at least check the function runs and produces valid output
+  # Batch-affected means include the shift on top of the perturbation.
+  # Across all clusters the average difference between batch and non-batch
+
+  # means should be close to shift_val (perturbation noise averages out).
+  batch_means <- rowMeans(sim$metadata$perturbed_means[[1]])
+  non_batch_means <- rowMeans(sim$metadata$perturbed_means[[3]])
+  avg_diff <- mean(batch_means - non_batch_means)
+  expect_gt(avg_diff, 0)
+
   expect_s3_class(sim$data, "tbl_df")
   expect_equal(nrow(sim$data), 4 * 100)
 })
