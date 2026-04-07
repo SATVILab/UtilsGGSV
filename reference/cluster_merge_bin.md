@@ -32,7 +32,7 @@ cluster_merge_bin(data, cluster, thresholds)
 
 ## Value
 
-A named list with two elements:
+A named list with two elements and a `"thresholds"` attribute:
 
 - `assign`: a
   [`tibble::tibble()`](https://tibble.tidyverse.org/reference/tibble.html)
@@ -46,6 +46,12 @@ A named list with two elements:
   joining per-variable bin indices with `"_"`) and `descriptive`
   (human-readable bin-combination description formed by joining
   per-variable range descriptions with `"; "`).
+
+The `"thresholds"` attribute stores the input `thresholds` list so that
+downstream functions such as
+[`cluster_merge_unimodal()`](https://satvilab.github.io/UtilsGGSV/reference/cluster_merge_unimodal.md)
+can re-use the bin boundaries without requiring the caller to pass them
+again.
 
 ## Examples
 
@@ -92,5 +98,12 @@ cluster_merge_bin(mat, cl, thresholds)
 #> 2 B     2_1   var1 > 0; var2 <= 0
 #> 3 C     2_1   var1 > 0; var2 <= 0
 #> 4 D     2_1   var1 > 0; var2 <= 0
+#> 
+#> attr(,"thresholds")
+#> attr(,"thresholds")$var1
+#> [1] 0
+#> 
+#> attr(,"thresholds")$var2
+#> [1] 0
 #> 
 ```

@@ -79,3 +79,5 @@ Functions for analysing and merging clusters
 
 - [`cluster_merge_bin()`](https://satvilab.github.io/UtilsGGSV/reference/cluster_merge_bin.md)
   : Merge clusters based on variable bin thresholds
+- [`cluster_merge_unimodal()`](https://satvilab.github.io/UtilsGGSV/reference/cluster_merge_unimodal.md)
+  : Merge clusters that remain unimodal when combined
