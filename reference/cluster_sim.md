@@ -20,7 +20,14 @@ cluster_sim(
   transform = c("none", "faust_gamma"),
   spike_clusters = NULL,
   spike_samples = NULL,
-  spike_fold_change = 2
+  spike_fold_change = 2,
+  noise_dims = NULL,
+  distribution = c("normal", "t"),
+  df = 3,
+  batch_effect_shift = NULL,
+  batch_samples = NULL,
+  knockout_clusters = NULL,
+  knockout_samples = NULL
 )
 ```
 
@@ -79,6 +86,47 @@ cluster_sim(
 
   Numeric. The multiplier for the spiked cluster weights.
 
+- noise_dims:
+
+  Integer. Number of nuisance noise columns to append, sampled from a
+  standard normal distribution. If `NULL` (default), no noise columns
+  are added.
+
+- distribution:
+
+  Character. Distribution used to generate cell data. `"normal"`
+  (default) uses
+  [`MASS::mvrnorm()`](https://rdrr.io/pkg/MASS/man/mvrnorm.html); `"t"`
+  uses [`mvtnorm::rmvt()`](https://rdrr.io/pkg/mvtnorm/man/Mvt.html) for
+  heavier tails. Requires the mvtnorm package when set to `"t"`.
+
+- df:
+
+  Numeric. Degrees of freedom for the multivariate t-distribution. Only
+  used when `distribution = "t"`. Default is `3`.
+
+- batch_effect_shift:
+
+  Numeric scalar or vector of length `n_dims`. Mean shift applied to
+  samples indicated by `batch_samples` to simulate a batch effect. If
+  `NULL` (default), no batch effect is applied.
+
+- batch_samples:
+
+  Integer vector. Indices of samples that receive the batch effect
+  shift. Must be provided together with `batch_effect_shift`.
+
+- knockout_clusters:
+
+  Integer vector. Indices of clusters whose probability is set to zero
+  in the samples given by `knockout_samples`. Must be provided together
+  with `knockout_samples`.
+
+- knockout_samples:
+
+  Integer vector. Indices of samples where `knockout_clusters` are
+  removed. Must be provided together with `knockout_clusters`.
+
 ## Value
 
 A list containing:
@@ -87,6 +135,8 @@ A list containing:
 
   A tibble of the simulated data with `sample_id`, `cell_id`,
   `cluster_id`, and one column per dimension (`dim_1`, `dim_2`, ...).
+  When `noise_dims` is set, additional columns `noise_1`, `noise_2`, ...
+  are appended.
 
 - metadata:
 
