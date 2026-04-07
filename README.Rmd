@@ -371,6 +371,57 @@ Combine into a grid with variable-name labels:
 plot_cluster_mst(cluster_data, cluster = "cluster", n_col = 2)
 ```
 
+### Clustering Pipeline
+
+UtilsGGSV provides end-to-end clustering functions that apply a clustering
+method and then merge similar clusters using bin thresholds and unimodality
+testing.
+
+#### Louvain Clustering
+
+`cluster_louvain()` builds a shared nearest-neighbour graph from the data and
+applies Louvain community detection. The result can be fed directly into the
+merge pipeline:
+```{r cluster_louvain}
+set.seed(1)
+cluster_mat <- matrix(
+  c(rnorm(50, -3), rnorm(50, 3), rnorm(100, 0)),
+  ncol = 2,
+  dimnames = list(NULL, c("v1", "v2"))
+)
+
+# Step by step
+cl <- cluster_louvain(cluster_mat, k = 10)
+bin_res <- cluster_merge_bin(cluster_mat, cl, list(v1 = 0, v2 = 0))
+final <- cluster_merge_unimodal(cluster_mat, bin_res)
+table(final$assign$merged)
+```
+
+Or use the convenience wrapper `cluster_louvain_merge()`:
+
+```{r cluster_louvain_merge}
+result <- cluster_louvain_merge(
+  cluster_mat,
+  thresholds = list(v1 = 0, v2 = 0),
+  k = 10
+)
+table(result$assign$merged)
+```
+
+#### SOM Clustering
+
+`cluster_som()` trains a Self-Organizing Map (requires the **kohonen**
+package) and returns node assignments. The same merge pipeline applies:
+
+```{r cluster_som_merge}
+result_som <- cluster_som_merge(
+  cluster_mat,
+  thresholds = list(v1 = 0, v2 = 0),
+  x_dim = 3, y_dim = 3
+)
+table(result_som$assign$merged)
+```
+
 ### Transformations with `get_trans`
 
 The utility function `get_trans` returns `trans` objects (as implemented by the `scales` package) when given characters. It also adds various higher roots (such as cubic and quartic) and adds the `asinh` transformation. 
