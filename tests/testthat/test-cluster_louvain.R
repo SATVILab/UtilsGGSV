@@ -112,7 +112,7 @@ test_that("cluster_louvain_merge reduces cluster count", {
     thresholds = list(v1 = 0, v2 = 0),
     k = 10
   )
-  # Merged result should have <= clusters than raw Louvain
+  # Merged result should have fewer or equal clusters than raw Louvain
   expect_true(
     length(unique(result$assign$merged)) <= length(unique(cl))
   )
