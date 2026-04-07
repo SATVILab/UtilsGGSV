@@ -3,6 +3,7 @@
 .Rhistory
 SCRATCH.R
 _tmp/*
+vignettes/_tmp/*
 
 .vscode/settings.json
 tests/testthat/Rplots.pdf
@@ -11,3 +12,4 @@ tests/testthat/Rplots.pdf
 *.Rcheck/
 *.tar.gz
 Rplots.pdf
+vignettes/benchmarking-merges.html
