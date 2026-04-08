@@ -246,3 +246,41 @@ test_that("cluster_merge_unimodal min_mode_dist accepts named vector", {
   )
   expect_s3_class(result$assign, "tbl_df")
 })
+
+test_that("dip test is restricted to mismatched variables only", {
+  # v1: clusters differ in bin (mismatched) and form a unimodal combined dist
+  # v2: clusters are in the same bin (matched) but the combined dist is bimodal
+  # Under the old behaviour (test all vars), the bimodal v2 would block the
+  # merge.  Under the correct behaviour (test only mismatched vars), v2 is
+  # ignored and the clusters ARE merged because v1 is unimodal.
+  set.seed(7)
+  n <- 300
+  # v1: slightly different means straddling 0 → unimodal when combined
+  v1 <- c(rnorm(n, 0.2, 0.6), rnorm(n, -0.2, 0.6))
+  # v2: strongly bimodal when combined, but BOTH clusters are in bin 2
+  #     (medians both > 0 but the data spans a wide range)
+  v2 <- c(rnorm(n, -3, 0.3), rnorm(n, 3, 0.3))
+  mat <- cbind(v1 = v1, v2 = v2)
+  cl <- rep(c("A", "B"), each = n)
+  # Use threshold 0 for both vars; v2 threshold=0 but both cluster medians
+  # are on opposite sides, so we need them in the same bin.
+  # Force both medians of v2 to be > 0 to ensure same bin:
+  v2_same_bin <- c(rnorm(n, 2, 0.3), rnorm(n, 4, 0.3))
+  mat2 <- cbind(v1 = v1, v2 = v2_same_bin)
+  bin_res <- cluster_merge_bin(mat2, cl, list(v1 = 0, v2 = 0))
+  # Confirm: both clusters have the same v2 bin but different v1 bins
+  labels <- unique(bin_res$assign$merged)
+  expect_equal(length(labels), 2L)
+  parsed <- lapply(labels, .cmu_parse_label)
+  # v1 bins differ
+  expect_false(parsed[[1L]][1L] == parsed[[2L]][1L])
+  # v2 bins are the same
+  expect_equal(parsed[[1L]][2L], parsed[[2L]][2L])
+  # v2_same_bin combined is bimodal; v1 combined is unimodal.
+  # The merge should proceed because only mismatched v1 is tested.
+  result <- cluster_merge_unimodal(mat2, bin_res, dip_threshold = 0.05)
+  expect_lt(
+    length(unique(result$assign$merged)),
+    length(unique(bin_res$assign$merged))
+  )
+})

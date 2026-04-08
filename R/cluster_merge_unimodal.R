@@ -4,8 +4,8 @@
 #' @description
 #' Takes the output of [cluster_merge_bin()] and iteratively merges
 #' similarly-labelled clusters as long as the combined population
-#' remains unimodal along every variable (assessed via Hartigan's
-#' Dip Test).
+#' remains unimodal along every variable where the two clusters have
+#' different bin indices (assessed via Hartigan's Dip Test).
 #'
 #' @param data matrix or data.frame.
 #'   Rows are observations, columns are variables. Must contain the
@@ -23,8 +23,9 @@
 #'   Merged-cluster labels to exclude from merging consideration.
 #'   Default `NULL` (no labels ignored).
 #' @param dip_threshold numeric(1).
-#'   Minimum dip-test p-value required for every variable before a
-#'   merge is accepted.
+#'   Minimum dip-test p-value required for every mismatched variable
+#'   (i.e. variables where the two candidate clusters fall in different
+#'   bins) before a merge is accepted.
 #'   A higher value is more conservative (demands stronger evidence
 #'   of unimodality).  Default `0.15`.
 #' @param min_mode_dist numeric or named numeric vector or `NULL`.
@@ -217,8 +218,14 @@ cluster_merge_unimodal <- function(data,
     b <- pairs$b[i]
     idx <- cluster %in% c(a, b)
 
-    # dip test per variable: p-value must be >= dip_threshold for ALL vars
-    all_unimodal <- all(vapply(vars, function(v) {
+    # dip test only on mismatched variables (where bin indices differ)
+    bins_a <- .cmu_parse_label(a)
+    bins_b <- .cmu_parse_label(b)
+    check_vars <- vars[bins_a != bins_b]
+    # if all bin indices match the clusters share a label and should be merged
+    if (length(check_vars) == 0L) return(TRUE)
+
+    all_unimodal <- all(vapply(check_vars, function(v) {
       vals <- as.numeric(data[idx, v])
       if (length(unique(vals)) < 4L) return(TRUE)
       diptest::dip.test(vals)$p.value >= dip_threshold
