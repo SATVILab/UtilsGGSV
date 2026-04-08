@@ -938,3 +938,135 @@ test_that("plot_cluster_density works with factor cluster column", {
   expect_type(result, "list")
   expect_s3_class(result[[1]], "ggplot")
 })
+
+# all-variables and group-alias tests
+
+test_that("plot_cluster_density with 3 vars and vars=NULL returns list of 3 plots", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0)),
+    var3 = c(rnorm(20, 0), rnorm(20, 1), rnorm(20, -1))
+  )
+  result <- plot_cluster_density(data, cluster = "cluster")
+  expect_type(result, "list")
+  expect_named(result, c("var1", "var2", "var3"))
+  for (p in result) expect_s3_class(p, "ggplot")
+})
+
+test_that("plot_cluster_density with explicit vars = all 3 non-cluster columns works", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0)),
+    var3 = c(rnorm(20, 0), rnorm(20, 1), rnorm(20, -1))
+  )
+  result <- plot_cluster_density(
+    data, cluster = "cluster", vars = c("var1", "var2", "var3")
+  )
+  expect_named(result, c("var1", "var2", "var3"))
+  for (p in result) expect_s3_class(p, "ggplot")
+})
+
+test_that("plot_cluster_density density='overall' works with 3 vars", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0)),
+    var3 = c(rnorm(20, 0), rnorm(20, 1), rnorm(20, -1))
+  )
+  result <- plot_cluster_density(
+    data, cluster = "cluster", density = "overall"
+  )
+  expect_named(result, c("var1", "var2", "var3"))
+  for (p in result) {
+    expect_s3_class(p, "ggplot")
+    expect_true(any(sapply(p$layers, function(l) inherits(l$geom, "GeomVline"))))
+  }
+})
+
+test_that("plot_cluster_density density='cluster' works with 3 vars", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0)),
+    var3 = c(rnorm(20, 0), rnorm(20, 1), rnorm(20, -1))
+  )
+  result <- plot_cluster_density(
+    data, cluster = "cluster", density = "cluster"
+  )
+  expect_named(result, c("var1", "var2", "var3"))
+  for (p in result) expect_s3_class(p, "ggplot")
+})
+
+test_that("plot_cluster_density density='both' works with 3 vars", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0)),
+    var3 = c(rnorm(20, 0), rnorm(20, 1), rnorm(20, -1))
+  )
+  result <- plot_cluster_density(
+    data, cluster = "cluster", density = "both"
+  )
+  expect_named(result, c("var1", "var2", "var3"))
+  for (p in result) expect_s3_class(p, "ggplot")
+})
+
+test_that("plot_cluster_density facet mode works with 3 vars", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0)),
+    var3 = c(rnorm(20, 0), rnorm(20, 1), rnorm(20, -1))
+  )
+  p <- plot_cluster_density(data, cluster = "cluster", n_col = 2)
+  expect_s3_class(p, "ggplot")
+  expect_equal(length(unique(p$layers[[1]]$data$variable)), 3L)
+})
+
+test_that("plot_cluster_density cluster column named 'group' works with vars=NULL", {
+  set.seed(1)
+  data <- data.frame(
+    group = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0)),
+    var3 = c(rnorm(20, 0), rnorm(20, 1), rnorm(20, -1))
+  )
+  result <- plot_cluster_density(data, cluster = "group")
+  expect_named(result, c("var1", "var2", "var3"))
+  for (p in result) expect_s3_class(p, "ggplot")
+})
+
+test_that("plot_cluster_density cluster column named 'group' works with explicit vars", {
+  set.seed(1)
+  data <- data.frame(
+    group = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0)),
+    var3 = c(rnorm(20, 0), rnorm(20, 1), rnorm(20, -1))
+  )
+  result <- plot_cluster_density(
+    data, cluster = "group", vars = c("var1", "var2", "var3")
+  )
+  expect_named(result, c("var1", "var2", "var3"))
+  for (p in result) expect_s3_class(p, "ggplot")
+})
+
+test_that("plot_cluster_density errors when group= is passed through ...", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
+  )
+  expect_error(
+    plot_cluster_density(data, cluster = "cluster", group = "cluster")
+  )
+})

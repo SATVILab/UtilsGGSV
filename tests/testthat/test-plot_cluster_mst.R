@@ -409,3 +409,73 @@ test_that("plot_cluster_mst works with factor cluster column", {
   expect_type(result, "list")
   for (p in result) expect_s3_class(p, "ggplot")
 })
+
+# all-variables and group-alias tests
+
+test_that("plot_cluster_mst with 3 vars and vars=NULL returns list of 3 plots", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0)),
+    var3 = c(rnorm(20, 0), rnorm(20, 1), rnorm(20, -1))
+  )
+  result <- plot_cluster_mst(data, cluster = "cluster")
+  expect_named(result, c("var1", "var2", "var3"))
+  for (p in result) expect_s3_class(p, "ggplot")
+})
+
+test_that("plot_cluster_mst with explicit vars = all 3 non-cluster columns works", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0)),
+    var3 = c(rnorm(20, 0), rnorm(20, 1), rnorm(20, -1))
+  )
+  result <- plot_cluster_mst(
+    data, cluster = "cluster", vars = c("var1", "var2", "var3")
+  )
+  expect_named(result, c("var1", "var2", "var3"))
+  for (p in result) expect_s3_class(p, "ggplot")
+})
+
+test_that("plot_cluster_mst cluster column named 'group' works with vars=NULL", {
+  set.seed(1)
+  data <- data.frame(
+    group = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0)),
+    var3 = c(rnorm(20, 0), rnorm(20, 1), rnorm(20, -1))
+  )
+  result <- plot_cluster_mst(data, cluster = "group")
+  expect_named(result, c("var1", "var2", "var3"))
+  for (p in result) expect_s3_class(p, "ggplot")
+})
+
+test_that("plot_cluster_mst cluster column named 'group' works with explicit vars", {
+  set.seed(1)
+  data <- data.frame(
+    group = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0)),
+    var3 = c(rnorm(20, 0), rnorm(20, 1), rnorm(20, -1))
+  )
+  result <- plot_cluster_mst(
+    data, cluster = "group", vars = c("var1", "var2", "var3")
+  )
+  expect_named(result, c("var1", "var2", "var3"))
+  for (p in result) expect_s3_class(p, "ggplot")
+})
+
+test_that("plot_cluster_mst errors when group= is passed through ...", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
+  )
+  expect_error(
+    plot_cluster_mst(data, cluster = "cluster", group = "cluster")
+  )
+})

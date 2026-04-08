@@ -503,3 +503,83 @@ test_that("plot_cluster_scatter works with factor cluster column", {
   result <- plot_cluster_scatter(data, cluster = "cluster")
   expect_s3_class(result, "ggplot")
 })
+
+# all-variables and group-alias tests
+
+test_that("plot_cluster_scatter with 3 vars and vars=NULL returns ggplot", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0)),
+    var3 = c(rnorm(20, 0), rnorm(20, 1), rnorm(20, -1))
+  )
+  result <- plot_cluster_scatter(data, cluster = "cluster")
+  expect_s3_class(result, "ggplot")
+})
+
+test_that("plot_cluster_scatter with explicit vars = all 3 non-cluster columns works", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0)),
+    var3 = c(rnorm(20, 0), rnorm(20, 1), rnorm(20, -1))
+  )
+  result <- plot_cluster_scatter(
+    data, cluster = "cluster", vars = c("var1", "var2", "var3")
+  )
+  expect_s3_class(result, "ggplot")
+})
+
+test_that("plot_cluster_scatter dim_red='none' with 2 of 3 vars works", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0)),
+    var3 = c(rnorm(20, 0), rnorm(20, 1), rnorm(20, -1))
+  )
+  result <- plot_cluster_scatter(
+    data, cluster = "cluster", dim_red = "none",
+    vars = c("var1", "var2", "var3")
+  )
+  expect_s3_class(result, "ggplot")
+})
+
+test_that("plot_cluster_scatter cluster column named 'group' works with vars=NULL", {
+  set.seed(1)
+  data <- data.frame(
+    group = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0)),
+    var3 = c(rnorm(20, 0), rnorm(20, 1), rnorm(20, -1))
+  )
+  result <- plot_cluster_scatter(data, cluster = "group")
+  expect_s3_class(result, "ggplot")
+})
+
+test_that("plot_cluster_scatter cluster column named 'group' works with explicit vars", {
+  set.seed(1)
+  data <- data.frame(
+    group = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
+  )
+  result <- plot_cluster_scatter(
+    data, cluster = "group", vars = c("var1", "var2"), dim_red = "none"
+  )
+  expect_s3_class(result, "ggplot")
+})
+
+test_that("plot_cluster_scatter errors when group= is passed through ...", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
+  )
+  expect_error(
+    plot_cluster_scatter(data, cluster = "cluster", group = "cluster")
+  )
+})
