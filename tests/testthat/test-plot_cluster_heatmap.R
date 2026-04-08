@@ -521,3 +521,85 @@ test_that("plot_cluster_heatmap works with factor cluster column", {
   p <- plot_cluster_heatmap(data, cluster = "cluster")
   expect_s3_class(p, "ggplot")
 })
+
+# all-variables and group-alias tests
+
+test_that("plot_cluster_heatmap with 3 vars and vars=NULL returns all variables in plot", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0)),
+    var3 = c(rnorm(20, 0), rnorm(20, 1), rnorm(20, -1))
+  )
+  p <- plot_cluster_heatmap(data, cluster = "cluster")
+  expect_s3_class(p, "ggplot")
+  expect_equal(
+    sort(unique(as.character(p$data$variable))),
+    sort(c("var1", "var2", "var3"))
+  )
+})
+
+test_that("plot_cluster_heatmap with explicit vars = all 3 non-cluster columns works", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0)),
+    var3 = c(rnorm(20, 0), rnorm(20, 1), rnorm(20, -1))
+  )
+  p <- plot_cluster_heatmap(
+    data, cluster = "cluster", vars = c("var1", "var2", "var3")
+  )
+  expect_s3_class(p, "ggplot")
+  expect_equal(
+    sort(unique(as.character(p$data$variable))),
+    sort(c("var1", "var2", "var3"))
+  )
+})
+
+test_that("plot_cluster_heatmap cluster column named 'group' works with vars=NULL", {
+  set.seed(1)
+  data <- data.frame(
+    group = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0)),
+    var3 = c(rnorm(20, 0), rnorm(20, 1), rnorm(20, -1))
+  )
+  p <- plot_cluster_heatmap(data, cluster = "group")
+  expect_s3_class(p, "ggplot")
+  expect_equal(
+    sort(unique(as.character(p$data$variable))),
+    sort(c("var1", "var2", "var3"))
+  )
+})
+
+test_that("plot_cluster_heatmap cluster column named 'group' works with explicit vars", {
+  set.seed(1)
+  data <- data.frame(
+    group = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0)),
+    var3 = c(rnorm(20, 0), rnorm(20, 1), rnorm(20, -1))
+  )
+  p <- plot_cluster_heatmap(
+    data, cluster = "group", vars = c("var1", "var2", "var3")
+  )
+  expect_s3_class(p, "ggplot")
+  expect_equal(
+    sort(unique(as.character(p$data$variable))),
+    sort(c("var1", "var2", "var3"))
+  )
+})
+
+test_that("plot_cluster_heatmap errors when group= is passed through ...", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
+  )
+  expect_error(
+    plot_cluster_heatmap(data, cluster = "cluster", group = "cluster")
+  )
+})
