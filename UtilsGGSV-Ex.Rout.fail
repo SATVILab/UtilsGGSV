@@ -1,0 +1,108 @@
+
+R version 4.4.1 (2024-06-14 ucrt) -- "Race for Your Life"
+Copyright (C) 2024 The R Foundation for Statistical Computing
+Platform: x86_64-w64-mingw32/x64
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> pkgname <- "UtilsGGSV"
+> source(file.path(R.home("share"), "R", "examples-header.R"))
+> options(warn = 1)
+> options(pager = "console")
+> library('UtilsGGSV')
+> 
+> base::assign(".oldSearch", base::search(), pos = 'CheckExEnv')
+> base::assign(".old_wd", base::getwd(), pos = 'CheckExEnv')
+> cleanEx()
+> nameEx("add_text_column")
+> ### * add_text_column
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: add_text_column
+> ### Title: Add a column of text to a ggplot
+> ### Aliases: add_text_column
+> 
+> ### ** Examples
+> 
+> data_mod <- data.frame(x = rnorm(10))
+> data_mod$y <- data_mod$x * 3 + rnorm(10, sd = 0.5)
+> fit <- lm(y ~ x, data = data_mod)
+> coef_tbl <- coefficients(summary(fit))
+> results_vec <- c(
++   paste0(
++     "Intercept: ", signif(coef_tbl[1, "Estimate"][[1]], 2), " (",
++     signif(coef_tbl[1, 1][[1]] - 2 * coef_tbl[1, 2][[1]], 3), ", ",
++     signif(coef_tbl[1, 1][[1]] + 2 * coef_tbl[1, 2][[1]], 3), "; p = ",
++     signif(coef_tbl[1, 4][[1]], 3), ")"
++   ),
++   paste0(
++     "Slope: ", signif(coef_tbl[2, "Estimate"][[1]], 2), " (",
++     signif(coef_tbl[2, 1][[1]] - 2 * coef_tbl[2, 2][[1]], 3), ", ",
++     signif(coef_tbl[2, 1][[1]] + 2 * coef_tbl[2, 2][[1]], 3), "; p = ",
++     signif(coef_tbl[2, 4][[1]], 3), ")"
++   )
++ )
+> library(ggplot2)
+Warning: package 'ggplot2' was built under R version 4.4.3
+> library(UtilsGGSV)
+> p <- ggplot(data_mod, aes(x = x, y = y)) + geom_point()
+> add_text_column(
++   p = p,
++   x = data_mod$x,
++   y = data_mod$y,
++   text = results_vec
++ )
+> 
+> # Works even if y-axis is transformed
+> p <- p + scale_y_continuous(trans = get_trans("asinh"))
+> add_text_column(
++   p = p,
++   x = data_mod$x,
++   y = data_mod$y,
++   text = results_vec,
++   trans = "asinh"
++ )
+> 
+> 
+> 
+> cleanEx()
+
+detaching 'package:ggplot2'
+
+> nameEx("axis_limits")
+> ### * axis_limits
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: axis_limits
+> ### Title: Manage axis limits
+> ### Aliases: axis_limits
+> 
+> ### ** Examples
+> 
+> data("cars", package = "datasets")
+> library(ggplot2)
+Warning: package 'ggplot2' was built under R version 4.4.3
+> p <- ggplot(cars, aes(speed, dist)) +
++   geom_point()
+> 
+> axis_limits(
++   p,
++   limits_equal = TRUE
++ )
+Error in axis_limits(p, limits_equal = TRUE) : 
+  p must be of class c('gg', 'ggplot')
+Execution halted

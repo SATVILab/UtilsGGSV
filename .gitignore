@@ -4,6 +4,9 @@
 SCRATCH.R
 _tmp/*
 vignettes/_tmp/*
+vignettes/.quarto
+vignettes/UtilsGGSV_files
+vignettes/*.html
 
 .vscode/settings.json
 tests/testthat/Rplots.pdf
@@ -13,3 +16,5 @@ tests/testthat/Rplots.pdf
 *.tar.gz
 Rplots.pdf
 vignettes/benchmarking-merges.html
+/doc/
+/Meta/

@@ -276,6 +276,19 @@ test_that("plot_cluster_density col_clusters applies colour scale (facet mode)",
   expect_false(is.null(colour_scale))
 })
 
+test_that("plot_cluster_density default palette supports more than twelve clusters", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:15), each = 5),
+    var1 = rnorm(75)
+  )
+  p <- plot_cluster_density(data, cluster = "cluster", n_col = 1)
+  pb <- ggplot2::ggplot_build(p)
+  colour_scale <- pb$plot$scales$get_scales("colour")
+  expect_false(is.null(colour_scale))
+  expect_equal(length(colour_scale$palette.cache), 15)
+})
+
 # density and scale parameter tests
 
 test_that("plot_cluster_density density = 'cluster' returns list of ggplot objects", {

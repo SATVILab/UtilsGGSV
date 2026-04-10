@@ -14,7 +14,8 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
   fig.width = 7,
-  fig.height = 5
+  fig.height = 5,
+  error = TRUE
 )
 ```
 
@@ -409,4 +410,5 @@ get_trans("log10")
 get_trans("asinh")
 get_trans("root_cube")
 ```
+
 
