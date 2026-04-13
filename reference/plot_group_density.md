@@ -23,6 +23,7 @@ plot_group_density(
   density_overall_weight = NULL,
   bandwidth = "hpi_1",
   na_rm = TRUE,
+  alpha = 0.75,
   font_size = 14,
   thm = cowplot::theme_cowplot(font_size = font_size) + ggplot2::theme(plot.background =
     ggplot2::element_rect(fill = "white", colour = NA), panel.background =
@@ -146,6 +147,12 @@ plot_cluster_density(.data, cluster, ...)
   variable. When `FALSE`, `NA` values are passed directly to
   [`stats::density()`](https://rdrr.io/r/stats/density.html), which will
   strip them with its own warning.
+
+- alpha:
+
+  numeric. Transparency applied to density curves (both overall and
+  per-group lines). Must be between 0 (fully transparent) and 1 (fully
+  opaque). Default is `0.75`.
 
 - font_size:
 

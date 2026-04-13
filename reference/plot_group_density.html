@@ -66,6 +66,7 @@ objects or a single faceted plot.</p>
 <span>  density_overall_weight <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  bandwidth <span class="op">=</span> <span class="st">"hpi_1"</span>,</span>
 <span>  na_rm <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  alpha <span class="op">=</span> <span class="fl">0.75</span>,</span>
 <span>  font_size <span class="op">=</span> <span class="fl">14</span>,</span>
 <span>  thm <span class="op">=</span> <span class="fu">cowplot</span><span class="fu">::</span><span class="fu"><a href="https://wilkelab.org/cowplot/reference/theme_cowplot.html" class="external-link">theme_cowplot</a></span><span class="op">(</span>font_size <span class="op">=</span> <span class="va">font_size</span><span class="op">)</span> <span class="op">+</span> <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>plot.background <span class="op">=</span></span>
 <span>    <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_rect</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"white"</span>, colour <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span>, panel.background <span class="op">=</span></span>
@@ -185,6 +186,12 @@ before computing densities and medians. When <code>TRUE</code> (default), <code>
 values are removed and a message is issued showing how many were removed
 per variable. When <code>FALSE</code>, <code>NA</code> values are passed directly to
 <code><a href="https://rdrr.io/r/stats/density.html" class="external-link">stats::density()</a></code>, which will strip them with its own warning.</p></dd>
+
+
+<dt id="arg-alpha">alpha<a class="anchor" aria-label="anchor" href="#arg-alpha"></a></dt>
+<dd><p>numeric. Transparency applied to density curves (both overall
+and per-group lines). Must be between 0 (fully transparent) and 1 (fully
+opaque). Default is <code>0.75</code>.</p></dd>
 
 
 <dt id="arg-font-size">font_size<a class="anchor" aria-label="anchor" href="#arg-font-size"></a></dt>
