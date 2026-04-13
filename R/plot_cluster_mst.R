@@ -48,9 +48,11 @@
 #'   from `coord_equal` — axes are suppressed when equal scaling is active.
 #' @param col_clusters named character vector or `NULL`. Per-cluster colours
 #'   applied to node borders and text labels. Names should match cluster
-#'   labels. When `NULL` (default), colours are chosen automatically: the
-#'   Paired palette is used for up to 12 groups and a hue-based palette is
-#'   used for more than 12 groups.
+#'   labels. When `NULL` (default), colours are chosen automatically by number
+#'   of groups: Okabe-Ito for up to 8, ColorBrewer Paired for up to 12,
+#'   Kelly's palette (requires `Polychrome`) for up to 21, Glasbey's palette
+#'   (requires `Polychrome`) for up to 31, and `hue_pal()` for larger
+#'   numbers.
 #' @param palette character or `NULL`. Named colour palette for the continuous
 #'   node fill scale. When not `NULL`, overrides `col` and `col_positions`.
 #'   Available palettes: `"bipolar"` (default, blue-white-red), `"alarm"`

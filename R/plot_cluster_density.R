@@ -57,8 +57,10 @@
 #'   Default is `NULL`.
 #' @param col_clusters named character vector or `NULL`. Per-group colours.
 #'   Names should match group labels. When `NULL` (default), colours are
-#'   chosen automatically: the Paired palette is used for up to 12 groups and
-#'   a hue-based palette is used for more than 12 groups.
+#'   chosen automatically by number of groups: Okabe-Ito for up to 8,
+#'   ColorBrewer Paired for up to 12, Kelly's palette (requires
+#'   `Polychrome`) for up to 21, Glasbey's palette (requires `Polychrome`)
+#'   for up to 31, and `hue_pal()` for larger numbers.
 #' @param n_col integer or `NULL`. Number of columns passed to
 #'   `ggplot2::facet_wrap`. If supplied (or if `n_row` is supplied) a single
 #'   faceted plot is returned instead of a list. Default is `NULL`.

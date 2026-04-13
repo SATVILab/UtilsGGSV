@@ -58,14 +58,56 @@ utils::globalVariables(c(
 
 # Internal helper: generate a named discrete colour vector for cluster/group
 # labels. When user_colours is not NULL it is returned unchanged. Otherwise,
-# colours are derived from the Paired palette (up to 12 groups) or a hue-based
-# palette (more than 12 groups), ensuring the full colour range is used.
+# colours are chosen from a tier of palettes designed for maximum perceptual
+# distinguishability:
+#   - up to  8 groups: Okabe-Ito (colorblind-friendly)
+#   - up to 12 groups: ColorBrewer Paired
+#   - up to 21 groups: Kelly's palette (Polychrome), white skipped
+#   - up to 31 groups: Glasbey's palette (Polychrome), white skipped
+#   - more than 31   : hue_pal() fallback (with a warning)
+# The Polychrome package is optional (in Suggests); if absent a warning is
+# issued and hue_pal() is used instead.
 .discrete_cluster_colours <- function(groups, user_colours = NULL) {
   if (!is.null(user_colours)) return(user_colours)
   n <- length(groups)
-  cols <- if (n <= 12) {
+  cols <- if (n <= 8L) {
+    c(
+      "#E69F00", "#56B4E9", "#009E73", "#F0E442",
+      "#0072B2", "#D55E00", "#CC79A7", "#999999"
+    )[seq_len(n)]
+  } else if (n <= 12L) {
     scales::brewer_pal(palette = "Paired")(n)
+  } else if (n <= 21L) {
+    if (!requireNamespace("Polychrome", quietly = TRUE)) {
+      warning(
+        "Package 'Polychrome' is recommended for > 12 groups but is not ",
+        "installed. Falling back to hue_pal(). Install it for better colour ",
+        "separation: install.packages('Polychrome').",
+        call. = FALSE
+      )
+      scales::hue_pal()(n)
+    } else {
+      unname(Polychrome::kelly.colors(22L))[-1L][seq_len(n)]
+    }
+  } else if (n <= 31L) {
+    if (!requireNamespace("Polychrome", quietly = TRUE)) {
+      warning(
+        "Package 'Polychrome' is recommended for > 12 groups but is not ",
+        "installed. Falling back to hue_pal(). Install it for better colour ",
+        "separation: install.packages('Polychrome').",
+        call. = FALSE
+      )
+      scales::hue_pal()(n)
+    } else {
+      unname(Polychrome::glasbey.colors(32L))[-1L][seq_len(n)]
+    }
   } else {
+    warning(
+      n, " groups exceeds the recommended maximum of 31 for distinct ",
+      "colours. Falling back to hue_pal(), which may produce indistinguishable ",
+      "colours at this scale.",
+      call. = FALSE
+    )
     scales::hue_pal()(n)
   }
   stats::setNames(cols, groups)

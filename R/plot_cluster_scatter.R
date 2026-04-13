@@ -12,8 +12,13 @@
 #' @param dim_red character or `NULL`. Dimensionality reduction method: one of `"none"`, `"pca"`, `"tsne"`, `"umap"`. If `NULL`, auto-selects `"none"` when exactly 2 numeric vars are available, otherwise `"pca"`.
 #' @param vars character vector or `NULL`. Names of numeric columns in `.data` to use for the plot or reduction. If `NULL`, uses all numeric columns except `group` and `point_col_var`.
 #' @param point_col_var character or `NULL`. Column to use for point colour mapping. Default is same as `cluster`.
-#' @param point_col named vector or `NULL`. Custom colours for discrete `point_col_var` (named by
-#'   level). Ignored for continuous `point_col_var` (use `col` instead).
+#' @param point_col named vector or `NULL`. Custom colours for discrete
+#'   `point_col_var` (named by level). When `NULL` (default), colours are
+#'   chosen automatically by number of groups: Okabe-Ito for up to 8,
+#'   ColorBrewer Paired for up to 12, Kelly's palette (requires `Polychrome`)
+#'   for up to 21, Glasbey's palette (requires `Polychrome`) for up to 31,
+#'   and `hue_pal()` for larger numbers. Ignored for continuous
+#'   `point_col_var` (use `col` instead).
 #' @param palette character or `NULL`. Named colour palette for the continuous `point_col_var` colour
 #'   scale. When not `NULL`, overrides `col` and `col_positions`. Available palettes:
 #'   `"bipolar"` (default, blue-white-red), `"alarm"` (green-white-red, good-to-bad),
