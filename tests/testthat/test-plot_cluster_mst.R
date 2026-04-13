@@ -529,3 +529,133 @@ test_that("plot_cluster_mst node_fill_by = 'variable' still returns list", {
   expect_type(result, "list")
   expect_length(result, 2L)
 })
+
+# Tests for node_fill_by = column name (new feature)
+
+test_that("plot_cluster_mst node_fill_by column returns a single ggplot", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:6), each = 20),
+    meta = rep(c("M1", "M1", "M2", "M2", "M3", "M3"), each = 20),
+    var1 = c(rnorm(20, 3), rnorm(20, 2), rnorm(20, 0), rnorm(20, -1),
+             rnorm(20, -2), rnorm(20, -3)),
+    var2 = rnorm(120)
+  )
+  result <- plot_cluster_mst(data, cluster = "cluster", node_fill_by = "meta")
+  expect_s3_class(result, "ggplot")
+})
+
+test_that("plot_cluster_mst node_fill_by column uses discrete fill scale", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:4), each = 20),
+    meta = rep(c("M1", "M1", "M2", "M2"), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 1), rnorm(20, -1), rnorm(20, -2))
+  )
+  result <- plot_cluster_mst(data, cluster = "cluster", node_fill_by = "meta")
+  fill_scale <- result$scales$get_scales("fill")
+  expect_false(is.null(fill_scale))
+  expect_s3_class(fill_scale, "ScaleDiscrete")
+})
+
+test_that("plot_cluster_mst node_fill_by column fill legend name is the column name", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:4), each = 20),
+    meta = rep(c("M1", "M1", "M2", "M2"), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 1), rnorm(20, -1), rnorm(20, -2))
+  )
+  result <- plot_cluster_mst(data, cluster = "cluster", node_fill_by = "meta")
+  fill_scale <- result$scales$get_scales("fill")
+  expect_equal(fill_scale$name, "meta")
+})
+
+test_that("plot_cluster_mst node_fill_by column excludes column from vars when vars is NULL", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:4), each = 20),
+    meta = rep(c("M1", "M1", "M2", "M2"), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 1), rnorm(20, -1), rnorm(20, -2)),
+    var2 = rnorm(80)
+  )
+  # Should not error even though 'meta' is character
+  result <- plot_cluster_mst(data, cluster = "cluster", node_fill_by = "meta")
+  expect_s3_class(result, "ggplot")
+})
+
+test_that("plot_cluster_mst node_fill_by respects col_node_fill", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:4), each = 20),
+    meta = rep(c("M1", "M1", "M2", "M2"), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 1), rnorm(20, -1), rnorm(20, -2))
+  )
+  cols <- c(M1 = "#FF0000", M2 = "#0000FF")
+  result <- plot_cluster_mst(
+    data, cluster = "cluster", node_fill_by = "meta", col_node_fill = cols
+  )
+  fill_scale <- result$scales$get_scales("fill")
+  expect_equal(unname(fill_scale$palette(2L)), unname(cols))
+})
+
+test_that("plot_cluster_mst errors when node_fill_by column not in .data", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2))
+  )
+  expect_error(
+    plot_cluster_mst(data, cluster = "cluster", node_fill_by = "missing_col"),
+    "not found in `\\.data`"
+  )
+})
+
+test_that("plot_cluster_mst errors when node_fill_by column is numeric", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    num_col = rep(c(1, 2, 3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2))
+  )
+  expect_error(
+    plot_cluster_mst(data, cluster = "cluster", node_fill_by = "num_col"),
+    "numeric"
+  )
+})
+
+test_that("plot_cluster_mst node_fill_by same as cluster acts as node_fill_by = 'cluster'", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
+  )
+  result <- plot_cluster_mst(data, cluster = "cluster", node_fill_by = "cluster")
+  result2 <- plot_cluster_mst(data, cluster = "cluster", node_fill_by = "cluster")
+  expect_s3_class(result, "ggplot")
+  expect_s3_class(result2, "ggplot")
+})
+
+test_that("plot_cluster_mst node_fill_by with factor column works", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:4), each = 20),
+    meta = factor(rep(c("M1", "M1", "M2", "M2"), each = 20)),
+    var1 = c(rnorm(20, 2), rnorm(20, 1), rnorm(20, -1), rnorm(20, -2))
+  )
+  result <- plot_cluster_mst(data, cluster = "cluster", node_fill_by = "meta")
+  expect_s3_class(result, "ggplot")
+})
+
+test_that("plot_group_mst node_fill_by column works via plot_group_mst", {
+  set.seed(1)
+  data <- data.frame(
+    grp = rep(paste0("G", 1:4), each = 20),
+    sex = rep(c("M", "F", "M", "F"), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 1), rnorm(20, -1), rnorm(20, -2))
+  )
+  result <- plot_group_mst(data, group = "grp", node_fill_by = "sex")
+  expect_s3_class(result, "ggplot")
+  fill_scale <- result$scales$get_scales("fill")
+  expect_s3_class(fill_scale, "ScaleDiscrete")
+})

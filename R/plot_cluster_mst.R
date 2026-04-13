@@ -59,6 +59,16 @@
 #' In this mode the function returns a **single ggplot2 object** (not a list)
 #' because the fill is the same regardless of variable.
 #'
+#' Set `node_fill_by` to the name of any other character or factor column in
+#' `.data` to colour nodes by that column's values (for example a `"sex"`
+#' column, or a coarser `"metacluster"` that maps each group to a broader
+#' category). The column must map each group to a single unique value; if a
+#' group maps to multiple values the first is used and a warning is issued.
+#' Colours are chosen automatically using `palette_group`, or can be specified
+#' via `col_node_fill`. Like `node_fill_by = "cluster"`, this mode returns a
+#' **single ggplot2 object**. The column is automatically excluded when `vars`
+#' is `NULL` so that it is not treated as a numeric variable.
+#'
 #' @param .data data.frame. Rows are observations. Must contain a column
 #'   identifying group membership and columns for variable values.
 #' @param group character. Name of the column in `.data` that identifies
@@ -85,13 +95,20 @@
 #'   Kelly's palette (requires `Polychrome`) for up to 21, Glasbey's palette
 #'   (requires `Polychrome`) for up to 31, and `hue_pal()` for larger
 #'   numbers.
+#' @param col_node_fill named character vector or `NULL`. Per-value colours for
+#'   node fill when `node_fill_by` is set to a column name (not `"variable"` or
+#'   `"cluster"`). Names should match the unique values in the `node_fill_by`
+#'   column. When `NULL` (default), colours are chosen automatically using
+#'   `palette_group`. Ignored when `node_fill_by` is `"variable"` or
+#'   `"cluster"`.
 #' @param palette_group character. Palette used for automatic colour assignment
 #'   when `col_clusters` is `NULL`. One of `"auto"` (default), `"okabe_ito"`,
 #'   `"paired"`, `"kelly"`, `"glasbey"`, or `"hue_pal"`. See the **Colour
 #'   palette** section of Details.
 #' @param node_fill_by character. Controls what the node fill encodes. One of
-#'   `"variable"` (default) or `"cluster"`. See the **Node fill** section of
-#'   Details.
+#'   `"variable"` (default), `"cluster"`, or the name of a character or factor
+#'   column in `.data` to use as a discrete grouping variable for node fill.
+#'   See the **Node fill** section of Details.
 #' @param palette character or `NULL`. Named colour palette for the continuous
 #'   node fill scale. When not `NULL`, overrides `col` and `col_positions`.
 #'   Available palettes: `"bipolar"` (default, blue-white-red), `"alarm"`
@@ -169,6 +186,7 @@ plot_group_mst <- function(.data,
                               coord_equal = TRUE,
                               suppress_axes = NULL,
                               col_clusters = NULL,
+                              col_node_fill = NULL,
                               node_fill_by = "variable",
                               palette_group = "auto",
                               palette = "bipolar",
@@ -254,12 +272,35 @@ plot_group_mst <- function(.data,
 
   if (is.null(suppress_axes)) suppress_axes <- coord_equal
 
+  if (!node_fill_by %in% c("variable", "cluster")) {
+    if (!node_fill_by %in% colnames(.data)) {
+      stop(
+        paste0("`node_fill_by` column \"", node_fill_by, "\" not found in `.data`."),
+        call. = FALSE
+      )
+    }
+    if (node_fill_by == cluster) {
+      node_fill_by <- "cluster"
+    } else if (is.numeric(.data[[node_fill_by]])) {
+      stop(
+        paste0(
+          "The `node_fill_by` column (\"", node_fill_by, "\") is numeric. ",
+          "It must be character or factor."
+        ),
+        call. = FALSE
+      )
+    }
+  } else {
+    node_fill_by <- match.arg(node_fill_by, c("variable", "cluster"))
+  }
+
   if (is.null(vars)) {
-    vars <- setdiff(colnames(.data), cluster)
+    exclude <- cluster
+    if (!node_fill_by %in% c("variable", "cluster")) exclude <- c(exclude, node_fill_by)
+    vars <- setdiff(colnames(.data), exclude)
   }
 
   cluster_vec <- unique(.data[[cluster]])
-  node_fill_by <- match.arg(node_fill_by, c("variable", "cluster"))
 
   med_mat  <- .plot_cluster_mst_medians(.data, cluster, vars, cluster_vec, na_rm)
   dist_mat <- as.matrix(stats::dist(med_mat))
@@ -267,13 +308,35 @@ plot_group_mst <- function(.data,
     dist_mat, cluster_vec, layout_algorithm
   )
   edge_tbl <- .plot_cluster_mst_edges(dist_mat, node_tbl_base)
-  if (node_fill_by == "cluster") {
+  if (node_fill_by != "variable") {
     node_tbl_c <- node_tbl_base
-    node_tbl_c$fill <- node_tbl_c$cluster
+    if (node_fill_by == "cluster") {
+      node_tbl_c$fill <- node_tbl_c$cluster
+    } else {
+      fill_map <- tapply(
+        as.character(.data[[node_fill_by]]),
+        as.character(.data[[cluster]]),
+        function(x) {
+          vals <- unique(x)
+          if (length(vals) > 1L) {
+            warning(
+              paste0(
+                "A group has multiple values for `node_fill_by` column \"",
+                node_fill_by, "\". Using the first value."
+              ),
+              call. = FALSE
+            )
+          }
+          vals[1L]
+        }
+      )
+      node_tbl_c$fill <- fill_map[node_tbl_c$cluster]
+    }
     return(.plot_cluster_mst_plot_one(
       node_tbl      = node_tbl_c,
       edge_tbl      = edge_tbl,
       col_clusters  = col_clusters,
+      col_node_fill = col_node_fill,
       palette_group = palette_group,
       col           = col,
       col_positions = col_positions,
@@ -297,6 +360,7 @@ plot_group_mst <- function(.data,
         node_tbl      = node_tbl,
         edge_tbl      = edge_tbl,
         col_clusters  = col_clusters,
+        col_node_fill = col_node_fill,
         palette_group = palette_group,
         col           = col,
         col_positions = col_positions,
@@ -460,6 +524,7 @@ plot_group_mst <- function(.data,
 }
 
 .plot_cluster_mst_plot_one <- function(node_tbl, edge_tbl, col_clusters,
+                                        col_node_fill = NULL,
                                         palette_group,
                                         col, col_positions, white_range,
                                         layout_algorithm,
@@ -479,12 +544,18 @@ plot_group_mst <- function(.data,
       name    = "Relative\nvalue",
       labels  = scales::percent
     )
-  } else {
+  } else if (node_fill_by == "cluster") {
     ggplot2::scale_fill_manual(
       values = .discrete_cluster_colours(
         unique(node_tbl$cluster), col_clusters, palette_group
       ),
       name = "Group"
+    )
+  } else {
+    fill_values <- unique(node_tbl$fill)
+    ggplot2::scale_fill_manual(
+      values = .discrete_cluster_colours(fill_values, col_node_fill, palette_group),
+      name   = node_fill_by
     )
   }
 
