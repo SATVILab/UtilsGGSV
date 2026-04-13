@@ -264,6 +264,39 @@ plot_cluster_heatmap(penguins, cluster = "cluster", vars = vars_penguin)
 
 ![](UtilsGGSV_files/figure-html/plot-cluster-heatmap-1.png)
 
+### Automatic Colour Palettes
+
+The `plot_cluster_density`, `plot_cluster_scatter`, and
+`plot_cluster_mst` functions (and their `plot_group_*` equivalents)
+automatically choose a group colour palette via the `palette_cluster`
+argument (default `"auto"`):
+
+| Groups  | Palette              | Notes                          |
+|---------|----------------------|--------------------------------|
+| 1 – 8   | Okabe-Ito            | Colorblind-safe                |
+| 9 – 12  | ColorBrewer Paired   | Light/dark pairs of 6 hues     |
+| 13 – 21 | Kelly (Polychrome)   | Maximum-contrast sequence      |
+| 22 – 31 | Glasbey (Polychrome) | Algorithmically spaced colours |
+| \> 31   | `hue_pal()`          | Fallback with a warning        |
+
+The `Polychrome` package is optional; if it is not installed the
+Kelly/Glasbey tiers fall back to `hue_pal()` with a warning. You can
+override the automatic selection for any group count by setting
+`palette_cluster` explicitly:
+
+``` r
+# Force the Paired palette for the 3-cluster solution
+plot_cluster_density(
+  penguins,
+  cluster  = "cluster",
+  vars     = vars_penguin,
+  n_col    = 2,
+  palette_cluster = "paired"
+)
+```
+
+![](UtilsGGSV_files/figure-html/palette-override-1.png)
+
 ### Density Plots with `plot_cluster_density`
 
 The `plot_cluster_density` function visualises, for each variable, how

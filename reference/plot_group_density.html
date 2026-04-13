@@ -11,7 +11,7 @@ objects or a single faceted plot."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">UtilsGGSV</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.10.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.11.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -55,6 +55,7 @@ objects or a single faceted plot.</p>
 <span>  <span class="va">group</span>,</span>
 <span>  vars <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  col_clusters <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  palette_group <span class="op">=</span> <span class="st">"auto"</span>,</span>
 <span>  n_col <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  n_row <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  density <span class="op">=</span> <span class="st">"both"</span>,</span>
@@ -67,6 +68,8 @@ objects or a single faceted plot.</p>
 <span>  bandwidth <span class="op">=</span> <span class="st">"hpi_1"</span>,</span>
 <span>  na_rm <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  alpha <span class="op">=</span> <span class="fl">0.75</span>,</span>
+<span>  label <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  legend <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  font_size <span class="op">=</span> <span class="fl">14</span>,</span>
 <span>  thm <span class="op">=</span> <span class="fu">cowplot</span><span class="fu">::</span><span class="fu"><a href="https://wilkelab.org/cowplot/reference/theme_cowplot.html" class="external-link">theme_cowplot</a></span><span class="op">(</span>font_size <span class="op">=</span> <span class="va">font_size</span><span class="op">)</span> <span class="op">+</span> <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>plot.background <span class="op">=</span></span>
 <span>    <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_rect</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"white"</span>, colour <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span>, panel.background <span class="op">=</span></span>
@@ -74,7 +77,7 @@ objects or a single faceted plot.</p>
 <span>  grid <span class="op">=</span> <span class="fu">cowplot</span><span class="fu">::</span><span class="fu"><a href="https://wilkelab.org/cowplot/reference/background_grid.html" class="external-link">background_grid</a></span><span class="op">(</span>major <span class="op">=</span> <span class="st">"xy"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">plot_cluster_density</span><span class="op">(</span><span class="va">.data</span>, <span class="va">cluster</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">plot_cluster_density</span><span class="op">(</span><span class="va">.data</span>, <span class="va">cluster</span>, palette_cluster <span class="op">=</span> <span class="st">"auto"</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -99,8 +102,15 @@ Default is <code>NULL</code>.</p></dd>
 
 <dt id="arg-col-clusters">col_clusters<a class="anchor" aria-label="anchor" href="#arg-col-clusters"></a></dt>
 <dd><p>named character vector or <code>NULL</code>. Per-group colours.
-Names should match group labels. When <code>NULL</code> (default), the default
-ggplot2 colour scale is used.</p></dd>
+Names should match group labels. When <code>NULL</code> (default), colours are
+chosen automatically by <code>palette_group</code>.</p></dd>
+
+
+<dt id="arg-palette-group">palette_group<a class="anchor" aria-label="anchor" href="#arg-palette-group"></a></dt>
+<dd><p>character. Palette used for automatic colour assignment
+when <code>col_clusters</code> is <code>NULL</code>. One of <code>"auto"</code> (default), <code>"okabe_ito"</code>,
+<code>"paired"</code>, <code>"kelly"</code>, <code>"glasbey"</code>, or <code>"hue_pal"</code>. See the <strong>Colour
+palette</strong> section of Details.</p></dd>
 
 
 <dt id="arg-n-col">n_col<a class="anchor" aria-label="anchor" href="#arg-n-col"></a></dt>
@@ -194,6 +204,20 @@ and per-group lines). Must be between 0 (fully transparent) and 1 (fully
 opaque). Default is <code>0.75</code>.</p></dd>
 
 
+<dt id="arg-label">label<a class="anchor" aria-label="anchor" href="#arg-label"></a></dt>
+<dd><p>logical. Whether to add on-plot labels at the highest-density
+peak of each group using <code><a href="https://ggrepel.slowkow.com/reference/geom_text_repel.html" class="external-link">ggrepel::geom_text_repel</a></code>. When <code>density</code> is
+<code>"overall"</code>, labels are placed at the overall-density value at each
+group's median. Default is <code>FALSE</code>.</p></dd>
+
+
+<dt id="arg-legend">legend<a class="anchor" aria-label="anchor" href="#arg-legend"></a></dt>
+<dd><p>logical or <code>NULL</code>. Whether to display the legend. <code>NULL</code>
+(default): the legend is shown when the number of groups is 15 or fewer
+and hidden otherwise. <code>TRUE</code>/<code>FALSE</code>: always show/hide the legend,
+overriding the default behaviour.</p></dd>
+
+
 <dt id="arg-font-size">font_size<a class="anchor" aria-label="anchor" href="#arg-font-size"></a></dt>
 <dd><p>numeric. Font size passed to <code><a href="https://wilkelab.org/cowplot/reference/theme_cowplot.html" class="external-link">cowplot::theme_cowplot</a></code>.
 Default is <code>14</code>.</p></dd>
@@ -213,6 +237,11 @@ background. Set to <code>NULL</code> to apply no theme adjustment.</p></dd>
 <dt id="arg-cluster">cluster<a class="anchor" aria-label="anchor" href="#arg-cluster"></a></dt>
 <dd><p>character. Name of the column in <code>.data</code> that identifies
 group membership. Alias for the <code>group</code> parameter.</p></dd>
+
+
+<dt id="arg-palette-cluster">palette_cluster<a class="anchor" aria-label="anchor" href="#arg-palette-cluster"></a></dt>
+<dd><p>character. Alias for <code>palette_group</code> in
+<code>plot_group_density()</code>. See the <strong>Colour palette</strong> section of Details.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -274,6 +303,26 @@ variable. If <code>n_col</code> or <code>n_row</code> is supplied the plots are 
 into a <strong>single faceted ggplot2 object</strong> via <code>facet_wrap</code>.</p>
 </div>
 
+<div class="section">
+<h3 id="colour-palette">Colour palette<a class="anchor" aria-label="anchor" href="#colour-palette"></a></h3>
+
+
+<p>When <code>col_clusters</code> is <code>NULL</code>, group colours are assigned automatically
+based on <code>palette_group</code>. The <code>"auto"</code> strategy selects a palette by the
+number of groups:</p><ul><li><p><strong>1–8 groups</strong>: Okabe-Ito — colorblind-safe 8-colour palette.</p></li>
+<li><p><strong>9–12 groups</strong>: ColorBrewer Paired — 12 colours pairing light and dark
+versions of 6 hues.</p></li>
+<li><p><strong>13–21 groups</strong>: Kelly's palette (optional <code>Polychrome</code> package) — 21
+colours of maximum perceptual contrast (white excluded). Falls back to
+<code>hue_pal()</code> with a warning if <code>Polychrome</code> is not installed.</p></li>
+<li><p><strong>22–31 groups</strong>: Glasbey's palette (optional <code>Polychrome</code> package) — 31
+algorithmically spaced colours (white excluded). Falls back to <code>hue_pal()</code>
+with a warning if <code>Polychrome</code> is not installed.</p></li>
+<li><p><strong>&gt; 31 groups</strong>: <code>hue_pal()</code> — evenly spaced hues (a warning is issued).</p></li>
+</ul><p>Set <code>palette_group</code> explicitly to override the automatic selection (provided
+the chosen palette supports at least as many colours as there are groups).</p>
+</div>
+
     </div>
 
     <div class="section level2">
@@ -319,6 +368,24 @@ into a <strong>single faceted ggplot2 object</strong> via <code>facet_wrap</code
 <span class="r-in"><span><span class="co"># Faceted plot with 2 columns</span></span></span>
 <span class="r-in"><span><span class="fu">plot_group_density</span><span class="op">(</span><span class="va">.data</span>, group <span class="op">=</span> <span class="st">"group"</span>, n_col <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="plot_group_density-7.png" alt="" width="700" height="433"></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># On-plot labels at density peaks</span></span></span>
+<span class="r-in"><span><span class="fu">plot_group_density</span><span class="op">(</span><span class="va">.data</span>, group <span class="op">=</span> <span class="st">"group"</span>, density <span class="op">=</span> <span class="st">"cluster"</span>, label <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $var1</span>
+<span class="r-plt img"><img src="plot_group_density-8.png" alt="" width="700" height="433"></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $var2</span>
+<span class="r-plt img"><img src="plot_group_density-9.png" alt="" width="700" height="433"></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Always show the legend regardless of group count</span></span></span>
+<span class="r-in"><span><span class="fu">plot_group_density</span><span class="op">(</span><span class="va">.data</span>, group <span class="op">=</span> <span class="st">"group"</span>, legend <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $var1</span>
+<span class="r-plt img"><img src="plot_group_density-10.png" alt="" width="700" height="433"></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $var2</span>
+<span class="r-plt img"><img src="plot_group_density-11.png" alt="" width="700" height="433"></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

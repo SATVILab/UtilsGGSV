@@ -31,6 +31,46 @@ into a single figure using
 [`cowplot::plot_grid`](https://wilkelab.org/cowplot/reference/plot_grid.html),
 with variable names as labels.
 
+### Colour palette
+
+When `col_clusters` is `NULL`, group colours are assigned automatically
+based on `palette_group`. The `"auto"` strategy selects a palette by the
+number of groups:
+
+- **1–8 groups**: Okabe-Ito — colorblind-safe 8-colour palette.
+
+- **9–12 groups**: ColorBrewer Paired — 12 colours pairing light and
+  dark versions of 6 hues.
+
+- **13–21 groups**: Kelly's palette (optional `Polychrome` package) — 21
+  colours of maximum perceptual contrast (white excluded). Falls back to
+  `hue_pal()` with a warning if `Polychrome` is not installed.
+
+- **22–31 groups**: Glasbey's palette (optional `Polychrome` package) —
+  31 algorithmically spaced colours (white excluded). Falls back to
+  `hue_pal()` with a warning if `Polychrome` is not installed.
+
+- **\> 31 groups**: `hue_pal()` — evenly spaced hues (a warning is
+  issued).
+
+Set `palette_group` explicitly to override the automatic selection
+(provided the chosen palette supports at least as many colours as there
+are groups).
+
+### Node fill
+
+By default (`node_fill_by = "variable"`) each variable produces a
+separate plot in which node fill encodes the ECDF-standardised
+percentile of that cluster's median — a continuous gradient from low
+(blue) to high (red) using the palette controlled by `palette` / `col` /
+`col_positions`.
+
+Set `node_fill_by = "cluster"` to instead fill nodes by cluster identity
+using the same discrete palette chosen by `palette_group` /
+`col_clusters`. In this mode the function returns a **single ggplot2
+object** (not a list) because the fill is the same regardless of
+variable.
+
 ## Usage
 
 ``` r
@@ -42,6 +82,8 @@ plot_group_mst(
   coord_equal = TRUE,
   suppress_axes = NULL,
   col_clusters = NULL,
+  node_fill_by = "variable",
+  palette_group = "auto",
   palette = "bipolar",
   col = c("#2166AC", "#F7F7F7", "#B2182B"),
   col_positions = "auto",
@@ -60,7 +102,13 @@ plot_group_mst(
   grid = cowplot::background_grid(major = "xy")
 )
 
-plot_cluster_mst(.data, cluster, ...)
+plot_cluster_mst(
+  .data,
+  cluster,
+  palette_cluster = "auto",
+  palette = "bipolar",
+  ...
+)
 ```
 
 ## Arguments
@@ -108,18 +156,28 @@ plot_cluster_mst(.data, cluster, ...)
 
   named character vector or `NULL`. Per-cluster colours applied to node
   borders and text labels. Names should match cluster labels. When
-  `NULL` (default), a colour-blind-friendly palette (`"Paired"`) is
-  used.
+  `NULL` (default), colours are chosen automatically by number of
+  groups: Okabe-Ito for up to 8, ColorBrewer Paired for up to 12,
+  Kelly's palette (requires `Polychrome`) for up to 21, Glasbey's
+  palette (requires `Polychrome`) for up to 31, and `hue_pal()` for
+  larger numbers.
+
+- node_fill_by:
+
+  character. Controls what the node fill encodes. One of `"variable"`
+  (default) or `"cluster"`. See the **Node fill** section of Details.
+
+- palette_group:
+
+  character. Palette used for automatic colour assignment when
+  `col_clusters` is `NULL`. One of `"auto"` (default), `"okabe_ito"`,
+  `"paired"`, `"kelly"`, `"glasbey"`, or `"hue_pal"`. See the **Colour
+  palette** section of Details.
 
 - palette:
 
   character or `NULL`. Named colour palette for the continuous node fill
-  scale. When not `NULL`, overrides `col` and `col_positions`. Available
-  palettes: `"bipolar"` (default, blue-white-red), `"alarm"`
-  (green-white-red, good-to-bad), `"accessible"` (blue-white-orange,
-  colour-blind-safe diverging), `"heat"` (light-yellow to dark-red,
-  sequential), `"sky"` (white to navy, sequential). Set to `NULL` to use
-  `col` and `col_positions` directly.
+  scale. Forwarded to `plot_group_mst()`. Default is `"bipolar"`.
 
 - col:
 
@@ -217,6 +275,11 @@ plot_cluster_mst(.data, cluster, ...)
 
   character. Name of the column in `.data` that identifies group
   membership. Alias for the `group` parameter.
+
+- palette_cluster:
+
+  character. Alias for `palette_group` in `plot_group_mst()`. See the
+  **Colour palette** section of Details.
 
 - ...:
 

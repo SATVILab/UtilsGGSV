@@ -12,6 +12,7 @@ plot_group_density(
   group,
   vars = NULL,
   col_clusters = NULL,
+  palette_group = "auto",
   n_col = NULL,
   n_row = NULL,
   density = "both",
@@ -24,6 +25,8 @@ plot_group_density(
   bandwidth = "hpi_1",
   na_rm = TRUE,
   alpha = 0.75,
+  label = FALSE,
+  legend = NULL,
   font_size = 14,
   thm = cowplot::theme_cowplot(font_size = font_size) + ggplot2::theme(plot.background =
     ggplot2::element_rect(fill = "white", colour = NA), panel.background =
@@ -31,7 +34,7 @@ plot_group_density(
   grid = cowplot::background_grid(major = "xy")
 )
 
-plot_cluster_density(.data, cluster, ...)
+plot_cluster_density(.data, cluster, palette_cluster = "auto", ...)
 ```
 
 ## Arguments
@@ -55,8 +58,15 @@ plot_cluster_density(.data, cluster, ...)
 - col_clusters:
 
   named character vector or `NULL`. Per-group colours. Names should
-  match group labels. When `NULL` (default), the default ggplot2 colour
-  scale is used.
+  match group labels. When `NULL` (default), colours are chosen
+  automatically by `palette_group`.
+
+- palette_group:
+
+  character. Palette used for automatic colour assignment when
+  `col_clusters` is `NULL`. One of `"auto"` (default), `"okabe_ito"`,
+  `"paired"`, `"kelly"`, `"glasbey"`, or `"hue_pal"`. See the **Colour
+  palette** section of Details.
 
 - n_col:
 
@@ -154,6 +164,21 @@ plot_cluster_density(.data, cluster, ...)
   per-group lines). Must be between 0 (fully transparent) and 1 (fully
   opaque). Default is `0.75`.
 
+- label:
+
+  logical. Whether to add on-plot labels at the highest-density peak of
+  each group using
+  [`ggrepel::geom_text_repel`](https://ggrepel.slowkow.com/reference/geom_text_repel.html).
+  When `density` is `"overall"`, labels are placed at the
+  overall-density value at each group's median. Default is `FALSE`.
+
+- legend:
+
+  logical or `NULL`. Whether to display the legend. `NULL` (default):
+  the legend is shown when the number of groups is 15 or fewer and
+  hidden otherwise. `TRUE`/`FALSE`: always show/hide the legend,
+  overriding the default behaviour.
+
 - font_size:
 
   numeric. Font size passed to
@@ -175,6 +200,11 @@ plot_cluster_density(.data, cluster, ...)
 
   character. Name of the column in `.data` that identifies group
   membership. Alias for the `group` parameter.
+
+- palette_cluster:
+
+  character. Alias for `palette_group` in `plot_group_density()`. See
+  the **Colour palette** section of Details.
 
 - ...:
 
@@ -239,6 +269,32 @@ By default the function returns a **named list of ggplot2 objects**, one
 per variable. If `n_col` or `n_row` is supplied the plots are instead
 combined into a **single faceted ggplot2 object** via `facet_wrap`.
 
+### Colour palette
+
+When `col_clusters` is `NULL`, group colours are assigned automatically
+based on `palette_group`. The `"auto"` strategy selects a palette by the
+number of groups:
+
+- **1–8 groups**: Okabe-Ito — colorblind-safe 8-colour palette.
+
+- **9–12 groups**: ColorBrewer Paired — 12 colours pairing light and
+  dark versions of 6 hues.
+
+- **13–21 groups**: Kelly's palette (optional `Polychrome` package) — 21
+  colours of maximum perceptual contrast (white excluded). Falls back to
+  `hue_pal()` with a warning if `Polychrome` is not installed.
+
+- **22–31 groups**: Glasbey's palette (optional `Polychrome` package) —
+  31 algorithmically spaced colours (white excluded). Falls back to
+  `hue_pal()` with a warning if `Polychrome` is not installed.
+
+- **\> 31 groups**: `hue_pal()` — evenly spaced hues (a warning is
+  issued).
+
+Set `palette_group` explicitly to override the automatic selection
+(provided the chosen palette supports at least as many colours as there
+are groups).
+
 ## Examples
 
 ``` r
@@ -282,4 +338,23 @@ plot_group_density(
 
 # Faceted plot with 2 columns
 plot_group_density(.data, group = "group", n_col = 2)
+
+
+# On-plot labels at density peaks
+plot_group_density(.data, group = "group", density = "cluster", label = TRUE)
+#> $var1
+
+#> 
+#> $var2
+
+#> 
+
+# Always show the legend regardless of group count
+plot_group_density(.data, group = "group", legend = TRUE)
+#> $var1
+
+#> 
+#> $var2
+
+#> 
 ```

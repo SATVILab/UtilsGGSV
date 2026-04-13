@@ -5,6 +5,32 @@ assignment. Median group centroids are overlaid as large points and
 labeled with group names. The plot can use either raw variables
 (specified by the user) or dimensionality reduction components as axes.
 
+### Colour palette
+
+When `point_col` is `NULL`, group colours are assigned automatically
+based on `palette_group`. The `"auto"` strategy selects a palette by the
+number of groups:
+
+- **1–8 groups**: Okabe-Ito — colorblind-safe 8-colour palette.
+
+- **9–12 groups**: ColorBrewer Paired — 12 colours pairing light and
+  dark versions of 6 hues.
+
+- **13–21 groups**: Kelly's palette (optional `Polychrome` package) — 21
+  colours of maximum perceptual contrast (white excluded). Falls back to
+  `hue_pal()` with a warning if `Polychrome` is not installed.
+
+- **22–31 groups**: Glasbey's palette (optional `Polychrome` package) —
+  31 algorithmically spaced colours (white excluded). Falls back to
+  `hue_pal()` with a warning if `Polychrome` is not installed.
+
+- **\> 31 groups**: `hue_pal()` — evenly spaced hues (a warning is
+  issued).
+
+Set `palette_group` explicitly to override the automatic selection
+(provided the chosen palette supports at least as many colours as there
+are groups).
+
 ## Usage
 
 ``` r
@@ -16,6 +42,7 @@ plot_group_scatter(
   dim_red_args = list(),
   point_col_var = NULL,
   point_col = NULL,
+  palette_group = "auto",
   palette = "bipolar",
   col = c("#2166AC", "#F7F7F7", "#B2182B"),
   col_positions = "auto",
@@ -37,7 +64,13 @@ plot_group_scatter(
   grid = cowplot::background_grid(major = "xy")
 )
 
-plot_cluster_scatter(.data, cluster, ...)
+plot_cluster_scatter(
+  .data,
+  cluster,
+  palette_cluster = "auto",
+  palette = "bipolar",
+  ...
+)
 ```
 
 ## Arguments
@@ -87,19 +120,25 @@ plot_cluster_scatter(.data, cluster, ...)
 - point_col:
 
   named vector or `NULL`. Custom colours for discrete `point_col_var`
-  (named by level). Ignored for continuous `point_col_var` (use `col`
-  instead).
+  (named by level). When `NULL` (default), colours are chosen
+  automatically by number of groups: Okabe-Ito for up to 8, ColorBrewer
+  Paired for up to 12, Kelly's palette (requires `Polychrome`) for up to
+  21, Glasbey's palette (requires `Polychrome`) for up to 31, and
+  `hue_pal()` for larger numbers. Ignored for continuous `point_col_var`
+  (use `col` instead).
+
+- palette_group:
+
+  character. Palette used for automatic colour assignment when
+  `point_col` is `NULL` for a discrete `point_col_var`. One of `"auto"`
+  (default), `"okabe_ito"`, `"paired"`, `"kelly"`, `"glasbey"`, or
+  `"hue_pal"`. See the **Colour palette** section of Details.
 
 - palette:
 
-  character or `NULL`. Named colour palette for the continuous
-  `point_col_var` colour scale. When not `NULL`, overrides `col` and
-  `col_positions`. Available palettes: `"bipolar"` (default,
-  blue-white-red), `"alarm"` (green-white-red, good-to-bad),
-  `"accessible"` (blue-white-orange, colour-blind-safe diverging),
-  `"heat"` (light-yellow to dark-red, sequential), `"sky"` (white to
-  navy, sequential). Set to `NULL` to use `col` and `col_positions`
-  directly. Ignored when `point_col_var` is discrete.
+  character or `NULL`. Named colour palette for the continuous point
+  colour scale. Forwarded to `plot_group_scatter()`. Default is
+  `"bipolar"`.
 
 - col:
 
@@ -202,6 +241,11 @@ plot_cluster_scatter(.data, cluster, ...)
 
   character. Name of the column in `.data` that identifies group
   membership. Alias for the `group` parameter.
+
+- palette_cluster:
+
+  character. Alias for `palette_group` in `plot_group_scatter()`. See
+  the **Colour palette** section of Details.
 
 - ...:
 

@@ -20,7 +20,43 @@ plot_group_heatmap(). The node border and label colour encode group
 identity and can be overridden via col_clusters.
 By default the function returns a named list of ggplot2 objects, one
 per variable. If n_col or n_row is supplied the plots are combined into
-a single figure using cowplot::plot_grid, with variable names as labels."><meta property="og:description" content="Computes the minimum-spanning tree (MST) over groups, where the distance
+a single figure using cowplot::plot_grid, with variable names as labels.
+Colour palette
+
+
+When col_clusters is NULL, group colours are assigned automatically
+based on palette_group. The &quot;auto&quot; strategy selects a palette by the
+number of groups:
+1–8 groups: Okabe-Ito — colorblind-safe 8-colour palette.
+9–12 groups: ColorBrewer Paired — 12 colours pairing light and dark
+versions of 6 hues.
+13–21 groups: Kelly's palette (optional Polychrome package) — 21
+colours of maximum perceptual contrast (white excluded). Falls back to
+hue_pal() with a warning if Polychrome is not installed.
+22–31 groups: Glasbey's palette (optional Polychrome package) — 31
+algorithmically spaced colours (white excluded). Falls back to hue_pal()
+with a warning if Polychrome is not installed.
+&amp;gt; 31 groups: hue_pal() — evenly spaced hues (a warning is issued).
+
+
+Set palette_group explicitly to override the automatic selection (provided
+the chosen palette supports at least as many colours as there are groups).
+
+
+
+Node fill
+
+
+By default (node_fill_by = &quot;variable&quot;) each variable produces a separate
+plot in which node fill encodes the ECDF-standardised percentile of that
+cluster's median — a continuous gradient from low (blue) to high (red) using
+the palette controlled by palette / col / col_positions.
+Set node_fill_by = &quot;cluster&quot; to instead fill nodes by cluster identity
+using the same discrete palette chosen by palette_group / col_clusters.
+In this mode the function returns a single ggplot2 object (not a list)
+because the fill is the same regardless of variable.
+
+"><meta property="og:description" content="Computes the minimum-spanning tree (MST) over groups, where the distance
 between two groups is the Euclidean distance between their median variable
 profiles. The MST is built from the full pairwise Euclidean distance matrix
 (i.e. a fully connected undirected weighted graph), matching the approach
@@ -41,7 +77,43 @@ plot_group_heatmap(). The node border and label colour encode group
 identity and can be overridden via col_clusters.
 By default the function returns a named list of ggplot2 objects, one
 per variable. If n_col or n_row is supplied the plots are combined into
-a single figure using cowplot::plot_grid, with variable names as labels."></head><body>
+a single figure using cowplot::plot_grid, with variable names as labels.
+Colour palette
+
+
+When col_clusters is NULL, group colours are assigned automatically
+based on palette_group. The &quot;auto&quot; strategy selects a palette by the
+number of groups:
+1–8 groups: Okabe-Ito — colorblind-safe 8-colour palette.
+9–12 groups: ColorBrewer Paired — 12 colours pairing light and dark
+versions of 6 hues.
+13–21 groups: Kelly's palette (optional Polychrome package) — 21
+colours of maximum perceptual contrast (white excluded). Falls back to
+hue_pal() with a warning if Polychrome is not installed.
+22–31 groups: Glasbey's palette (optional Polychrome package) — 31
+algorithmically spaced colours (white excluded). Falls back to hue_pal()
+with a warning if Polychrome is not installed.
+&amp;gt; 31 groups: hue_pal() — evenly spaced hues (a warning is issued).
+
+
+Set palette_group explicitly to override the automatic selection (provided
+the chosen palette supports at least as many colours as there are groups).
+
+
+
+Node fill
+
+
+By default (node_fill_by = &quot;variable&quot;) each variable produces a separate
+plot in which node fill encodes the ECDF-standardised percentile of that
+cluster's median — a continuous gradient from low (blue) to high (red) using
+the palette controlled by palette / col / col_positions.
+Set node_fill_by = &quot;cluster&quot; to instead fill nodes by cluster identity
+using the same discrete palette chosen by palette_group / col_clusters.
+In this mode the function returns a single ggplot2 object (not a list)
+because the fill is the same regardless of variable.
+
+"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -49,7 +121,7 @@ a single figure using cowplot::plot_grid, with variable names as labels."></head
 
     <a class="navbar-brand me-2" href="../index.html">UtilsGGSV</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.10.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.11.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -99,7 +171,40 @@ group's median value for the variable — the same scaling used by
 identity and can be overridden via <code>col_clusters</code>.</p>
 <p>By default the function returns a <strong>named list of ggplot2 objects</strong>, one
 per variable. If <code>n_col</code> or <code>n_row</code> is supplied the plots are combined into
-a single figure using <code><a href="https://wilkelab.org/cowplot/reference/plot_grid.html" class="external-link">cowplot::plot_grid</a></code>, with variable names as labels.</p>
+a single figure using <code><a href="https://wilkelab.org/cowplot/reference/plot_grid.html" class="external-link">cowplot::plot_grid</a></code>, with variable names as labels.</p><div class="section">
+<h3 id="colour-palette">Colour palette<a class="anchor" aria-label="anchor" href="#colour-palette"></a></h3>
+
+
+<p>When <code>col_clusters</code> is <code>NULL</code>, group colours are assigned automatically
+based on <code>palette_group</code>. The <code>"auto"</code> strategy selects a palette by the
+number of groups:</p><ul><li><p><strong>1–8 groups</strong>: Okabe-Ito — colorblind-safe 8-colour palette.</p></li>
+<li><p><strong>9–12 groups</strong>: ColorBrewer Paired — 12 colours pairing light and dark
+versions of 6 hues.</p></li>
+<li><p><strong>13–21 groups</strong>: Kelly's palette (optional <code>Polychrome</code> package) — 21
+colours of maximum perceptual contrast (white excluded). Falls back to
+<code>hue_pal()</code> with a warning if <code>Polychrome</code> is not installed.</p></li>
+<li><p><strong>22–31 groups</strong>: Glasbey's palette (optional <code>Polychrome</code> package) — 31
+algorithmically spaced colours (white excluded). Falls back to <code>hue_pal()</code>
+with a warning if <code>Polychrome</code> is not installed.</p></li>
+<li><p><strong>&gt; 31 groups</strong>: <code>hue_pal()</code> — evenly spaced hues (a warning is issued).</p></li>
+</ul><p>Set <code>palette_group</code> explicitly to override the automatic selection (provided
+the chosen palette supports at least as many colours as there are groups).</p>
+</div>
+
+<div class="section">
+<h3 id="node-fill">Node fill<a class="anchor" aria-label="anchor" href="#node-fill"></a></h3>
+
+
+<p>By default (<code>node_fill_by = "variable"</code>) each variable produces a separate
+plot in which node fill encodes the ECDF-standardised percentile of that
+cluster's median — a continuous gradient from low (blue) to high (red) using
+the palette controlled by <code>palette</code> / <code>col</code> / <code>col_positions</code>.</p>
+<p>Set <code>node_fill_by = "cluster"</code> to instead fill nodes by cluster identity
+using the same discrete palette chosen by <code>palette_group</code> / <code>col_clusters</code>.
+In this mode the function returns a <strong>single ggplot2 object</strong> (not a list)
+because the fill is the same regardless of variable.</p>
+</div>
+
     </div>
 
     <div class="section level2">
@@ -112,6 +217,8 @@ a single figure using <code><a href="https://wilkelab.org/cowplot/reference/plot
 <span>  coord_equal <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  suppress_axes <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  col_clusters <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  node_fill_by <span class="op">=</span> <span class="st">"variable"</span>,</span>
+<span>  palette_group <span class="op">=</span> <span class="st">"auto"</span>,</span>
 <span>  palette <span class="op">=</span> <span class="st">"bipolar"</span>,</span>
 <span>  col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"#2166AC"</span>, <span class="st">"#F7F7F7"</span>, <span class="st">"#B2182B"</span><span class="op">)</span>,</span>
 <span>  col_positions <span class="op">=</span> <span class="st">"auto"</span>,</span>
@@ -130,7 +237,13 @@ a single figure using <code><a href="https://wilkelab.org/cowplot/reference/plot
 <span>  grid <span class="op">=</span> <span class="fu">cowplot</span><span class="fu">::</span><span class="fu"><a href="https://wilkelab.org/cowplot/reference/background_grid.html" class="external-link">background_grid</a></span><span class="op">(</span>major <span class="op">=</span> <span class="st">"xy"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">plot_cluster_mst</span><span class="op">(</span><span class="va">.data</span>, <span class="va">cluster</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">plot_cluster_mst</span><span class="op">(</span></span>
+<span>  <span class="va">.data</span>,</span>
+<span>  <span class="va">cluster</span>,</span>
+<span>  palette_cluster <span class="op">=</span> <span class="st">"auto"</span>,</span>
+<span>  palette <span class="op">=</span> <span class="st">"bipolar"</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -177,18 +290,29 @@ from <code>coord_equal</code> — axes are suppressed when equal scaling is acti
 <dt id="arg-col-clusters">col_clusters<a class="anchor" aria-label="anchor" href="#arg-col-clusters"></a></dt>
 <dd><p>named character vector or <code>NULL</code>. Per-cluster colours
 applied to node borders and text labels. Names should match cluster
-labels. When <code>NULL</code> (default), a colour-blind-friendly palette
-(<code>"Paired"</code>) is used.</p></dd>
+labels. When <code>NULL</code> (default), colours are chosen automatically by number
+of groups: Okabe-Ito for up to 8, ColorBrewer Paired for up to 12,
+Kelly's palette (requires <code>Polychrome</code>) for up to 21, Glasbey's palette
+(requires <code>Polychrome</code>) for up to 31, and <code>hue_pal()</code> for larger
+numbers.</p></dd>
+
+
+<dt id="arg-node-fill-by">node_fill_by<a class="anchor" aria-label="anchor" href="#arg-node-fill-by"></a></dt>
+<dd><p>character. Controls what the node fill encodes. One of
+<code>"variable"</code> (default) or <code>"cluster"</code>. See the <strong>Node fill</strong> section of
+Details.</p></dd>
+
+
+<dt id="arg-palette-group">palette_group<a class="anchor" aria-label="anchor" href="#arg-palette-group"></a></dt>
+<dd><p>character. Palette used for automatic colour assignment
+when <code>col_clusters</code> is <code>NULL</code>. One of <code>"auto"</code> (default), <code>"okabe_ito"</code>,
+<code>"paired"</code>, <code>"kelly"</code>, <code>"glasbey"</code>, or <code>"hue_pal"</code>. See the <strong>Colour
+palette</strong> section of Details.</p></dd>
 
 
 <dt id="arg-palette">palette<a class="anchor" aria-label="anchor" href="#arg-palette"></a></dt>
 <dd><p>character or <code>NULL</code>. Named colour palette for the continuous
-node fill scale. When not <code>NULL</code>, overrides <code>col</code> and <code>col_positions</code>.
-Available palettes: <code>"bipolar"</code> (default, blue-white-red), <code>"alarm"</code>
-(green-white-red, good-to-bad), <code>"accessible"</code> (blue-white-orange,
-colour-blind-safe diverging), <code>"heat"</code> (light-yellow to dark-red,
-sequential), <code>"sky"</code> (white to navy, sequential). Set to <code>NULL</code> to use
-<code>col</code> and <code>col_positions</code> directly.</p></dd>
+node fill scale. Forwarded to <code>plot_group_mst()</code>. Default is <code>"bipolar"</code>.</p></dd>
 
 
 <dt id="arg-col">col<a class="anchor" aria-label="anchor" href="#arg-col"></a></dt>
@@ -275,6 +399,11 @@ background. Set to <code>NULL</code> to apply no theme adjustment.</p></dd>
 <dt id="arg-cluster">cluster<a class="anchor" aria-label="anchor" href="#arg-cluster"></a></dt>
 <dd><p>character. Name of the column in <code>.data</code> that identifies
 group membership. Alias for the <code>group</code> parameter.</p></dd>
+
+
+<dt id="arg-palette-cluster">palette_cluster<a class="anchor" aria-label="anchor" href="#arg-palette-cluster"></a></dt>
+<dd><p>character. Alias for <code>palette_group</code> in
+<code>plot_group_mst()</code>. See the <strong>Colour palette</strong> section of Details.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>

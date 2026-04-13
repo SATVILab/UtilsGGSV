@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">UtilsGGSV</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.10.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.11.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -39,7 +39,9 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="utilsggsv-development-version">UtilsGGSV (development version)<a class="anchor" aria-label="anchor" href="#utilsggsv-development-version"></a></h2>
-<ul><li>Fix <code>devtools::check()</code> WARNING: documented <code>...</code> argument in <code>plot_cluster_*</code> alias functions.</li>
+<ul><li>Add <code>node_fill_by</code> parameter to <code><a href="../reference/plot_group_mst.html">plot_group_mst()</a></code> / <code><a href="../reference/plot_group_mst.html">plot_cluster_mst()</a></code>, allowing nodes to be filled by cluster identity (discrete palette) instead of per-variable ECDF percentile (continuous gradient).</li>
+<li>Add tiered automatic colour palette for all <code>plot_cluster_*</code> and <code>plot_group_*</code> functions: Okabe-Ito for up to 8 groups (colorblind-safe), ColorBrewer Paired for up to 12, Kelly’s palette (from the optional <code>Polychrome</code> package) for up to 21, Glasbey’s palette for up to 31, and <code>hue_pal()</code> fallback beyond that. The <code>Polychrome</code> package is optional; a warning is issued and <code>hue_pal()</code> is used if it is not installed.</li>
+<li>Fix <code>devtools::check()</code> WARNING: documented <code>...</code> argument in <code>plot_cluster_*</code> alias functions.</li>
 <li>Fix <code>devtools::check()</code> NOTE: add <code>^issues$</code> to <code>.Rbuildignore</code>.</li>
 <li>Fix <code>devtools::check()</code> NOTE: import <code><a href="https://rdrr.io/r/utils/modifyList.html" class="external-link">utils::modifyList</a></code> in <code><a href="../reference/plot_group_scatter.html">plot_group_scatter()</a></code>.</li>
 <li>Add <code>Depends: R (&gt;= 3.5.0)</code> to suppress serialised-object build warning.</li>

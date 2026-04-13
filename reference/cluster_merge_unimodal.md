@@ -3,8 +3,8 @@
 Takes the output of
 [`cluster_merge_bin()`](https://satvilab.github.io/UtilsGGSV/reference/cluster_merge_bin.md)
 and iteratively merges similarly-labelled clusters as long as the
-combined population remains unimodal along every variable (assessed via
-Hartigan's Dip Test).
+combined population remains unimodal along every variable where the two
+clusters have different bin indices (assessed via Hartigan's Dip Test).
 
 ## Usage
 
@@ -47,9 +47,11 @@ cluster_merge_unimodal(
 
 - dip_threshold:
 
-  numeric(1). Minimum dip-test p-value required for every variable
-  before a merge is accepted. A higher value is more conservative
-  (demands stronger evidence of unimodality). Default `0.15`.
+  numeric(1). Minimum dip-test p-value required for every mismatched
+  variable (i.e. variables where the two candidate clusters fall in
+  different bins) before a merge is accepted. A higher value is more
+  conservative (demands stronger evidence of unimodality). Default
+  `0.15`.
 
 - min_mode_dist:
 

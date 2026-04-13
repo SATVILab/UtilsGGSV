@@ -263,22 +263,6 @@ if (nzchar(precomputed_path) && file.exists(precomputed_path)) {
   }
 }
 #> No pre-computed results found; running simulation grid...
-#> Warning in RColorBrewer::brewer.pal(n, pal): n too large, allowed maximum for palette Paired is 12
-#> Returning the palette you asked for with that many colors
-#> Warning: Removed 10752 rows containing missing values or values outside the scale range
-#> (`geom_line()`).
-#> Warning in RColorBrewer::brewer.pal(n, pal): n too large, allowed maximum for palette Paired is 12
-#> Returning the palette you asked for with that many colors
-#> Warning: Removed 10752 rows containing missing values or values outside the scale range
-#> (`geom_line()`).
-#> Warning in RColorBrewer::brewer.pal(n, pal): n too large, allowed maximum for palette Paired is 12
-#> Returning the palette you asked for with that many colors
-#> Warning: Removed 46592 rows containing missing values or values outside the scale range
-#> (`geom_line()`).
-#> Warning in RColorBrewer::brewer.pal(n, pal): n too large, allowed maximum for palette Paired is 12
-#> Returning the palette you asked for with that many colors
-#> Warning: Removed 46592 rows containing missing values or values outside the scale range
-#> (`geom_line()`).
 ```
 
 ## 3. Visualisations
