@@ -1,6 +1,8 @@
 ---
 title: "Benchmarking cluster_som_merge and cluster_louvain_merge via FAUST Simulations"
-output: rmarkdown::html_vignette
+output:
+  rmarkdown::html_vignette:
+    self_contained: true
 vignette: >
   %\VignetteIndexEntry{Benchmarking cluster_som_merge and cluster_louvain_merge via FAUST Simulations}
   %\VignetteEngine{knitr::rmarkdown}

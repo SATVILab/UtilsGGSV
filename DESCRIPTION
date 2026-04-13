@@ -1,7 +1,7 @@
 Package: UtilsGGSV
 Type: Package
 Title: Utility Functions for ggplot2
-Version: 0.10.1
+Version: 0.11.0
 Author: Miguel Rodo
 Maintainer: Miguel Rodo <rdxmig002@myuct.ac.za>
 Description: Provides utility functions for working with `ggplot2` objects.
@@ -20,6 +20,7 @@ Suggests:
     kohonen,
     mvtnorm,
     palmerpenguins,
+    Polychrome,
     remotes,
     rmarkdown,
     testthat (>= 3.0.0),

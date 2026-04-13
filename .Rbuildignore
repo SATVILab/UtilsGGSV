@@ -20,3 +20,10 @@
 ^pkgdown$
 ^issues$
 ^CONTRIBUTING\.md$
+^vignettes/\.quarto$
+^vignettes/_tmp$
+^vignettes/UtilsGGSV_files$
+^vignettes/inst/doc$
+^vignettes/.*\.html$
+^doc$
+^Meta$

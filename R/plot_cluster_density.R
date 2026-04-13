@@ -48,6 +48,26 @@
 #' variable. If `n_col` or `n_row` is supplied the plots are instead combined
 #' into a **single faceted ggplot2 object** via `facet_wrap`.
 #'
+#' ## Colour palette
+#'
+#' When `col_clusters` is `NULL`, group colours are assigned automatically
+#' based on `palette_group`. The `"auto"` strategy selects a palette by the
+#' number of groups:
+#'
+#' - **1–8 groups**: Okabe-Ito — colorblind-safe 8-colour palette.
+#' - **9–12 groups**: ColorBrewer Paired — 12 colours pairing light and dark
+#'   versions of 6 hues.
+#' - **13–21 groups**: Kelly's palette (optional `Polychrome` package) — 21
+#'   colours of maximum perceptual contrast (white excluded). Falls back to
+#'   `hue_pal()` with a warning if `Polychrome` is not installed.
+#' - **22–31 groups**: Glasbey's palette (optional `Polychrome` package) — 31
+#'   algorithmically spaced colours (white excluded). Falls back to `hue_pal()`
+#'   with a warning if `Polychrome` is not installed.
+#' - **> 31 groups**: `hue_pal()` — evenly spaced hues (a warning is issued).
+#'
+#' Set `palette_group` explicitly to override the automatic selection (provided
+#' the chosen palette supports at least as many colours as there are groups).
+#'
 #' @param .data data.frame. Rows are observations. Must contain a column
 #'   identifying group membership and columns for variable values.
 #' @param group character. Name of the column in `.data` that identifies
@@ -56,8 +76,12 @@
 #'   use as variables. If `NULL`, all columns except `group` are used.
 #'   Default is `NULL`.
 #' @param col_clusters named character vector or `NULL`. Per-group colours.
-#'   Names should match group labels. When `NULL` (default), the default
-#'   ggplot2 colour scale is used.
+#'   Names should match group labels. When `NULL` (default), colours are
+#'   chosen automatically by `palette_group`.
+#' @param palette_group character. Palette used for automatic colour assignment
+#'   when `col_clusters` is `NULL`. One of `"auto"` (default), `"okabe_ito"`,
+#'   `"paired"`, `"kelly"`, `"glasbey"`, or `"hue_pal"`. See the **Colour
+#'   palette** section of Details.
 #' @param n_col integer or `NULL`. Number of columns passed to
 #'   `ggplot2::facet_wrap`. If supplied (or if `n_row` is supplied) a single
 #'   faceted plot is returned instead of a list. Default is `NULL`.
@@ -153,6 +177,7 @@ plot_group_density <- function(.data,
                                  group,
                                  vars = NULL,
                                  col_clusters = NULL,
+                                 palette_group = "auto",
                                  n_col = NULL,
                                  n_row = NULL,
                                  density = "both",
@@ -495,11 +520,9 @@ plot_group_density <- function(.data,
           if (!is.null(ec)) p <- p + ggplot2::expand_limits(x = ec)
         }
 
-        if (!is.null(col_clusters)) {
-          p <- p + ggplot2::scale_colour_manual(values = col_clusters)
-        } else {
-          p <- p + ggplot2::scale_colour_brewer(palette = "Paired")
-        }
+        p <- p + ggplot2::scale_colour_manual(
+          values = .discrete_cluster_colours(cluster_vec, col_clusters, palette_group)
+        )
         if (!is.null(thm)) p <- p + thm
         if (!is.null(grid)) p <- p + grid
 
@@ -647,11 +670,9 @@ plot_group_density <- function(.data,
     p <- p + ggplot2::expand_limits(x = expand_coord)
   }
 
-  if (!is.null(col_clusters)) {
-    p <- p + ggplot2::scale_colour_manual(values = col_clusters)
-  } else {
-    p <- p + ggplot2::scale_colour_brewer(palette = "Paired")
-  }
+  p <- p + ggplot2::scale_colour_manual(
+    values = .discrete_cluster_colours(cluster_vec, col_clusters, palette_group)
+  )
   if (!is.null(thm)) p <- p + thm
   if (!is.null(grid)) p <- p + grid
 
@@ -661,8 +682,10 @@ plot_group_density <- function(.data,
 #' @rdname plot_group_density
 #' @param cluster character. Name of the column in `.data` that identifies
 #'   group membership. Alias for the `group` parameter.
+#' @param palette_cluster character. Alias for `palette_group` in
+#'   [plot_group_density()]. See the **Colour palette** section of Details.
 #' @param ... Additional arguments passed to [plot_group_density()].
 #' @export
-plot_cluster_density <- function(.data, cluster, ...) {
-  plot_group_density(.data, group = cluster, ...)
+plot_cluster_density <- function(.data, cluster, palette_cluster = "auto", ...) {
+  plot_group_density(.data, group = cluster, palette_group = palette_cluster, ...)
 }
