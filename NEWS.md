@@ -1,5 +1,8 @@
 # UtilsGGSV (development version)
 
+- Add `node_fill_by` parameter to `plot_group_mst()` / `plot_cluster_mst()`,
+  allowing nodes to be filled by cluster identity (discrete palette) instead
+  of per-variable ECDF percentile (continuous gradient).
 - Add tiered automatic colour palette for all `plot_cluster_*` and
   `plot_group_*` functions: Okabe-Ito for up to 8 groups (colorblind-safe),
   ColorBrewer Paired for up to 12, Kelly's palette (from the optional

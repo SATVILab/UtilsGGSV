@@ -449,8 +449,13 @@ plot_group_scatter <- function(.data,
 #'   group membership. Alias for the `group` parameter.
 #' @param palette_cluster character. Alias for `palette_group` in
 #'   [plot_group_scatter()]. See the **Colour palette** section of Details.
+#' @param palette character or `NULL`. Named colour palette for the continuous
+#'   point colour scale. Forwarded to [plot_group_scatter()]. Default is
+#'   `"bipolar"`.
 #' @param ... Additional arguments passed to [plot_group_scatter()].
 #' @export
-plot_cluster_scatter <- function(.data, cluster, palette_cluster = "auto", ...) {
-  plot_group_scatter(.data, group = cluster, palette_group = palette_cluster, ...)
+plot_cluster_scatter <- function(.data, cluster, palette_cluster = "auto",
+                                  palette = "bipolar", ...) {
+  plot_group_scatter(.data, group = cluster, palette_group = palette_cluster,
+                      palette = palette, ...)
 }

@@ -13,6 +13,7 @@ plot_group_mst(
   coord_equal = TRUE,
   suppress_axes = NULL,
   col_clusters = NULL,
+  node_fill_by = "variable",
   palette_group = "auto",
   palette = "bipolar",
   col = c("#2166AC", "#F7F7F7", "#B2182B"),
@@ -32,7 +33,13 @@ plot_group_mst(
   grid = cowplot::background_grid(major = "xy")
 )
 
-plot_cluster_mst(.data, cluster, palette_cluster = "auto", ...)
+plot_cluster_mst(
+  .data,
+  cluster,
+  palette_cluster = "auto",
+  palette = "bipolar",
+  ...
+)
 }
 \arguments{
 \item{.data}{data.frame. Rows are observations. Must contain a column
@@ -68,18 +75,17 @@ Kelly's palette (requires \code{Polychrome}) for up to 21, Glasbey's palette
 (requires \code{Polychrome}) for up to 31, and \code{hue_pal()} for larger
 numbers.}
 
+\item{node_fill_by}{character. Controls what the node fill encodes. One of
+\code{"variable"} (default) or \code{"cluster"}. See the \strong{Node fill} section of
+Details.}
+
 \item{palette_group}{character. Palette used for automatic colour assignment
 when \code{col_clusters} is \code{NULL}. One of \code{"auto"} (default), \code{"okabe_ito"},
 \code{"paired"}, \code{"kelly"}, \code{"glasbey"}, or \code{"hue_pal"}. See the \strong{Colour
 palette} section of Details.}
 
 \item{palette}{character or \code{NULL}. Named colour palette for the continuous
-node fill scale. When not \code{NULL}, overrides \code{col} and \code{col_positions}.
-Available palettes: \code{"bipolar"} (default, blue-white-red), \code{"alarm"}
-(green-white-red, good-to-bad), \code{"accessible"} (blue-white-orange,
-colour-blind-safe diverging), \code{"heat"} (light-yellow to dark-red,
-sequential), \code{"sky"} (white to navy, sequential). Set to \code{NULL} to use
-\code{col} and \code{col_positions} directly.}
+node fill scale. Forwarded to \code{\link[=plot_group_mst]{plot_group_mst()}}. Default is \code{"bipolar"}.}
 
 \item{col}{character vector. Colours used to fill nodes, ordered from low
 to high values. Default is \code{c("#2166AC", "#F7F7F7", "#B2182B")} (blue,
@@ -195,6 +201,19 @@ with a warning if \code{Polychrome} is not installed.
 
 Set \code{palette_group} explicitly to override the automatic selection (provided
 the chosen palette supports at least as many colours as there are groups).
+}
+
+\subsection{Node fill}{
+
+By default (\code{node_fill_by = "variable"}) each variable produces a separate
+plot in which node fill encodes the ECDF-standardised percentile of that
+cluster's median — a continuous gradient from low (blue) to high (red) using
+the palette controlled by \code{palette} / \code{col} / \code{col_positions}.
+
+Set \code{node_fill_by = "cluster"} to instead fill nodes by cluster identity
+using the same discrete palette chosen by \code{palette_group} / \code{col_clusters}.
+In this mode the function returns a \strong{single ggplot2 object} (not a list)
+because the fill is the same regardless of variable.
 }
 }
 \examples{

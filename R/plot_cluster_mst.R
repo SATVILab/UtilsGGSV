@@ -47,6 +47,18 @@
 #' Set `palette_group` explicitly to override the automatic selection (provided
 #' the chosen palette supports at least as many colours as there are groups).
 #'
+#' ## Node fill
+#'
+#' By default (`node_fill_by = "variable"`) each variable produces a separate
+#' plot in which node fill encodes the ECDF-standardised percentile of that
+#' cluster's median — a continuous gradient from low (blue) to high (red) using
+#' the palette controlled by `palette` / `col` / `col_positions`.
+#'
+#' Set `node_fill_by = "cluster"` to instead fill nodes by cluster identity
+#' using the same discrete palette chosen by `palette_group` / `col_clusters`.
+#' In this mode the function returns a **single ggplot2 object** (not a list)
+#' because the fill is the same regardless of variable.
+#'
 #' @param .data data.frame. Rows are observations. Must contain a column
 #'   identifying group membership and columns for variable values.
 #' @param group character. Name of the column in `.data` that identifies
@@ -77,6 +89,9 @@
 #'   when `col_clusters` is `NULL`. One of `"auto"` (default), `"okabe_ito"`,
 #'   `"paired"`, `"kelly"`, `"glasbey"`, or `"hue_pal"`. See the **Colour
 #'   palette** section of Details.
+#' @param node_fill_by character. Controls what the node fill encodes. One of
+#'   `"variable"` (default) or `"cluster"`. See the **Node fill** section of
+#'   Details.
 #' @param palette character or `NULL`. Named colour palette for the continuous
 #'   node fill scale. When not `NULL`, overrides `col` and `col_positions`.
 #'   Available palettes: `"bipolar"` (default, blue-white-red), `"alarm"`
@@ -154,6 +169,7 @@ plot_group_mst <- function(.data,
                               coord_equal = TRUE,
                               suppress_axes = NULL,
                               col_clusters = NULL,
+                              node_fill_by = "variable",
                               palette_group = "auto",
                               palette = "bipolar",
                               col = c("#2166AC", "#F7F7F7", "#B2182B"),
@@ -243,6 +259,7 @@ plot_group_mst <- function(.data,
   }
 
   cluster_vec <- unique(.data[[cluster]])
+  node_fill_by <- match.arg(node_fill_by, c("variable", "cluster"))
 
   med_mat  <- .plot_cluster_mst_medians(.data, cluster, vars, cluster_vec, na_rm)
   dist_mat <- as.matrix(stats::dist(med_mat))
@@ -250,6 +267,26 @@ plot_group_mst <- function(.data,
     dist_mat, cluster_vec, layout_algorithm
   )
   edge_tbl <- .plot_cluster_mst_edges(dist_mat, node_tbl_base)
+  if (node_fill_by == "cluster") {
+    node_tbl_c <- node_tbl_base
+    node_tbl_c$fill <- node_tbl_c$cluster
+    return(.plot_cluster_mst_plot_one(
+      node_tbl      = node_tbl_c,
+      edge_tbl      = edge_tbl,
+      col_clusters  = col_clusters,
+      palette_group = palette_group,
+      col           = col,
+      col_positions = col_positions,
+      white_range   = white_range,
+      layout_algorithm = layout_algorithm,
+      coord_equal   = coord_equal,
+      suppress_axes = suppress_axes,
+      thm           = thm,
+      grid          = grid,
+      node_fill_by  = node_fill_by
+    ))
+  }
+
   perc_tbl <- .plot_cluster_mst_percentiles(.data, cluster, vars, cluster_vec, na_rm)
   plot_list <- stats::setNames(
     lapply(vars, function(v) {
@@ -257,18 +294,19 @@ plot_group_mst <- function(.data,
       node_tbl <- node_tbl_base
       node_tbl$fill <- perc_v$perc[match(node_tbl$cluster, perc_v$cluster)]
       .plot_cluster_mst_plot_one(
-        node_tbl = node_tbl,
-        edge_tbl = edge_tbl,
-        col_clusters = col_clusters,
+        node_tbl      = node_tbl,
+        edge_tbl      = edge_tbl,
+        col_clusters  = col_clusters,
         palette_group = palette_group,
-        col = col,
+        col           = col,
         col_positions = col_positions,
-        white_range = white_range,
+        white_range   = white_range,
         layout_algorithm = layout_algorithm,
-        coord_equal = coord_equal,
+        coord_equal   = coord_equal,
         suppress_axes = suppress_axes,
-        thm = thm,
-        grid = grid
+        thm           = thm,
+        grid          = grid,
+        node_fill_by  = node_fill_by
       )
     }),
     vars
@@ -426,8 +464,29 @@ plot_group_mst <- function(.data,
                                         col, col_positions, white_range,
                                         layout_algorithm,
                                         coord_equal, suppress_axes,
-                                        thm, grid) {
-  gradientn_args <- .build_gradientn_args(col, col_positions, white_range)
+                                        thm, grid,
+                                        node_fill_by = "variable") {
+  gradientn_args <- if (node_fill_by == "variable") {
+    .build_gradientn_args(col, col_positions, white_range)
+  } else {
+    NULL
+  }
+  fill_scale <- if (node_fill_by == "variable") {
+    ggplot2::scale_fill_gradientn(
+      colours = gradientn_args$colours,
+      values  = gradientn_args$values,
+      limits  = c(0, 1),
+      name    = "Relative\nvalue",
+      labels  = scales::percent
+    )
+  } else {
+    ggplot2::scale_fill_manual(
+      values = .discrete_cluster_colours(
+        unique(node_tbl$cluster), col_clusters, palette_group
+      ),
+      name = "Group"
+    )
+  }
 
   axis_labels <- if (layout_algorithm == "kamada-kawai") {
     list(x = "KK 1", y = "KK 2")
@@ -459,13 +518,7 @@ plot_group_mst <- function(.data,
       ),
       vjust = -1
     ) +
-    ggplot2::scale_fill_gradientn(
-      colours = gradientn_args$colours,
-      values  = gradientn_args$values,
-      limits  = c(0, 1),
-      name    = "Relative\nvalue",
-      labels  = scales::percent
-    ) +
+    fill_scale +
     ggplot2::labs(x = axis_labels$x, y = axis_labels$y, colour = "Group")
 
   if (coord_equal) p <- p + ggplot2::coord_equal()
@@ -494,8 +547,12 @@ plot_group_mst <- function(.data,
 #'   group membership. Alias for the `group` parameter.
 #' @param palette_cluster character. Alias for `palette_group` in
 #'   [plot_group_mst()]. See the **Colour palette** section of Details.
+#' @param palette character or `NULL`. Named colour palette for the continuous
+#'   node fill scale. Forwarded to [plot_group_mst()]. Default is `"bipolar"`.
 #' @param ... Additional arguments passed to [plot_group_mst()].
 #' @export
-plot_cluster_mst <- function(.data, cluster, palette_cluster = "auto", ...) {
-  plot_group_mst(.data, group = cluster, palette_group = palette_cluster, ...)
+plot_cluster_mst <- function(.data, cluster, palette_cluster = "auto",
+                              palette = "bipolar", ...) {
+  plot_group_mst(.data, group = cluster, palette_group = palette_cluster,
+                  palette = palette, ...)
 }

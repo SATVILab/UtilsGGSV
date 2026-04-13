@@ -35,7 +35,13 @@ plot_group_scatter(
   grid = cowplot::background_grid(major = "xy")
 )
 
-plot_cluster_scatter(.data, cluster, palette_cluster = "auto", ...)
+plot_cluster_scatter(
+  .data,
+  cluster,
+  palette_cluster = "auto",
+  palette = "bipolar",
+  ...
+)
 }
 \arguments{
 \item{.data}{data.frame. Rows are observations. Must contain a column identifying group membership and numeric variables.}
@@ -70,12 +76,9 @@ when \code{point_col} is \code{NULL} for a discrete \code{point_col_var}. One of
 \code{"auto"} (default), \code{"okabe_ito"}, \code{"paired"}, \code{"kelly"}, \code{"glasbey"},
 or \code{"hue_pal"}. See the \strong{Colour palette} section of Details.}
 
-\item{palette}{character or \code{NULL}. Named colour palette for the continuous \code{point_col_var} colour
-scale. When not \code{NULL}, overrides \code{col} and \code{col_positions}. Available palettes:
-\code{"bipolar"} (default, blue-white-red), \code{"alarm"} (green-white-red, good-to-bad),
-\code{"accessible"} (blue-white-orange, colour-blind-safe diverging), \code{"heat"} (light-yellow to
-dark-red, sequential), \code{"sky"} (white to navy, sequential). Set to \code{NULL} to use \code{col} and
-\code{col_positions} directly. Ignored when \code{point_col_var} is discrete.}
+\item{palette}{character or \code{NULL}. Named colour palette for the continuous
+point colour scale. Forwarded to \code{\link[=plot_group_scatter]{plot_group_scatter()}}. Default is
+\code{"bipolar"}.}
 
 \item{col}{character vector. Colours used for the continuous \code{point_col_var} colour scale, ordered
 from low to high values. Default is \code{c("#2166AC", "#F7F7F7", "#B2182B")} (blue, white, red).
