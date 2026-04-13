@@ -21,6 +21,8 @@ plot_group_density(
   density_overall_weight = NULL,
   bandwidth = "hpi_1",
   na_rm = TRUE,
+  label = FALSE,
+  legend = NULL,
   font_size = 14,
   thm = cowplot::theme_cowplot(font_size = font_size) + ggplot2::theme(plot.background =
     ggplot2::element_rect(fill = "white", colour = NA), panel.background =
@@ -107,6 +109,16 @@ before computing densities and medians. When \code{TRUE} (default), \code{NA}
 values are removed and a message is issued showing how many were removed
 per variable. When \code{FALSE}, \code{NA} values are passed directly to
 \code{stats::density()}, which will strip them with its own warning.}
+
+\item{label}{logical. Whether to add on-plot labels at the highest-density
+peak of each group using \code{ggrepel::geom_text_repel}. When \code{density} is
+\code{"overall"}, labels are placed at the overall-density value at each
+group's median. Default is \code{FALSE}.}
+
+\item{legend}{logical or \code{NULL}. Whether to display the legend. \code{NULL}
+(default): the legend is shown when the number of groups is 15 or fewer
+and hidden otherwise. \code{TRUE}/\code{FALSE}: always show/hide the legend,
+overriding the default behaviour.}
 
 \item{font_size}{numeric. Font size passed to \code{cowplot::theme_cowplot}.
 Default is \code{14}.}
@@ -205,4 +217,10 @@ plot_group_density(
 
 # Faceted plot with 2 columns
 plot_group_density(.data, group = "group", n_col = 2)
+
+# On-plot labels at density peaks
+plot_group_density(.data, group = "group", density = "cluster", label = TRUE)
+
+# Always show the legend regardless of group count
+plot_group_density(.data, group = "group", legend = TRUE)
 }
