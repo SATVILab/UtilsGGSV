@@ -630,10 +630,11 @@ test_that("plot_cluster_mst node_fill_by same as cluster acts as node_fill_by = 
     var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
     var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
   )
+  # Passing the cluster column name to node_fill_by should behave like node_fill_by = "cluster"
   result <- plot_cluster_mst(data, cluster = "cluster", node_fill_by = "cluster")
-  result2 <- plot_cluster_mst(data, cluster = "cluster", node_fill_by = "cluster")
   expect_s3_class(result, "ggplot")
-  expect_s3_class(result2, "ggplot")
+  fill_scale <- result$scales$get_scales("fill")
+  expect_s3_class(fill_scale, "ScaleDiscrete")
 })
 
 test_that("plot_cluster_mst node_fill_by with factor column works", {
