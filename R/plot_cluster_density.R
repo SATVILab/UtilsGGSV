@@ -137,6 +137,14 @@
 #' @param alpha numeric. Transparency applied to density curves (both overall
 #'   and per-group lines). Must be between 0 (fully transparent) and 1 (fully
 #'   opaque). Default is `0.75`.
+#' @param label logical. Whether to add on-plot labels at the highest-density
+#'   peak of each group using `ggrepel::geom_text_repel`. When `density` is
+#'   `"overall"`, labels are placed at the overall-density value at each
+#'   group's median. Default is `FALSE`.
+#' @param legend logical or `NULL`. Whether to display the legend. `NULL`
+#'   (default): the legend is shown when the number of groups is 15 or fewer
+#'   and hidden otherwise. `TRUE`/`FALSE`: always show/hide the legend,
+#'   overriding the default behaviour.
 #' @param font_size numeric. Font size passed to `cowplot::theme_cowplot`.
 #'   Default is `14`.
 #' @param thm ggplot2 theme object or `NULL`. Default is
@@ -173,6 +181,12 @@
 #'
 #' # Faceted plot with 2 columns
 #' plot_group_density(.data, group = "group", n_col = 2)
+#'
+#' # On-plot labels at density peaks
+#' plot_group_density(.data, group = "group", density = "cluster", label = TRUE)
+#'
+#' # Always show the legend regardless of group count
+#' plot_group_density(.data, group = "group", legend = TRUE)
 plot_group_density <- function(.data,
                                  group,
                                  vars = NULL,
@@ -190,6 +204,8 @@ plot_group_density <- function(.data,
                                  bandwidth = "hpi_1",
                                  na_rm = TRUE,
                                  alpha = 0.75,
+                                 label = FALSE,
+                                 legend = NULL,
                                  font_size = 14,
                                  thm = cowplot::theme_cowplot(
                                    font_size = font_size
@@ -228,6 +244,13 @@ plot_group_density <- function(.data,
   if (!is.numeric(alpha) || length(alpha) != 1L || is.na(alpha) ||
         alpha < 0 || alpha > 1) {
     stop("`alpha` must be a single number between 0 and 1.", call. = FALSE)
+  }
+  if (!is.logical(label) || length(label) != 1L || is.na(label)) {
+    stop("`label` must be TRUE or FALSE.", call. = FALSE)
+  }
+  if (!is.null(legend) &&
+      (!is.logical(legend) || length(legend) != 1L || is.na(legend))) {
+    stop("`legend` must be TRUE, FALSE, or NULL.", call. = FALSE)
   }
 
   .plot_cluster_validate(.data, cluster, vars)
@@ -291,6 +314,8 @@ plot_group_density <- function(.data,
   }
 
   cluster_vec <- unique(data[[cluster]])
+  n_groups <- length(cluster_vec)
+  show_legend <- if (is.null(legend)) n_groups <= 15L else isTRUE(legend)
 
   # Helper: resolve per-cluster bandwidth from the `bandwidth` argument.
   .resolve_bw <- function(vals) {
@@ -515,6 +540,44 @@ plot_group_density <- function(.data,
 
         p <- .add_rug(p, all_vals, dens_vals, v)
 
+        if (isTRUE(label)) {
+          if (density == "overall") {
+            od_lbl <- if (!is.null(density_overall_weight)) {
+              overall_d
+            } else {
+              .dens_tbl(dens_vals)
+            }
+            label_tbl <- purrr::map_df(cluster_vec, function(cl) {
+              x_lbl <- med_tbl$median[med_tbl$cluster == cl]
+              y_lbl <- if (!is.null(od_lbl) && length(x_lbl) == 1L) {
+                y <- stats::approx(od_lbl$x, od_lbl$y, xout = x_lbl)$y
+                if (is.na(y)) 0 else y
+              } else {
+                0
+              }
+              tibble::tibble(cluster = cl, x = x_lbl, y = y_lbl)
+            })
+          } else {
+            label_tbl <- purrr::map_df(cluster_vec, function(cl) {
+              cl_d <- cl_dens[cl_dens$cluster == cl, , drop = FALSE]
+              if (nrow(cl_d) == 0L) return(tibble::tibble())
+              peak_idx <- which.max(cl_d$y)
+              tibble::tibble(
+                cluster = cl, x = cl_d$x[peak_idx], y = cl_d$y[peak_idx]
+              )
+            })
+          }
+          p <- p + ggrepel::geom_text_repel(
+            data = label_tbl,
+            ggplot2::aes(
+              x = .data$x, y = .data$y, label = .data$cluster,
+              colour = .data$cluster
+            ),
+            inherit.aes = FALSE,
+            show.legend = FALSE
+          )
+        }
+
         if (!is.null(expand_coord)) {
           ec <- if (is.list(expand_coord)) expand_coord[[v]] else expand_coord
           if (!is.null(ec)) p <- p + ggplot2::expand_limits(x = ec)
@@ -525,6 +588,7 @@ plot_group_density <- function(.data,
         )
         if (!is.null(thm)) p <- p + thm
         if (!is.null(grid)) p <- p + grid
+        if (!show_legend) p <- p + ggplot2::theme(legend.position = "none")
 
         p
       }),
@@ -666,6 +730,53 @@ plot_group_density <- function(.data,
 
   p <- .add_rug_facet(p)
 
+  if (isTRUE(label)) {
+    if (density == "overall") {
+      label_tbl <- purrr::map_df(vars, function(v) {
+        all_vals_lbl  <- .strip_na(data[[v]], v)
+        dens_vals_lbl <- .filter_vals(all_vals_lbl, v)
+        od_lbl <- if (!is.null(density_overall_weight)) {
+          overall_dens_tbl[overall_dens_tbl$variable == v, , drop = FALSE]
+        } else {
+          .dens_tbl(dens_vals_lbl)
+        }
+        purrr::map_df(cluster_vec, function(cl) {
+          x_lbl <- median_tbl$median[
+            median_tbl$variable == v & median_tbl$cluster == cl
+          ]
+          y_lbl <- if (!is.null(od_lbl) && nrow(od_lbl) > 0L &&
+                       length(x_lbl) == 1L) {
+            y <- stats::approx(od_lbl$x, od_lbl$y, xout = x_lbl)$y
+            if (is.na(y)) 0 else y
+          } else {
+            0
+          }
+          tibble::tibble(variable = v, cluster = cl, x = x_lbl, y = y_lbl)
+        })
+      })
+    } else {
+      label_tbl <- dplyr::group_by(
+        cluster_dens_tbl, .data$variable, .data$cluster
+      )
+      label_tbl <- dplyr::slice_max(
+        label_tbl, order_by = .data$y, n = 1L, with_ties = FALSE
+      )
+      label_tbl <- dplyr::ungroup(label_tbl)
+      label_tbl <- dplyr::select(
+        label_tbl, .data$variable, .data$cluster, .data$x, .data$y
+      )
+    }
+    p <- p + ggrepel::geom_text_repel(
+      data = label_tbl,
+      ggplot2::aes(
+        x = .data$x, y = .data$y, label = .data$cluster,
+        colour = .data$cluster
+      ),
+      inherit.aes = FALSE,
+      show.legend = FALSE
+    )
+  }
+
   if (!is.null(expand_coord) && is.numeric(expand_coord)) {
     p <- p + ggplot2::expand_limits(x = expand_coord)
   }
@@ -675,6 +786,7 @@ plot_group_density <- function(.data,
   )
   if (!is.null(thm)) p <- p + thm
   if (!is.null(grid)) p <- p + grid
+  if (!show_legend) p <- p + ggplot2::theme(legend.position = "none")
 
   p
 }
