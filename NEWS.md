@@ -1,5 +1,8 @@
 # UtilsGGSV (development version)
 
+- Add dynamic cluster colour generation in `plot_cluster_density()` so the
+  default palette supports any number of groups: the Paired palette is used for
+  up to 12 groups; a hue-based palette is used for more than 12.
 - Fix `devtools::check()` WARNING: documented `...` argument in `plot_cluster_*`
   alias functions.
 - Fix `devtools::check()` NOTE: add `^issues$` to `.Rbuildignore`.

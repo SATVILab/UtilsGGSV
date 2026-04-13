@@ -258,6 +258,16 @@ plot_group_density <- function(.data,
   }
 
   cluster_vec <- unique(data[[cluster]])
+  .cluster_colours <- function() {
+    if (!is.null(col_clusters)) return(col_clusters)
+    n <- length(cluster_vec)
+    cols <- if (n <= 12) {
+      scales::brewer_pal(palette = "Paired")(n)
+    } else {
+      scales::hue_pal()(n)
+    }
+    stats::setNames(cols, cluster_vec)
+  }
 
   # Helper: resolve per-cluster bandwidth from the `bandwidth` argument.
   .resolve_bw <- function(vals) {
