@@ -329,27 +329,24 @@ plot_group_scatter <- function(.data,
     ggplot2::geom_point(size = point_size, alpha = point_alpha)
 
   if (point_col_discrete) {
-    if (!is.null(point_col)) {
-      if (is.null(names(point_col))) {
-        n_unique <- length(unique(plot_data$point_col))
-        if (length(point_col) < n_unique) {
-          stop("point_col must have length at least the number of unique values in point_col_var.")
-        }
-        point_col <- setNames(point_col[seq_len(n_unique)], levels(plot_data$point_col))
+    if (!is.null(point_col) && is.null(names(point_col))) {
+      n_unique <- length(unique(plot_data$point_col))
+      if (length(point_col) < n_unique) {
+        stop("point_col must have length at least the number of unique values in point_col_var.")
       }
-      p <- p + ggplot2::scale_colour_manual(values = point_col)
-    } else {
-      p <- p + ggplot2::scale_colour_brewer(palette = "Paired")
+      point_col <- setNames(point_col[seq_len(n_unique)], levels(plot_data$point_col))
     }
-
+    p <- p + ggplot2::scale_colour_manual(
+      values = .discrete_cluster_colours(levels(plot_data$point_col), point_col)
+    )
     if (point_col_var == cluster) {
-      if (!is.null(point_col)) {
-        p <- p + ggplot2::scale_fill_manual(values = point_col)
-      } else {
-        p <- p + ggplot2::scale_fill_brewer(palette = "Paired")
-      }
+      p <- p + ggplot2::scale_fill_manual(
+        values = .discrete_cluster_colours(levels(plot_data$cluster), point_col)
+      )
     } else {
-      p <- p + ggplot2::scale_fill_brewer(palette = "Paired")
+      p <- p + ggplot2::scale_fill_manual(
+        values = .discrete_cluster_colours(levels(plot_data$cluster), NULL)
+      )
     }
   } else {
     gradientn_args <- .build_gradientn_args(col, col_positions, white_range)
@@ -358,7 +355,9 @@ plot_group_scatter <- function(.data,
       values  = gradientn_args$values,
       name    = point_col_var
     )
-    p <- p + ggplot2::scale_fill_brewer(palette = "Paired")
+    p <- p + ggplot2::scale_fill_manual(
+      values = .discrete_cluster_colours(levels(plot_data$cluster), NULL)
+    )
   }
 
   if (!is.null(label_offset)) {

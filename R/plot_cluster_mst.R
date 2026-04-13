@@ -48,8 +48,9 @@
 #'   from `coord_equal` — axes are suppressed when equal scaling is active.
 #' @param col_clusters named character vector or `NULL`. Per-cluster colours
 #'   applied to node borders and text labels. Names should match cluster
-#'   labels. When `NULL` (default), a colour-blind-friendly palette
-#'   (`"Paired"`) is used.
+#'   labels. When `NULL` (default), colours are chosen automatically: the
+#'   Paired palette is used for up to 12 groups and a hue-based palette is
+#'   used for more than 12 groups.
 #' @param palette character or `NULL`. Named colour palette for the continuous
 #'   node fill scale. When not `NULL`, overrides `col` and `col_positions`.
 #'   Available palettes: `"bipolar"` (default, blue-white-red), `"alarm"`
@@ -440,11 +441,9 @@ plot_group_mst <- function(.data,
 
   if (coord_equal) p <- p + ggplot2::coord_equal()
 
-  if (!is.null(col_clusters)) {
-    p <- p + ggplot2::scale_colour_manual(values = col_clusters)
-  } else {
-    p <- p + ggplot2::scale_colour_brewer(palette = "Paired")
-  }
+  p <- p + ggplot2::scale_colour_manual(
+    values = .discrete_cluster_colours(unique(node_tbl$cluster), col_clusters)
+  )
 
   if (!is.null(thm)) p <- p + thm
   if (!is.null(grid)) p <- p + grid

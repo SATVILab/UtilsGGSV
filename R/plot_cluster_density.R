@@ -56,8 +56,9 @@
 #'   use as variables. If `NULL`, all columns except `group` are used.
 #'   Default is `NULL`.
 #' @param col_clusters named character vector or `NULL`. Per-group colours.
-#'   Names should match group labels. When `NULL` (default), the default
-#'   ggplot2 colour scale is used.
+#'   Names should match group labels. When `NULL` (default), colours are
+#'   chosen automatically: the Paired palette is used for up to 12 groups and
+#'   a hue-based palette is used for more than 12 groups.
 #' @param n_col integer or `NULL`. Number of columns passed to
 #'   `ggplot2::facet_wrap`. If supplied (or if `n_row` is supplied) a single
 #'   faceted plot is returned instead of a list. Default is `NULL`.
@@ -258,16 +259,6 @@ plot_group_density <- function(.data,
   }
 
   cluster_vec <- unique(data[[cluster]])
-  .cluster_colours <- function() {
-    if (!is.null(col_clusters)) return(col_clusters)
-    n <- length(cluster_vec)
-    cols <- if (n <= 12) {
-      scales::brewer_pal(palette = "Paired")(n)
-    } else {
-      scales::hue_pal()(n)
-    }
-    stats::setNames(cols, cluster_vec)
-  }
 
   # Helper: resolve per-cluster bandwidth from the `bandwidth` argument.
   .resolve_bw <- function(vals) {
@@ -494,11 +485,9 @@ plot_group_density <- function(.data,
           if (!is.null(ec)) p <- p + ggplot2::expand_limits(x = ec)
         }
 
-        if (!is.null(col_clusters)) {
-          p <- p + ggplot2::scale_colour_manual(values = col_clusters)
-        } else {
-          p <- p + ggplot2::scale_colour_brewer(palette = "Paired")
-        }
+        p <- p + ggplot2::scale_colour_manual(
+          values = .discrete_cluster_colours(cluster_vec, col_clusters)
+        )
         if (!is.null(thm)) p <- p + thm
         if (!is.null(grid)) p <- p + grid
 
@@ -643,11 +632,9 @@ plot_group_density <- function(.data,
     p <- p + ggplot2::expand_limits(x = expand_coord)
   }
 
-  if (!is.null(col_clusters)) {
-    p <- p + ggplot2::scale_colour_manual(values = col_clusters)
-  } else {
-    p <- p + ggplot2::scale_colour_brewer(palette = "Paired")
-  }
+  p <- p + ggplot2::scale_colour_manual(
+    values = .discrete_cluster_colours(cluster_vec, col_clusters)
+  )
   if (!is.null(thm)) p <- p + thm
   if (!is.null(grid)) p <- p + grid
 

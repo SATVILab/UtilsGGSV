@@ -56,6 +56,21 @@ utils::globalVariables(c(
   )
 }
 
+# Internal helper: generate a named discrete colour vector for cluster/group
+# labels. When user_colours is not NULL it is returned unchanged. Otherwise,
+# colours are derived from the Paired palette (up to 12 groups) or a hue-based
+# palette (more than 12 groups), ensuring the full colour range is used.
+.discrete_cluster_colours <- function(groups, user_colours = NULL) {
+  if (!is.null(user_colours)) return(user_colours)
+  n <- length(groups)
+  cols <- if (n <= 12) {
+    scales::brewer_pal(palette = "Paired")(n)
+  } else {
+    scales::hue_pal()(n)
+  }
+  stats::setNames(cols, groups)
+}
+
 # Internal helper: resolve palette → col + col_positions, with validation.
 # Returns a list(col, col_positions).  If palette is NULL, returns the
 # supplied col/col_positions unchanged.
