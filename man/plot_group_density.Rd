@@ -21,6 +21,7 @@ plot_group_density(
   density_overall_weight = NULL,
   bandwidth = "hpi_1",
   na_rm = TRUE,
+  alpha = 0.75,
   label = FALSE,
   legend = NULL,
   font_size = 14,
@@ -109,6 +110,10 @@ before computing densities and medians. When \code{TRUE} (default), \code{NA}
 values are removed and a message is issued showing how many were removed
 per variable. When \code{FALSE}, \code{NA} values are passed directly to
 \code{stats::density()}, which will strip them with its own warning.}
+
+\item{alpha}{numeric. Transparency applied to density curves (both overall
+and per-group lines). Must be between 0 (fully transparent) and 1 (fully
+opaque). Default is \code{0.75}.}
 
 \item{label}{logical. Whether to add on-plot labels at the highest-density
 peak of each group using \code{ggrepel::geom_text_repel}. When \code{density} is

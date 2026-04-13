@@ -110,6 +110,9 @@
 #'   values are removed and a message is issued showing how many were removed
 #'   per variable. When `FALSE`, `NA` values are passed directly to
 #'   `stats::density()`, which will strip them with its own warning.
+#' @param alpha numeric. Transparency applied to density curves (both overall
+#'   and per-group lines). Must be between 0 (fully transparent) and 1 (fully
+#'   opaque). Default is `0.75`.
 #' @param label logical. Whether to add on-plot labels at the highest-density
 #'   peak of each group using `ggrepel::geom_text_repel`. When `density` is
 #'   `"overall"`, labels are placed at the overall-density value at each
@@ -175,6 +178,7 @@ plot_group_density <- function(.data,
                                  density_overall_weight = NULL,
                                  bandwidth = "hpi_1",
                                  na_rm = TRUE,
+                                 alpha = 0.75,
                                  label = FALSE,
                                  legend = NULL,
                                  font_size = 14,
@@ -211,6 +215,10 @@ plot_group_density <- function(.data,
   }
   if (!is.logical(na_rm) || length(na_rm) != 1L || is.na(na_rm)) {
     stop("`na_rm` must be TRUE or FALSE.", call. = FALSE)
+  }
+  if (!is.numeric(alpha) || length(alpha) != 1L || is.na(alpha) ||
+        alpha < 0 || alpha > 1) {
+    stop("`alpha` must be a single number between 0 and 1.", call. = FALSE)
   }
   if (!is.logical(label) || length(label) != 1L || is.na(label)) {
     stop("`label` must be TRUE or FALSE.", call. = FALSE)
@@ -441,7 +449,8 @@ plot_group_density <- function(.data,
             p <- ggplot2::ggplot() +
               ggplot2::geom_line(
                 data = overall_d,
-                ggplot2::aes(x = .data$x, y = .data$y)
+                ggplot2::aes(x = .data$x, y = .data$y),
+                alpha = alpha
               ) +
               ggplot2::geom_vline(
                 data = med_tbl,
@@ -455,7 +464,7 @@ plot_group_density <- function(.data,
             p <- ggplot2::ggplot(
               dens_tbl, ggplot2::aes(x = .data$value)
             ) +
-              ggplot2::geom_density() +
+              ggplot2::geom_density(alpha = alpha) +
               ggplot2::geom_vline(
                 data = med_tbl,
                 ggplot2::aes(
@@ -484,19 +493,21 @@ plot_group_density <- function(.data,
                 x = .data$x, y = .data$y, colour = .data$cluster
               )
             ) +
-              ggplot2::geom_line() +
+              ggplot2::geom_line(alpha = alpha) +
               ggplot2::labs(x = v, y = "Density", colour = "Group")
           } else {
             p <- ggplot2::ggplot() +
               ggplot2::geom_line(
                 data = overall_d,
-                ggplot2::aes(x = .data$x, y = .data$y)
+                ggplot2::aes(x = .data$x, y = .data$y),
+                alpha = alpha
               ) +
               ggplot2::geom_line(
                 data = cl_dens,
                 ggplot2::aes(
                   x = .data$x, y = .data$y, colour = .data$cluster
-                )
+                ),
+                alpha = alpha
               ) +
               ggplot2::labs(x = v, y = "Density", colour = "Group")
           }
@@ -593,7 +604,8 @@ plot_group_density <- function(.data,
       p <- ggplot2::ggplot() +
         ggplot2::geom_line(
           data = overall_dens_tbl,
-          ggplot2::aes(x = .data$x, y = .data$y)
+          ggplot2::aes(x = .data$x, y = .data$y),
+          alpha = alpha
         ) +
         ggplot2::geom_vline(
           data = median_tbl,
@@ -608,7 +620,7 @@ plot_group_density <- function(.data,
         ggplot2::labs(x = "Value", y = "Density", colour = "Group")
     } else {
       p <- ggplot2::ggplot(long_tbl, ggplot2::aes(x = .data$value)) +
-        ggplot2::geom_density() +
+        ggplot2::geom_density(alpha = alpha) +
         ggplot2::geom_vline(
           data = median_tbl,
           ggplot2::aes(xintercept = .data$median, colour = .data$cluster)
@@ -661,7 +673,7 @@ plot_group_density <- function(.data,
           x = .data$x, y = .data$y, colour = .data$cluster
         )
       ) +
-        ggplot2::geom_line() +
+        ggplot2::geom_line(alpha = alpha) +
         ggplot2::facet_wrap(
           ~ .data$variable,
           scales = scales,
@@ -673,13 +685,15 @@ plot_group_density <- function(.data,
       p <- ggplot2::ggplot() +
         ggplot2::geom_line(
           data = overall_dens_tbl,
-          ggplot2::aes(x = .data$x, y = .data$y)
+          ggplot2::aes(x = .data$x, y = .data$y),
+          alpha = alpha
         ) +
         ggplot2::geom_line(
           data = cluster_dens_tbl,
           ggplot2::aes(
             x = .data$x, y = .data$y, colour = .data$cluster
-          )
+          ),
+          alpha = alpha
         ) +
         ggplot2::facet_wrap(
           ~ .data$variable,

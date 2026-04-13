@@ -1071,6 +1071,60 @@ test_that("plot_cluster_density errors when group= is passed through ...", {
   )
 })
 
+# alpha parameter tests ---------------------------------------------------
+
+test_that("plot_cluster_density default alpha is 0.75", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2))
+  )
+  result <- plot_cluster_density(data, cluster = "cluster")
+  p <- result[["var1"]]
+  line_layers <- Filter(function(l) inherits(l$geom, "GeomLine"), p$layers)
+  for (l in line_layers) expect_equal(l$aes_params$alpha, 0.75)
+})
+
+test_that("plot_cluster_density alpha is user-adjustable", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2))
+  )
+  result <- plot_cluster_density(data, cluster = "cluster", alpha = 0.5)
+  p <- result[["var1"]]
+  line_layers <- Filter(function(l) inherits(l$geom, "GeomLine"), p$layers)
+  for (l in line_layers) expect_equal(l$aes_params$alpha, 0.5)
+})
+
+test_that("plot_cluster_density alpha applies in facet mode", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2)),
+    var2 = c(rnorm(20, -1), rnorm(20, 1), rnorm(20, 0))
+  )
+  p <- plot_cluster_density(data, cluster = "cluster", n_col = 2, alpha = 0.4)
+  line_layers <- Filter(function(l) inherits(l$geom, "GeomLine"), p$layers)
+  for (l in line_layers) expect_equal(l$aes_params$alpha, 0.4)
+})
+
+test_that("plot_cluster_density errors on invalid alpha", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = c(rnorm(20, 2), rnorm(20, 0), rnorm(20, -2))
+  )
+  expect_error(
+    plot_cluster_density(data, cluster = "cluster", alpha = 1.5),
+    "alpha"
+  )
+  expect_error(
+    plot_cluster_density(data, cluster = "cluster", alpha = -0.1),
+    "alpha"
+  )
+})
+
 # label parameter tests ---------------------------------------------------
 
 test_that("plot_cluster_density label=TRUE adds geom_text_repel layer (cluster density, list mode)", {
