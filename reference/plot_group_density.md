@@ -25,6 +25,8 @@ plot_group_density(
   bandwidth = "hpi_1",
   na_rm = TRUE,
   alpha = 0.75,
+  label = FALSE,
+  legend = NULL,
   font_size = 14,
   thm = cowplot::theme_cowplot(font_size = font_size) + ggplot2::theme(plot.background =
     ggplot2::element_rect(fill = "white", colour = NA), panel.background =
@@ -161,6 +163,21 @@ plot_cluster_density(.data, cluster, palette_cluster = "auto", ...)
   numeric. Transparency applied to density curves (both overall and
   per-group lines). Must be between 0 (fully transparent) and 1 (fully
   opaque). Default is `0.75`.
+
+- label:
+
+  logical. Whether to add on-plot labels at the highest-density peak of
+  each group using
+  [`ggrepel::geom_text_repel`](https://ggrepel.slowkow.com/reference/geom_text_repel.html).
+  When `density` is `"overall"`, labels are placed at the
+  overall-density value at each group's median. Default is `FALSE`.
+
+- legend:
+
+  logical or `NULL`. Whether to display the legend. `NULL` (default):
+  the legend is shown when the number of groups is 15 or fewer and
+  hidden otherwise. `TRUE`/`FALSE`: always show/hide the legend,
+  overriding the default behaviour.
 
 - font_size:
 
@@ -321,4 +338,23 @@ plot_group_density(
 
 # Faceted plot with 2 columns
 plot_group_density(.data, group = "group", n_col = 2)
+
+
+# On-plot labels at density peaks
+plot_group_density(.data, group = "group", density = "cluster", label = TRUE)
+#> $var1
+
+#> 
+#> $var2
+
+#> 
+
+# Always show the legend regardless of group count
+plot_group_density(.data, group = "group", legend = TRUE)
+#> $var1
+
+#> 
+#> $var2
+
+#> 
 ```
