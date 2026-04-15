@@ -763,7 +763,7 @@ plot_group_density <- function(.data,
       )
       label_tbl <- dplyr::ungroup(label_tbl)
       label_tbl <- dplyr::select(
-        label_tbl, .data$variable, .data$cluster, .data$x, .data$y
+        label_tbl, "variable", "cluster", "x", "y"
       )
     }
     p <- p + ggrepel::geom_text_repel(
