@@ -13,6 +13,7 @@ plot_group_mst(
   coord_equal = TRUE,
   suppress_axes = NULL,
   col_clusters = NULL,
+  col_node_fill = NULL,
   node_fill_by = "variable",
   palette_group = "auto",
   palette = "bipolar",
@@ -75,9 +76,17 @@ Kelly's palette (requires \code{Polychrome}) for up to 21, Glasbey's palette
 (requires \code{Polychrome}) for up to 31, and \code{hue_pal()} for larger
 numbers.}
 
+\item{col_node_fill}{named character vector or \code{NULL}. Per-value colours for
+node fill when \code{node_fill_by} is set to a column name (not \code{"variable"} or
+\code{"cluster"}). Names should match the unique values in the \code{node_fill_by}
+column. When \code{NULL} (default), colours are chosen automatically using
+\code{palette_group}. Ignored when \code{node_fill_by} is \code{"variable"} or
+\code{"cluster"}.}
+
 \item{node_fill_by}{character. Controls what the node fill encodes. One of
-\code{"variable"} (default) or \code{"cluster"}. See the \strong{Node fill} section of
-Details.}
+\code{"variable"} (default), \code{"cluster"}, or the name of a character or factor
+column in \code{.data} to use as a discrete grouping variable for node fill.
+See the \strong{Node fill} section of Details.}
 
 \item{palette_group}{character. Palette used for automatic colour assignment
 when \code{col_clusters} is \code{NULL}. One of \code{"auto"} (default), \code{"okabe_ito"},
@@ -214,6 +223,16 @@ Set \code{node_fill_by = "cluster"} to instead fill nodes by cluster identity
 using the same discrete palette chosen by \code{palette_group} / \code{col_clusters}.
 In this mode the function returns a \strong{single ggplot2 object} (not a list)
 because the fill is the same regardless of variable.
+
+Set \code{node_fill_by} to the name of any other character or factor column in
+\code{.data} to colour nodes by that column's values (for example a \code{"sex"}
+column, or a coarser \code{"metacluster"} that maps each group to a broader
+category). The column must map each group to a single unique value; if a
+group maps to multiple values the first is used and a warning is issued.
+Colours are chosen automatically using \code{palette_group}, or can be specified
+via \code{col_node_fill}. Like \code{node_fill_by = "cluster"}, this mode returns a
+\strong{single ggplot2 object}. The column is automatically excluded when \code{vars}
+is \code{NULL} so that it is not treated as a numeric variable.
 }
 }
 \examples{
