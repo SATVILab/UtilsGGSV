@@ -90,7 +90,7 @@ axis_limits <- function(p,
   # checks
   # ----------------------------
 
-  if (!ggplot2::is.ggplot(p)) {
+  if (!ggplot2::is_ggplot(p)) {
     stop("p must be of class c('gg', 'ggplot')")
   }
 
