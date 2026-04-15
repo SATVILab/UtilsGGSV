@@ -71,6 +71,17 @@ using the same discrete palette chosen by `palette_group` /
 object** (not a list) because the fill is the same regardless of
 variable.
 
+Set `node_fill_by` to the name of any other character or factor column
+in `.data` to colour nodes by that column's values (for example a
+`"sex"` column, or a coarser `"metacluster"` that maps each group to a
+broader category). The column must map each group to a single unique
+value; if a group maps to multiple values the first is used and a
+warning is issued. Colours are chosen automatically using
+`palette_group`, or can be specified via `col_node_fill`. Like
+`node_fill_by = "cluster"`, this mode returns a **single ggplot2
+object**. The column is automatically excluded when `vars` is `NULL` so
+that it is not treated as a numeric variable.
+
 ## Usage
 
 ``` r
@@ -82,6 +93,7 @@ plot_group_mst(
   coord_equal = TRUE,
   suppress_axes = NULL,
   col_clusters = NULL,
+  col_node_fill = NULL,
   node_fill_by = "variable",
   palette_group = "auto",
   palette = "bipolar",
@@ -162,10 +174,21 @@ plot_cluster_mst(
   palette (requires `Polychrome`) for up to 31, and `hue_pal()` for
   larger numbers.
 
+- col_node_fill:
+
+  named character vector or `NULL`. Per-value colours for node fill when
+  `node_fill_by` is set to a column name (not `"variable"` or
+  `"cluster"`). Names should match the unique values in the
+  `node_fill_by` column. When `NULL` (default), colours are chosen
+  automatically using `palette_group`. Ignored when `node_fill_by` is
+  `"variable"` or `"cluster"`.
+
 - node_fill_by:
 
   character. Controls what the node fill encodes. One of `"variable"`
-  (default) or `"cluster"`. See the **Node fill** section of Details.
+  (default), `"cluster"`, or the name of a character or factor column in
+  `.data` to use as a discrete grouping variable for node fill. See the
+  **Node fill** section of Details.
 
 - palette_group:
 
