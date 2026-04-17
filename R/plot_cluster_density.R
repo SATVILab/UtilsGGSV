@@ -245,10 +245,10 @@ plot_group_density <- function(.data,
   }
   if (!is.null(max_n) &&
       (!is.numeric(max_n) || length(max_n) != 1L || is.na(max_n) ||
-       is.infinite(max_n) || max_n <= 0)) {
-    stop("`max_n` must be NULL or a single positive number.", call. = FALSE)
+       is.infinite(max_n) || max_n < 1)) {
+    stop("`max_n` must be NULL or a single number >= 1.", call. = FALSE)
   }
-  max_n_int <- if (is.null(max_n)) NULL else floor(max_n)
+  max_n_int <- if (is.null(max_n)) NULL else as.integer(max_n)
   if (!is.logical(na_rm) || length(na_rm) != 1L || is.na(na_rm)) {
     stop("`na_rm` must be TRUE or FALSE.", call. = FALSE)
   }

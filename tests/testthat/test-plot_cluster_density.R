@@ -1378,6 +1378,7 @@ test_that("plot_cluster_density max_n down-samples pooled density values in list
     thm = NULL,
     grid = NULL
   )
+  # 15 sampled from C1 (40 rows) + all 10 from C2.
   expect_equal(nrow(result[["var1"]]$data), 25L)
 })
 
@@ -1399,8 +1400,10 @@ test_that("plot_cluster_density max_n down-samples pooled density values in face
   )
 
   set.seed(123)
-  expected_var1 <- c(sample(data$var1[data$cluster == "C1"], 15), data$var1[data$cluster == "C2"])
-  expected_var2 <- c(sample(data$var2[data$cluster == "C1"], 15), data$var2[data$cluster == "C2"])
+  c1_idx <- data$cluster == "C1"
+  c2_idx <- data$cluster == "C2"
+  expected_var1 <- c(sample(data$var1[c1_idx], 15), data$var1[c2_idx])
+  expected_var2 <- c(sample(data$var2[c1_idx], 15), data$var2[c2_idx])
 
   observed_var1 <- p$data$value[p$data$variable == "var1"]
   observed_var2 <- p$data$value[p$data$variable == "var2"]
@@ -1417,6 +1420,6 @@ test_that("plot_cluster_density max_n invalid value errors", {
   )
   expect_error(
     plot_cluster_density(data, cluster = "cluster", max_n = "10"),
-    "`max_n` must be NULL or a single positive number"
+    "`max_n` must be NULL or a single number >= 1"
   )
 })
