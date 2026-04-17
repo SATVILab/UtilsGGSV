@@ -1363,3 +1363,63 @@ test_that("plot_cluster_density errors on invalid legend argument", {
     "`legend` must be TRUE, FALSE, or NULL"
   )
 })
+
+test_that("plot_cluster_density max_n down-samples pooled density values in list mode", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = c(rep("C1", 40), rep("C2", 10)),
+    var1 = rnorm(50)
+  )
+  result <- plot_cluster_density(
+    data,
+    cluster = "cluster",
+    density = "overall",
+    max_n = 15,
+    thm = NULL,
+    grid = NULL
+  )
+  # 15 sampled from C1 (40 rows) + all 10 from C2.
+  expect_equal(nrow(result[["var1"]]$data), 25L)
+})
+
+test_that("plot_cluster_density max_n down-samples pooled density values in facet mode", {
+  set.seed(123)
+  data <- data.frame(
+    cluster = c(rep("C1", 40), rep("C2", 10)),
+    var1 = 1:50,
+    var2 = 101:150
+  )
+  p <- plot_cluster_density(
+    data,
+    cluster = "cluster",
+    density = "overall",
+    max_n = 15,
+    n_col = 1,
+    thm = NULL,
+    grid = NULL
+  )
+
+  set.seed(123)
+  c1_idx <- data$cluster == "C1"
+  c2_idx <- data$cluster == "C2"
+  expected_var1 <- c(sample(data$var1[c1_idx], 15), data$var1[c2_idx])
+  expected_var2 <- c(sample(data$var2[c1_idx], 15), data$var2[c2_idx])
+
+  observed_var1 <- p$data$value[p$data$variable == "var1"]
+  observed_var2 <- p$data$value[p$data$variable == "var2"]
+
+  expect_equal(sort(observed_var1), sort(expected_var1))
+  expect_equal(sort(observed_var2), sort(expected_var2))
+})
+
+test_that("plot_cluster_density max_n invalid value errors", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = rnorm(60)
+  )
+  expect_error(
+    plot_cluster_density(data, cluster = "cluster", max_n = "10"),
+    "`max_n` must be NULL or a single number >= 1"
+  )
+})

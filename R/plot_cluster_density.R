@@ -129,6 +129,10 @@
 #' @param bandwidth character or positive numeric. Bandwidth used for
 #'   per-cluster kernel density estimation. One of `"hpi_1"` (default),
 #'   `"hpi_0"`, `"SJ"`, or a positive number. See **Details**.
+#' @param max_n numeric or `NULL`. Optional per-group cap for observations used
+#'   to estimate densities. Default `NULL` uses all available observations. When
+#'   numeric, groups with more than `max_n` observations are randomly sampled
+#'   down to `max_n` for density calculations.
 #' @param na_rm logical. Whether to remove `NA` values from each variable
 #'   before computing densities and medians. When `TRUE` (default), `NA`
 #'   values are removed and a message is issued showing how many were removed
@@ -202,6 +206,7 @@ plot_group_density <- function(.data,
                                  rug = NULL,
                                  density_overall_weight = NULL,
                                  bandwidth = "hpi_1",
+                                 max_n = NULL,
                                  na_rm = TRUE,
                                  alpha = 0.75,
                                  label = FALSE,
@@ -238,6 +243,12 @@ plot_group_density <- function(.data,
   } else if (bandwidth <= 0) {
     stop("`bandwidth` must be a positive number.", call. = FALSE)
   }
+  if (!is.null(max_n) &&
+      (!is.numeric(max_n) || length(max_n) != 1L || is.na(max_n) ||
+       is.infinite(max_n) || max_n < 1)) {
+    stop("`max_n` must be NULL or a single number >= 1.", call. = FALSE)
+  }
+  max_n_int <- if (is.null(max_n)) NULL else as.integer(max_n)
   if (!is.logical(na_rm) || length(na_rm) != 1L || is.na(na_rm)) {
     stop("`na_rm` must be TRUE or FALSE.", call. = FALSE)
   }
@@ -313,6 +324,12 @@ plot_group_density <- function(.data,
     vals
   }
 
+  # Helper: optional per-group random down-sampling for density calculations.
+  .downsample_density_vals <- function(vals) {
+    if (is.null(max_n_int) || length(vals) <= max_n_int) return(vals)
+    sample(vals, size = max_n_int)
+  }
+
   cluster_vec <- unique(data[[cluster]])
   n_groups <- length(cluster_vec)
   show_legend <- if (is.null(legend)) n_groups <= 15L else isTRUE(legend)
@@ -358,6 +375,7 @@ plot_group_density <- function(.data,
     y_list <- lapply(cluster_vec, function(cl) {
       cl_vals <- .filter_vals(all_vals[data[[cluster]] == cl], v)
       cl_vals <- .strip_na(cl_vals, v, paste0("cluster '", cl, "'"))
+      cl_vals <- .downsample_density_vals(cl_vals)
       if (length(cl_vals) < 2) return(NULL)
       bw <- .resolve_bw(cl_vals)
       d <- stats::density(cl_vals, from = from, to = to, n = n_grid, bw = bw)
@@ -377,6 +395,7 @@ plot_group_density <- function(.data,
     purrr::map_df(cluster_vec, function(cl) {
       cl_vals <- .filter_vals(all_vals[data[[cluster]] == cl], v)
       cl_vals <- .strip_na(cl_vals, v, paste0("cluster '", cl, "'"))
+      cl_vals <- .downsample_density_vals(cl_vals)
       if (length(cl_vals) < 2) return(tibble::tibble())
       bw <- .resolve_bw(cl_vals)
       d <- stats::density(cl_vals, bw = bw)
@@ -394,6 +413,16 @@ plot_group_density <- function(.data,
   .rug_mode <- function() {
     if (!is.null(rug)) return(rug)
     if (density %in% c("cluster", "both")) "cluster" else "overall"
+  }
+
+  # Helper: pool per-group density values after optional down-sampling.
+  # Uses the parent-scope group definition (cluster_vec/data/cluster).
+  .pooled_density_vals <- function(all_vals, v) {
+    unlist(lapply(cluster_vec, function(cl) {
+      cl_vals <- .filter_vals(all_vals[data[[cluster]] == cl], v)
+      cl_vals <- .strip_na(cl_vals, v, paste0("cluster '", cl, "'"))
+      .downsample_density_vals(cl_vals)
+    }), use.names = FALSE)
   }
 
   # Helper: add a rug layer to a plot (non-faceted).
@@ -458,7 +487,7 @@ plot_group_density <- function(.data,
       lapply(vars, function(v) {
         all_vals  <- data[[v]]
         all_vals  <- .strip_na(all_vals, v)
-        dens_vals <- .filter_vals(all_vals, v)
+        dens_vals <- .pooled_density_vals(all_vals, v)
 
         if (density == "overall") {
           med_tbl <- purrr::map_df(cluster_vec, function(cl) {
@@ -600,7 +629,7 @@ plot_group_density <- function(.data,
   if (density == "overall") {
     long_tbl <- purrr::map_df(vars, function(v) {
       all_vals <- .strip_na(data[[v]], v)
-      tibble::tibble(variable = v, value = .filter_vals(all_vals, v))
+      tibble::tibble(variable = v, value = .pooled_density_vals(all_vals, v))
     })
 
     median_tbl <- purrr::map_df(vars, function(v) {
@@ -618,7 +647,7 @@ plot_group_density <- function(.data,
     if (!is.null(density_overall_weight)) {
       overall_dens_tbl <- purrr::map_df(vars, function(v) {
         all_vals  <- .strip_na(data[[v]], v)
-        dens_vals <- .filter_vals(all_vals, v)
+        dens_vals <- .pooled_density_vals(all_vals, v)
         d <- .even_weight_dens_tbl(dens_vals, all_vals, v)
         if (is.null(d)) return(tibble::tibble())
         d$variable <- v
@@ -659,7 +688,7 @@ plot_group_density <- function(.data,
   } else {
     overall_dens_tbl <- purrr::map_df(vars, function(v) {
       all_vals  <- .strip_na(data[[v]], v)
-      dens_vals <- .filter_vals(all_vals, v)
+      dens_vals <- .pooled_density_vals(all_vals, v)
       d <- if (!is.null(density_overall_weight)) {
         .even_weight_dens_tbl(dens_vals, all_vals, v)
       } else {
@@ -672,7 +701,7 @@ plot_group_density <- function(.data,
 
     cluster_dens_tbl <- purrr::map_df(vars, function(v) {
       all_vals  <- .strip_na(data[[v]], v)
-      dens_vals <- .filter_vals(all_vals, v)
+      dens_vals <- .pooled_density_vals(all_vals, v)
       max_y_ref <- if (scale == "max_overall") {
         od <- if (!is.null(density_overall_weight)) {
           .even_weight_dens_tbl(dens_vals, all_vals, v)
@@ -734,7 +763,7 @@ plot_group_density <- function(.data,
     if (density == "overall") {
       label_tbl <- purrr::map_df(vars, function(v) {
         all_vals_lbl  <- .strip_na(data[[v]], v)
-        dens_vals_lbl <- .filter_vals(all_vals_lbl, v)
+        dens_vals_lbl <- .pooled_density_vals(all_vals_lbl, v)
         od_lbl <- if (!is.null(density_overall_weight)) {
           overall_dens_tbl[overall_dens_tbl$variable == v, , drop = FALSE]
         } else {
