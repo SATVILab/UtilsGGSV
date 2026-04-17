@@ -21,6 +21,7 @@ plot_group_density(
   rug = NULL,
   density_overall_weight = NULL,
   bandwidth = "hpi_1",
+  max_n = NULL,
   na_rm = TRUE,
   alpha = 0.75,
   label = FALSE,
@@ -110,6 +111,11 @@ dominating the density estimate. Ignored when \code{density} is \code{"cluster"}
 \item{bandwidth}{character or positive numeric. Bandwidth used for
 per-cluster kernel density estimation. One of \code{"hpi_1"} (default),
 \code{"hpi_0"}, \code{"SJ"}, or a positive number. See \strong{Details}.}
+
+\item{max_n}{numeric or \code{NULL}. Optional per-group cap for observations used
+to estimate densities. Default \code{NULL} uses all available observations. When
+numeric, groups with more than \code{max_n} observations are randomly sampled
+down to \code{max_n} for density calculations.}
 
 \item{na_rm}{logical. Whether to remove \code{NA} values from each variable
 before computing densities and medians. When \code{TRUE} (default), \code{NA}

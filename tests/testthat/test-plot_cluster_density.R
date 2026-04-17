@@ -1363,3 +1363,51 @@ test_that("plot_cluster_density errors on invalid legend argument", {
     "`legend` must be TRUE, FALSE, or NULL"
   )
 })
+
+test_that("plot_cluster_density max_n down-samples pooled density values in list mode", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = c(rep("C1", 40), rep("C2", 10)),
+    var1 = rnorm(50)
+  )
+  result <- plot_cluster_density(
+    data,
+    cluster = "cluster",
+    density = "overall",
+    max_n = 15,
+    thm = NULL,
+    grid = NULL
+  )
+  expect_equal(nrow(result[["var1"]]$data), 25L)
+})
+
+test_that("plot_cluster_density max_n down-samples pooled density values in facet mode", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = c(rep("C1", 40), rep("C2", 10)),
+    var1 = rnorm(50),
+    var2 = rnorm(50)
+  )
+  p <- plot_cluster_density(
+    data,
+    cluster = "cluster",
+    density = "overall",
+    max_n = 15,
+    n_col = 1,
+    thm = NULL,
+    grid = NULL
+  )
+  expect_equal(nrow(p$data), 50L)
+})
+
+test_that("plot_cluster_density max_n invalid value errors", {
+  set.seed(1)
+  data <- data.frame(
+    cluster = rep(paste0("C", 1:3), each = 20),
+    var1 = rnorm(60)
+  )
+  expect_error(
+    plot_cluster_density(data, cluster = "cluster", max_n = "10"),
+    "`max_n` must be NULL or a single positive number"
+  )
+})
