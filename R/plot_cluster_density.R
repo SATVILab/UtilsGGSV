@@ -324,7 +324,7 @@ plot_group_density <- function(.data,
     vals
   }
 
-  # Helper: optional down-sampling for density calculations.
+  # Helper: optional per-group random down-sampling for density calculations.
   .downsample_density_vals <- function(vals) {
     if (is.null(max_n_int) || length(vals) <= max_n_int) return(vals)
     sample(vals, size = max_n_int)
@@ -416,6 +416,7 @@ plot_group_density <- function(.data,
   }
 
   # Helper: pool per-group density values after optional down-sampling.
+  # Uses the parent-scope group definition (cluster_vec/data/cluster).
   .pooled_density_vals <- function(all_vals, v) {
     unlist(lapply(cluster_vec, function(cl) {
       cl_vals <- .filter_vals(all_vals[data[[cluster]] == cl], v)

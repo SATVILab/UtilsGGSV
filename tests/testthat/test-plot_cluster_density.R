@@ -1382,11 +1382,11 @@ test_that("plot_cluster_density max_n down-samples pooled density values in list
 })
 
 test_that("plot_cluster_density max_n down-samples pooled density values in facet mode", {
-  set.seed(1)
+  set.seed(123)
   data <- data.frame(
     cluster = c(rep("C1", 40), rep("C2", 10)),
-    var1 = rnorm(50),
-    var2 = rnorm(50)
+    var1 = 1:50,
+    var2 = 101:150
   )
   p <- plot_cluster_density(
     data,
@@ -1397,7 +1397,16 @@ test_that("plot_cluster_density max_n down-samples pooled density values in face
     thm = NULL,
     grid = NULL
   )
-  expect_equal(nrow(p$data), 50L)
+
+  set.seed(123)
+  expected_var1 <- c(sample(data$var1[data$cluster == "C1"], 15), data$var1[data$cluster == "C2"])
+  expected_var2 <- c(sample(data$var2[data$cluster == "C1"], 15), data$var2[data$cluster == "C2"])
+
+  observed_var1 <- p$data$value[p$data$variable == "var1"]
+  observed_var2 <- p$data$value[p$data$variable == "var2"]
+
+  expect_equal(sort(observed_var1), sort(expected_var1))
+  expect_equal(sort(observed_var2), sort(expected_var2))
 })
 
 test_that("plot_cluster_density max_n invalid value errors", {
