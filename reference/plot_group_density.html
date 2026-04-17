@@ -11,7 +11,7 @@ objects or a single faceted plot."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">UtilsGGSV</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.11.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.11.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -66,6 +66,7 @@ objects or a single faceted plot.</p>
 <span>  rug <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  density_overall_weight <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  bandwidth <span class="op">=</span> <span class="st">"hpi_1"</span>,</span>
+<span>  max_n <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  na_rm <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  alpha <span class="op">=</span> <span class="fl">0.75</span>,</span>
 <span>  label <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -188,6 +189,13 @@ dominating the density estimate. Ignored when <code>density</code> is <code>"clu
 <dd><p>character or positive numeric. Bandwidth used for
 per-cluster kernel density estimation. One of <code>"hpi_1"</code> (default),
 <code>"hpi_0"</code>, <code>"SJ"</code>, or a positive number. See <strong>Details</strong>.</p></dd>
+
+
+<dt id="arg-max-n">max_n<a class="anchor" aria-label="anchor" href="#arg-max-n"></a></dt>
+<dd><p>numeric or <code>NULL</code>. Optional per-group cap for observations used
+to estimate densities. Default <code>NULL</code> uses all available observations. When
+numeric, groups with more than <code>max_n</code> observations are randomly sampled
+down to <code>max_n</code> for density calculations.</p></dd>
 
 
 <dt id="arg-na-rm">na_rm<a class="anchor" aria-label="anchor" href="#arg-na-rm"></a></dt>

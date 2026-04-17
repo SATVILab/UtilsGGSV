@@ -23,6 +23,7 @@ plot_group_density(
   rug = NULL,
   density_overall_weight = NULL,
   bandwidth = "hpi_1",
+  max_n = NULL,
   na_rm = TRUE,
   alpha = 0.75,
   label = FALSE,
@@ -148,6 +149,13 @@ plot_cluster_density(.data, cluster, palette_cluster = "auto", ...)
   character or positive numeric. Bandwidth used for per-cluster kernel
   density estimation. One of `"hpi_1"` (default), `"hpi_0"`, `"SJ"`, or
   a positive number. See **Details**.
+
+- max_n:
+
+  numeric or `NULL`. Optional per-group cap for observations used to
+  estimate densities. Default `NULL` uses all available observations.
+  When numeric, groups with more than `max_n` observations are randomly
+  sampled down to `max_n` for density calculations.
 
 - na_rm:
 
